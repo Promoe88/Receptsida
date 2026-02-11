@@ -9,12 +9,17 @@
     "start": "node src/index.js",
     "seed": "node src/utils/seed-lexicon.js",
     "migrate": "npx prisma migrate dev",
-    "studio": "npx prisma studio"
+    "studio": "npx prisma studio",
+    "scrape": "node src/utils/run-scraper.js",
+    "scrape:all": "node src/utils/run-scraper.js all",
+    "scrape:stats": "node src/utils/run-scraper.js --stats",
+    "scrape:lexicon": "node src/utils/run-scraper.js --lexicon"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
     "@prisma/client": "^5.20.0",
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.2.0",
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "express-rate-limit": "^7.4.0",
@@ -22,6 +27,7 @@
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "p-queue": "^9.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

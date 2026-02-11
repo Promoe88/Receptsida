@@ -178,3 +178,112 @@ model LexiconEntry {
   @@index([category])
   @@map("lexicon")
 }
+
+// ──────────────────────────────────────────
+// Scraper — Scraped recipe database
+// ──────────────────────────────────────────
+
+model ScrapedRecipe {
+  id           String   @id @default(cuid())
+  urlHash      String   @unique @map("url_hash") // SHA-256 of sourceUrl
+  title        String
+  description  String?
+  sourceUrl    String   @unique @map("source_url")
+  sourceDomain String   @map("source_domain")
+  imageUrl     String?  @map("image_url")
+  totalTime    Int?     @map("total_time") // minutes
+  prepTime     Int?     @map("prep_time")
+  cookTime     Int?     @map("cook_time")
+  servings     String?  // e.g. "4 portioner"
+  servingsNum  Int?     @map("servings_num")
+  category     String?  // e.g. "Middag", "Dessert"
+  cuisine      String?  // e.g. "Svensk", "Italiensk"
+  tags         String[]
+  rating       Float?
+  ratingCount  Int?     @map("rating_count")
+  author       String?
+  rawJsonLd    Json?    @map("raw_json_ld")
+  scrapedAt    DateTime @default(now()) @map("scraped_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  ingredients ScrapedIngredient[]
+  steps       ScrapedStep[]
+
+  @@index([sourceDomain])
+  @@index([category])
+  @@index([scrapedAt])
+  @@map("scraped_recipes")
+}
+
+model ScrapedIngredient {
+  id        String @id @default(cuid())
+  recipeId  String @map("recipe_id")
+  raw       String // Original text e.g. "2 dl vispgrädde"
+  name      String // Parsed name e.g. "vispgrädde"
+  amount    String? // e.g. "2"
+  unit      String? // e.g. "dl"
+  sortOrder Int    @default(0) @map("sort_order")
+
+  recipe ScrapedRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@index([name])
+  @@map("scraped_ingredients")
+}
+
+model ScrapedStep {
+  id        String @id @default(cuid())
+  recipeId  String @map("recipe_id")
+  content   String
+  sortOrder Int    @default(0) @map("sort_order")
+
+  recipe ScrapedRecipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@map("scraped_steps")
+}
+
+// ──────────────────────────────────────────
+// Recipe Word Lexicon — built from scraped data
+// ──────────────────────────────────────────
+
+model RecipeWord {
+  id           String   @id @default(cuid())
+  word         String   @unique
+  canonical    String
+  category     String   // ingredient, technique, tool, measurement, descriptor
+  frequency    Int      @default(1)
+  synonyms     String[]
+  relatedWords String[] @map("related_words")
+  emoji        String?
+  metadata     Json?    // Extra: typical amounts, common pairings, etc.
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([canonical])
+  @@index([category])
+  @@index([frequency(sort: Desc)])
+  @@map("recipe_words")
+}
+
+// ──────────────────────────────────────────
+// Scrape Job — Track scraping progress
+// ──────────────────────────────────────────
+
+model ScrapeJob {
+  id          String    @id @default(cuid())
+  domain      String
+  status      String    @default("pending") // pending, running, completed, failed
+  totalUrls   Int       @default(0) @map("total_urls")
+  scrapedUrls Int       @default(0) @map("scraped_urls")
+  failedUrls  Int       @default(0) @map("failed_urls")
+  newRecipes  Int       @default(0) @map("new_recipes")
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  error       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([domain])
+  @@index([status])
+  @@map("scrape_jobs")
+}
