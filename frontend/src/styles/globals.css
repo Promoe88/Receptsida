@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   html {
@@ -10,132 +10,79 @@
   }
 
   body {
-    @apply bg-cream-50 text-cream-800 font-body antialiased;
+    @apply bg-void text-zinc-300 font-body antialiased;
   }
 
-  /* Subtle grain texture overlay */
   body::before {
     content: '';
     @apply fixed inset-0 pointer-events-none z-[9999];
-    opacity: 0.015;
+    opacity: 0.03;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   }
 }
 
 @layer components {
-  /* ── Buttons ── */
-  .btn-primary {
-    @apply bg-action-400 text-white px-6 py-3 rounded-2xl font-semibold text-sm
-           hover:bg-action-500 transition-all duration-200
-           disabled:opacity-50 disabled:cursor-not-allowed
-           active:scale-[0.97] shadow-sm hover:shadow-md;
+  .btn-accent {
+    @apply bg-accent-400 text-void px-6 py-3 rounded-xl font-semibold text-sm
+           hover:bg-accent-300 transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed
+           active:scale-[0.97] shadow-glow-sm hover:shadow-glow;
   }
 
-  .btn-secondary {
-    @apply bg-white text-cream-800 px-6 py-3 rounded-2xl font-semibold text-sm
-           border border-cream-200 hover:border-pine-400 hover:text-pine-600
-           transition-all duration-200 active:scale-[0.97];
+  .btn-surface {
+    @apply bg-surface-200 text-zinc-200 px-6 py-3 rounded-xl font-semibold text-sm
+           border border-zinc-800 hover:border-zinc-600 hover:bg-surface-100
+           transition-all duration-150 active:scale-[0.97];
   }
 
   .btn-ghost {
-    @apply text-cream-500 px-4 py-2 rounded-xl font-medium text-sm
-           hover:bg-cream-100 hover:text-cream-800
+    @apply text-zinc-400 px-4 py-2 rounded-xl font-medium text-sm
+           hover:bg-surface-200 hover:text-zinc-200
+           transition-all duration-150;
+  }
+
+  .card-dark {
+    @apply bg-surface rounded-2xl border border-zinc-800/60 shadow-inner-glow;
+  }
+
+  .card-elevated {
+    @apply bg-surface-300 rounded-2xl border border-zinc-800/60
+           hover:border-zinc-700 hover:bg-surface-200
+           transition-all duration-200 shadow-inner-glow;
+  }
+
+  .input-dark {
+    @apply w-full px-4 py-3 bg-surface-300 border border-zinc-800 rounded-xl
+           font-body text-zinc-100 placeholder:text-zinc-600
+           focus:outline-none focus:border-accent-400/50 focus:shadow-glow-ring
            transition-all duration-200;
   }
 
-  .btn-pine {
-    @apply bg-pine-600 text-white px-6 py-3 rounded-2xl font-semibold text-sm
-           hover:bg-pine-500 transition-all duration-200
-           active:scale-[0.97] shadow-sm;
+  .label-sm {
+    @apply text-[10px] font-semibold uppercase tracking-[0.15em] text-zinc-600;
   }
 
-  /* ── Glass Card ── */
-  .glass {
-    @apply bg-white/60 backdrop-blur-xl border border-white/30 shadow-glass;
+  .badge-accent {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px]
+           font-bold bg-accent-400/15 text-accent-400 border border-accent-400/20;
   }
 
-  .glass-dark {
-    @apply bg-pine-600/80 backdrop-blur-xl border border-white/10;
+  .badge-emerald {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px]
+           font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20;
   }
 
-  /* ── Card ── */
-  .card {
-    @apply bg-white rounded-2xl shadow-soft border border-cream-200 p-6;
+  .badge-surface {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px]
+           font-semibold bg-surface-50 text-zinc-400 border border-zinc-800;
   }
 
-  .card-premium {
-    @apply bg-white rounded-3xl shadow-medium border border-cream-100 p-6
-           hover:shadow-strong hover:-translate-y-0.5
-           transition-all duration-300;
-  }
-
-  /* ── Input ── */
-  .input-field {
-    @apply w-full px-4 py-3 bg-white border border-cream-200 rounded-2xl
-           font-body text-cream-800 placeholder:text-cream-400
-           focus:outline-none focus:border-pine-400 focus:ring-4 focus:ring-pine-400/10
-           transition-all duration-200;
-  }
-
-  /* ── Badges ── */
-  .badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
-  }
-
-  .badge-green {
-    @apply badge bg-pine-50 text-pine-500;
-  }
-
-  .badge-gold {
-    @apply badge bg-gold-50 text-gold-500;
-  }
-
-  .badge-brand {
-    @apply badge bg-action-50 text-action-500;
-  }
-
-  .badge-verified {
-    @apply badge bg-pine-600 text-white;
-  }
-
-  /* ── Price Badge ── */
-  .price-badge {
+  .price-accent {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl
-           bg-action-400 text-white text-xs font-bold shadow-price;
-  }
-
-  /* ── Section label ── */
-  .section-label {
-    @apply text-[10px] font-bold uppercase tracking-[0.15em] text-cream-400;
+           bg-accent-400 text-void text-xs font-bold shadow-glow-sm;
   }
 }
 
-/* ── Autocomplete ── */
-.autocomplete-dropdown {
-  @apply absolute top-full left-0 right-0 mt-1 bg-white/90 backdrop-blur-xl
-         border border-cream-200 rounded-2xl shadow-strong z-50 overflow-hidden;
-}
-
-.autocomplete-item {
-  @apply px-4 py-3 cursor-pointer flex items-center gap-3 text-sm
-         hover:bg-cream-50 transition-colors duration-100;
-}
-
-.autocomplete-item:not(:last-child) {
-  @apply border-b border-cream-100;
-}
-
-/* ── Loading skeleton ── */
-.skeleton {
-  @apply bg-cream-100 animate-pulse rounded-xl;
-}
-
-/* ── Recipe card hover ── */
-.recipe-card-hover {
-  @apply transition-all duration-300 hover:shadow-medium hover:-translate-y-0.5;
-}
-
-/* ── Line clamp ── */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -143,37 +90,30 @@
   overflow: hidden;
 }
 
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3F3F46; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #52525B; }
+
+.hud-mode {
+  @apply fixed inset-0 z-[60] bg-void;
 }
 
-/* ── Custom scrollbar ── */
-::-webkit-scrollbar {
-  width: 5px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #E8DCC3;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #D4C4A0;
-}
-
-/* ── Cooking mode - full screen ── */
-.cooking-mode {
-  @apply fixed inset-0 z-[60] bg-cream-50;
-}
-
-/* ── Timer ring ── */
 .timer-ring {
   transition: stroke-dashoffset 1s linear;
+}
+
+.scan-line {
+  position: relative;
+  overflow: hidden;
+}
+.scan-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,92,0,0.03), transparent);
+  animation: scan 3s linear infinite;
 }

@@ -1,5 +1,5 @@
 // ============================================
-// RecipeCard — Full recipe display
+// RecipeCard — Dark theme full recipe display
 // ============================================
 
 'use client';
@@ -32,21 +32,21 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
   }
 
   return (
-    <div className="card recipe-card-hover">
+    <div className="card-dark p-6">
       {/* Header */}
       <div className="flex justify-between items-start gap-4 mb-5">
         <div className="flex-1">
-          <h3 className="font-display text-2xl text-warm-800">{recipe.title}</h3>
+          <h3 className="font-display text-2xl text-zinc-100">{recipe.title}</h3>
 
           {recipe.source_name && (
-            <p className="text-sm text-warm-400 mt-1 flex items-center gap-1.5">
-              📄 Baserat på recept från{' '}
+            <p className="text-sm text-zinc-500 mt-1 flex items-center gap-1.5">
+              Baserat på recept från{' '}
               {recipe.source_url ? (
                 <a
                   href={recipe.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brand-400 font-medium hover:underline inline-flex items-center gap-1"
+                  className="text-accent-400 font-medium hover:underline inline-flex items-center gap-1"
                 >
                   {recipe.source_name} <ExternalLink size={12} />
                 </a>
@@ -58,31 +58,30 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
 
           {/* Meta badges */}
           <div className="flex flex-wrap gap-2 mt-3">
-            <span className="badge bg-warm-50 text-warm-600">
+            <span className="badge-surface">
               <Clock size={13} /> {recipe.time_minutes} min
             </span>
-            <span className="badge bg-warm-50 text-warm-600">
+            <span className="badge-surface">
               <BarChart3 size={13} /> {recipe.difficulty}
             </span>
-            <span className="badge bg-warm-50 text-warm-600">
+            <span className="badge-surface">
               <Users size={13} /> {recipe.servings} port
             </span>
             {recipe.cost_estimate && (
-              <span className="badge bg-gold-50 text-gold-500">
+              <span className="badge-accent">
                 <Coins size={13} /> {recipe.cost_estimate}
               </span>
             )}
           </div>
         </div>
 
-        {/* Favorite button */}
         {onToggleFavorite && (
           <button
             onClick={handleFavorite}
             className={`p-2.5 rounded-xl border-2 transition-all duration-200
               ${isFavorite
-                ? 'border-red-200 bg-red-50 text-red-500'
-                : 'border-warm-200 text-warm-400 hover:border-red-200 hover:text-red-400'
+                ? 'border-red-400/30 bg-red-400/10 text-red-400'
+                : 'border-zinc-800 text-zinc-500 hover:border-red-400/30 hover:text-red-400'
               }`}
           >
             <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
@@ -91,17 +90,17 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
       </div>
 
       {/* Ingredients */}
-      <Section icon={<ShoppingCart size={16} />} title="Ingredienser" color="forest">
+      <Section icon={<ShoppingCart size={16} />} title="Ingredienser" color="accent">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {recipe.ingredients.map((ing, idx) => (
             <button
               key={idx}
               onClick={() => toggleIngredient(idx)}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm text-left
-                        transition-all duration-150 group
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-left
+                        transition-all duration-150 group border
                 ${ing.have
-                  ? 'bg-warm-50 hover:bg-warm-100'
-                  : 'bg-gold-50 border border-gold-200/50 hover:bg-gold-100'
+                  ? 'bg-surface-300 border-zinc-800/60 hover:bg-surface-200'
+                  : 'bg-accent-400/5 border-accent-400/15 hover:bg-accent-400/10'
                 }
                 ${checkedIngredients.has(idx) ? 'opacity-50' : ''}`}
             >
@@ -109,18 +108,18 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
                           transition-all duration-150
                   ${checkedIngredients.has(idx)
-                    ? 'bg-forest-400 border-forest-400 text-white'
-                    : 'border-warm-300 group-hover:border-warm-400'
+                    ? 'bg-accent-400 border-accent-400 text-void'
+                    : 'border-zinc-600 group-hover:border-zinc-500'
                   }`}
               >
                 {checkedIngredients.has(idx) && <Check size={12} strokeWidth={3} />}
               </span>
               <span className="flex-1">
-                <strong className="font-medium">{ing.amount}</strong>{' '}
-                {ing.name}
+                <strong className="font-medium text-zinc-200">{ing.amount}</strong>{' '}
+                <span className="text-zinc-400">{ing.name}</span>
               </span>
               {!ing.have && (
-                <span className="text-xs text-gold-500 font-medium">köp</span>
+                <span className="text-xs text-accent-400 font-medium font-mono">köp</span>
               )}
             </button>
           ))}
@@ -128,32 +127,32 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
       </Section>
 
       {/* Tools */}
-      <Section icon={<Wrench size={16} />} title="Verktyg som behövs" color="purple">
+      <Section icon={<Wrench size={16} />} title="Verktyg som behövs" color="surface">
         <div className="flex flex-wrap gap-2">
           {recipe.tools.map((tool, idx) => (
             <span
               key={idx}
-              className="bg-warm-100 text-warm-700 px-3.5 py-1.5 rounded-full text-sm font-medium
-                       flex items-center gap-1.5"
+              className="bg-surface-300 text-zinc-300 px-3.5 py-1.5 rounded-lg text-sm font-medium
+                       border border-zinc-800/60"
             >
-              🔹 {typeof tool === 'string' ? tool : tool.name}
+              {typeof tool === 'string' ? tool : tool.name}
             </span>
           ))}
         </div>
       </Section>
 
       {/* Steps */}
-      <Section icon={<ListOrdered size={16} />} title="Tillvägagångssätt" color="brand">
-        <ol className="space-y-0 divide-y divide-warm-100">
+      <Section icon={<ListOrdered size={16} />} title="Tillvägagångssätt" color="accent">
+        <ol className="space-y-0 divide-y divide-zinc-800/60">
           {recipe.steps.map((step, idx) => (
             <li key={idx} className="flex gap-4 py-3.5">
               <span
-                className="w-7 h-7 bg-brand-400 text-white rounded-full flex items-center justify-center
+                className="w-7 h-7 bg-accent-400 text-void rounded-full flex items-center justify-center
                          text-xs font-bold flex-shrink-0 mt-0.5"
               >
                 {idx + 1}
               </span>
-              <p className="text-sm text-warm-700 leading-relaxed flex-1">
+              <p className="text-sm text-zinc-300 leading-relaxed flex-1">
                 {typeof step === 'string' ? step : step.content}
               </p>
             </li>
@@ -163,10 +162,10 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
 
       {/* Tips */}
       {recipe.tips && (
-        <div className="mt-5 p-4 bg-gold-50 rounded-xl flex gap-3">
-          <Lightbulb size={18} className="text-gold-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-gold-600">
-            <strong className="font-semibold">Tips:</strong> {recipe.tips}
+        <div className="mt-5 p-4 bg-accent-400/10 rounded-xl border border-accent-400/15 flex gap-3">
+          <Lightbulb size={18} className="text-accent-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-zinc-300">
+            <strong className="font-semibold text-accent-400">Tips:</strong> {recipe.tips}
           </p>
         </div>
       )}
@@ -174,18 +173,11 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
   );
 }
 
-// Section sub-component
 function Section({ icon, title, color, children }) {
-  const bgMap = {
-    forest: 'bg-forest-50 text-forest-400',
-    purple: 'bg-purple-50 text-purple-500',
-    brand: 'bg-brand-50 text-brand-400',
-  };
-
   return (
     <div className="mt-6">
-      <h4 className="flex items-center gap-2.5 font-semibold text-sm text-warm-700 mb-3">
-        <span className={`w-7 h-7 rounded-lg flex items-center justify-center ${bgMap[color]}`}>
+      <h4 className="flex items-center gap-2.5 font-semibold text-sm text-zinc-200 mb-3">
+        <span className="w-7 h-7 rounded-lg bg-accent-400/10 text-accent-400 flex items-center justify-center">
           {icon}
         </span>
         {title}

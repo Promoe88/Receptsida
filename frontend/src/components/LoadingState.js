@@ -1,5 +1,5 @@
 // ============================================
-// LoadingState — Animated search progress
+// LoadingState — Dark theme animated search progress
 // ============================================
 
 'use client';
@@ -37,12 +37,12 @@ export function LoadingState() {
 
   return (
     <div className="text-center py-16 px-6 max-w-md mx-auto animate-fade-in">
-      <Loader2 size={48} className="text-brand-400 animate-spin mx-auto mb-6" />
+      <Loader2 size={48} className="text-accent-400 animate-spin mx-auto mb-6" />
 
-      <h3 className="font-display text-xl text-warm-800 mb-2">
+      <h3 className="font-display text-xl text-zinc-100 mb-2">
         Söker efter perfekta recept...
       </h3>
-      <p className="text-sm text-warm-400 mb-8">
+      <p className="text-sm text-zinc-500 mb-8">
         AI:n söker bland riktiga recept på nätet och anpassar dem åt dig.
       </p>
 
@@ -55,20 +55,20 @@ export function LoadingState() {
             <div
               key={idx}
               className={`flex items-center gap-3 py-2 px-3 rounded-lg transition-all duration-300
-                ${isActive ? 'bg-brand-50 text-warm-800 font-medium' : ''}
-                ${isDone ? 'text-forest-400' : ''}
-                ${!isDone && !isActive ? 'text-warm-300' : ''}`}
+                ${isActive ? 'bg-accent-400/10 text-zinc-200 font-medium border border-accent-400/20' : ''}
+                ${isDone ? 'text-emerald-400' : ''}
+                ${!isDone && !isActive ? 'text-zinc-600' : ''}`}
             >
               <span
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0
                           transition-all duration-300
-                  ${isDone ? 'bg-forest-400 text-white' : ''}
-                  ${isActive ? 'bg-brand-400 text-white' : ''}
-                  ${!isDone && !isActive ? 'bg-warm-200 text-warm-400' : ''}`}
+                  ${isDone ? 'bg-emerald-500 text-void' : ''}
+                  ${isActive ? 'bg-accent-400 text-void' : ''}
+                  ${!isDone && !isActive ? 'bg-zinc-800 text-zinc-600' : ''}`}
               >
                 {isDone ? <Check size={12} strokeWidth={3} /> : idx + 1}
               </span>
-              <span className="text-sm">{step.label}</span>
+              <span className="text-sm font-mono">{step.label}</span>
             </div>
           );
         })}

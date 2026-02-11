@@ -1,5 +1,5 @@
 // ============================================
-// SearchBar — Ingredient input with autocomplete
+// SearchBar — Dark theme API search with autocomplete
 // ============================================
 
 'use client';
@@ -34,7 +34,6 @@ export function SearchBar({ onSearch, loading }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
 
-  // Close autocomplete on outside click
   useEffect(() => {
     function handleClick(e) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
@@ -91,8 +90,8 @@ export function SearchBar({ onSearch, loading }) {
     <div className="w-full max-w-2xl mx-auto">
       {/* Search box */}
       <div className="relative" ref={wrapperRef}>
-        <div className="flex bg-white rounded-xl shadow-strong border-2 border-transparent
-                      focus-within:border-brand-400 focus-within:shadow-glow transition-all duration-300">
+        <div className="flex bg-surface-300 rounded-xl border-2 border-zinc-800
+                      focus-within:border-accent-400/50 focus-within:shadow-glow transition-all duration-300">
           <input
             ref={inputRef}
             type="text"
@@ -101,15 +100,15 @@ export function SearchBar({ onSearch, loading }) {
             onKeyDown={handleKeyDown}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             placeholder="T.ex. kyckling, ris, paprika, vitlök..."
-            className="flex-1 px-5 py-5 bg-transparent border-none outline-none text-base
-                     font-body text-warm-800 placeholder:text-warm-400 placeholder:font-light"
+            className="flex-1 px-5 py-4 bg-transparent border-none outline-none text-base
+                     font-mono text-zinc-100 placeholder:text-zinc-600"
             disabled={loading}
           />
           <button
             onClick={handleSubmit}
             disabled={loading || query.trim().length < 2}
-            className="bg-brand-400 text-white px-6 sm:px-8 rounded-r-xl font-semibold
-                     hover:bg-brand-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+            className="bg-accent-400 text-void px-6 sm:px-8 rounded-r-xl font-semibold
+                     hover:bg-accent-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed
                      flex items-center gap-2 text-sm sm:text-base whitespace-nowrap"
           >
             {loading ? (
@@ -123,17 +122,17 @@ export function SearchBar({ onSearch, loading }) {
 
         {/* Autocomplete dropdown */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="autocomplete-dropdown">
+          <div className="absolute w-full mt-2 bg-surface-300 border border-zinc-800 rounded-xl shadow-strong overflow-hidden z-20">
             {suggestions.map((s, i) => (
               <button
                 key={i}
-                className="autocomplete-item w-full text-left"
+                className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-surface-200 transition-colors"
                 onClick={() => handleSuggestionClick(s)}
               >
                 <span className="text-lg">{s.emoji || '🔹'}</span>
                 <div>
-                  <span className="font-medium text-warm-800">{s.word}</span>
-                  <span className="text-warm-400 text-xs ml-2">{s.category}</span>
+                  <span className="font-medium text-zinc-200">{s.word}</span>
+                  <span className="text-zinc-600 text-xs ml-2">{s.category}</span>
                 </div>
               </button>
             ))}
@@ -147,8 +146,8 @@ export function SearchBar({ onSearch, loading }) {
           <button
             key={tag.label}
             onClick={() => handleTagClick(tag.label)}
-            className="bg-white border border-warm-200 px-3.5 py-1.5 rounded-full text-sm
-                     text-warm-500 hover:border-brand-400 hover:text-brand-400 hover:bg-brand-50
+            className="bg-surface-300 border border-zinc-800 px-3.5 py-1.5 rounded-lg text-sm
+                     text-zinc-500 hover:border-accent-400/30 hover:text-accent-400
                      transition-all duration-200"
           >
             {tag.emoji} {tag.label}
@@ -158,9 +157,7 @@ export function SearchBar({ onSearch, loading }) {
 
       {/* Household selector */}
       <div className="mt-7">
-        <p className="text-xs font-semibold text-warm-400 uppercase tracking-wider text-center mb-3">
-          Hushåll
-        </p>
+        <p className="label-sm text-center mb-3">Hushåll</p>
         <div className="flex gap-2.5 justify-center flex-wrap">
           {HOUSEHOLDS.map((h) => (
             <button
@@ -169,12 +166,12 @@ export function SearchBar({ onSearch, loading }) {
               className={`px-5 py-3 rounded-xl border-2 text-center min-w-[90px] transition-all duration-200
                 ${
                   householdSize === h.value
-                    ? 'border-brand-400 bg-brand-50'
-                    : 'border-warm-200 bg-white hover:border-warm-300'
+                    ? 'border-accent-400/50 bg-accent-400/10'
+                    : 'border-zinc-800 bg-surface-300 hover:border-zinc-700'
                 }`}
             >
               <span className="text-xl block">{h.emoji}</span>
-              <span className="text-xs font-medium text-warm-700 mt-1 block">{h.label}</span>
+              <span className="text-xs font-medium text-zinc-400 mt-1 block">{h.label}</span>
             </button>
           ))}
         </div>

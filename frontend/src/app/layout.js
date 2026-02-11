@@ -1,5 +1,5 @@
 // ============================================
-// Root Layout — Premium app shell
+// Root Layout — Dark theme app shell
 // ============================================
 
 import '../styles/globals.css';
@@ -26,15 +26,15 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-cream-200/60 py-10 px-6">
+          <footer className="border-t border-zinc-800/60 py-10 px-6">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-pine-600 rounded-md flex items-center justify-center">
-                  <span className="text-white text-[10px] font-bold">M</span>
+                <div className="w-5 h-5 bg-accent-400 rounded-md flex items-center justify-center">
+                  <span className="text-void text-[10px] font-bold">M</span>
                 </div>
-                <p className="text-sm text-cream-500 font-light">MatKompass</p>
+                <p className="text-sm text-zinc-500 font-light">MatKompass</p>
               </div>
-              <p className="text-[11px] text-cream-400">
+              <p className="text-[11px] text-zinc-600">
                 Priser uppdateras regelbundet. Faktiska priser kan variera.
               </p>
             </div>

@@ -1,6 +1,6 @@
 // ============================================
-// Home Page — Premium Decision Engine
-// Daily Recommendation + Smart Fridge + Bento Grid
+// Home Page — Dark Command Interface
+// Daily Recommendation + Smart Fridge + Intelligence Grid
 // ============================================
 
 'use client';
@@ -22,7 +22,7 @@ import { SourceBanner } from '../components/SourceBanner';
 import { MOCK_RECIPES, getDailyRecommendation, filterRecipesByIngredients } from '../data/recipes';
 import {
   ArrowLeft, Sparkles, TrendingDown, ChefHat, ShieldCheck,
-  Search, LayoutGrid, Zap,
+  Search, LayoutGrid, Zap, Terminal,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -32,7 +32,6 @@ export default function HomePage() {
   const { toggleFavorite } = useFavorites();
   const [lastQuery, setLastQuery] = useState('');
 
-  // Local state
   const [searchTags, setSearchTags] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [smartFridgeMeals, setSmartFridgeMeals] = useState([]);
@@ -68,21 +67,21 @@ export default function HomePage() {
     reset();
   }
 
-  // ── API Results view ──
+  // API Results view
   if (results) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-          <h2 className="font-display text-2xl sm:text-3xl text-cream-800">
+          <h2 className="font-display text-2xl sm:text-3xl text-zinc-100">
             Recept för &ldquo;{lastQuery}&rdquo;
           </h2>
-          <button onClick={handleReset} className="btn-secondary text-sm !py-2">
+          <button onClick={handleReset} className="btn-surface text-sm !py-2">
             <ArrowLeft size={16} className="mr-1.5 inline" />
             Ny sökning
           </button>
         </div>
         {results.cached && (
-          <div className="badge-green mb-4">Cachad sökning</div>
+          <div className="badge-emerald mb-4">Cachad sökning</div>
         )}
         <SourceBanner sources={results.sources} />
         <div className="space-y-5">
@@ -105,12 +104,12 @@ export default function HomePage() {
 
   if (loading) return <LoadingState />;
 
-  // ── Main premium view ──
+  // Main dark command interface
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20">
 
-        {/* ── Top section: Daily + SmartFridge ── */}
+        {/* Top section: Daily + SmartFridge */}
         <div className="grid lg:grid-cols-5 gap-5 mb-10">
           <div className="lg:col-span-3">
             <DailyRecommendation
@@ -126,7 +125,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── Smart Fridge Results ── */}
+        {/* Smart Fridge Results */}
         <AnimatePresence>
           {smartFridgeMeals.length > 0 && searchTags.length === 0 && (
             <motion.section
@@ -136,14 +135,14 @@ export default function HomePage() {
               className="mb-12 overflow-hidden"
             >
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-2xl bg-pine-50 flex items-center justify-center">
-                  <ChefHat size={18} className="text-pine-500" />
+                <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
+                  <ChefHat size={18} className="text-accent-400" />
                 </div>
                 <div>
-                  <h2 className="font-display text-xl text-cream-800">
+                  <h2 className="font-display text-xl text-zinc-100">
                     Recept du kan laga nu
                   </h2>
-                  <p className="text-xs text-cream-400 mt-0.5">Baserat på ditt kylskåp</p>
+                  <p className="text-xs text-zinc-500 mt-0.5 font-mono">Baserat på ditt kylskåp</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -160,12 +159,12 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
-        {/* ── Magic Search ── */}
+        {/* Command Search */}
         <section className="mb-12">
           <HeroSearch onSearch={handleMagicSearch} loading={false} />
         </section>
 
-        {/* ── Search Results Grid ── */}
+        {/* Search Results Grid */}
         <AnimatePresence>
           {searchTags.length > 0 && filteredRecipes.length > 0 && (
             <motion.section
@@ -176,21 +175,21 @@ export default function HomePage() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-2xl bg-action-50 flex items-center justify-center">
-                    <LayoutGrid size={18} className="text-action-400" />
+                  <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
+                    <LayoutGrid size={18} className="text-accent-400" />
                   </div>
                   <div>
-                    <h2 className="font-display text-xl text-cream-800">
+                    <h2 className="font-display text-xl text-zinc-100">
                       {filteredRecipes.length} recept hittade
                     </h2>
-                    <p className="text-xs text-cream-400 mt-0.5">
+                    <p className="text-xs text-zinc-500 mt-0.5 font-mono">
                       Baserat på {searchTags.join(', ')}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handleReset}
-                  className="text-sm text-cream-400 hover:text-action-400 transition-colors font-medium"
+                  className="text-sm text-zinc-500 hover:text-accent-400 transition-colors font-medium"
                 >
                   Rensa
                 </button>
@@ -206,10 +205,10 @@ export default function HomePage() {
                 ))}
               </div>
               {user && (
-                <div className="mt-8 p-6 bg-white rounded-3xl border border-cream-100 shadow-soft text-center">
-                  <Sparkles size={20} className="text-action-400 mx-auto mb-2" />
-                  <p className="text-sm text-cream-600 mb-4">
-                    Vill du ha <strong>fler recept</strong> från hela webben?
+                <div className="mt-8 p-6 card-dark text-center">
+                  <Sparkles size={20} className="text-accent-400 mx-auto mb-2" />
+                  <p className="text-sm text-zinc-400 mb-4">
+                    Vill du ha <strong className="text-zinc-200">fler recept</strong> från hela webben?
                   </p>
                   <SearchBar onSearch={handleApiSearch} loading={loading} />
                 </div>
@@ -218,23 +217,23 @@ export default function HomePage() {
           )}
         </AnimatePresence>
 
-        {/* ── No search results ── */}
+        {/* No search results */}
         {searchTags.length > 0 && filteredRecipes.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="max-w-md mx-auto py-12 text-center"
           >
-            <div className="w-14 h-14 rounded-2xl bg-cream-100 flex items-center justify-center mx-auto mb-4">
-              <Search size={22} className="text-cream-400" />
+            <div className="w-14 h-14 rounded-xl bg-surface-300 flex items-center justify-center mx-auto mb-4 border border-zinc-800">
+              <Search size={22} className="text-zinc-500" />
             </div>
-            <h3 className="font-display text-xl text-cream-800 mb-2">Inga recept matchade</h3>
-            <p className="text-sm text-cream-400 mb-5">Prova andra ingredienser.</p>
-            <button onClick={handleReset} className="btn-secondary text-sm">Prova igen</button>
+            <h3 className="font-display text-xl text-zinc-100 mb-2">Inga recept matchade</h3>
+            <p className="text-sm text-zinc-500 mb-5">Prova andra ingredienser.</p>
+            <button onClick={handleReset} className="btn-surface text-sm">Prova igen</button>
           </motion.div>
         )}
 
-        {/* ── Features grid ── */}
+        {/* Features grid */}
         {searchTags.length === 0 && smartFridgeMeals.length === 0 && (
           <>
             <div className="grid sm:grid-cols-3 gap-4 mb-14">
@@ -242,27 +241,24 @@ export default function HomePage() {
                 icon={<Zap size={18} />}
                 title="Noll beslutströtthet"
                 text="Säg vad du har, vi löser middagen."
-                color="action"
               />
               <FeatureCard
                 icon={<TrendingDown size={18} />}
                 title="Bästa priset"
                 text="Prisjämför ICA, Willys, Coop och Lidl automatiskt."
-                color="pine"
               />
               <FeatureCard
                 icon={<ShieldCheck size={18} />}
                 title="Verifierade recept"
                 text="Alla recept testade och kvalitetsgranskade."
-                color="gold"
               />
             </div>
             <section>
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-2xl bg-gold-50 flex items-center justify-center">
-                  <ChefHat size={18} className="text-gold-500" />
+                <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
+                  <ChefHat size={18} className="text-accent-400" />
                 </div>
-                <h2 className="font-display text-xl text-cream-800">Populära recept</h2>
+                <h2 className="font-display text-xl text-zinc-100">Populära recept</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {MOCK_RECIPES.slice(0, 3).map((recipe, idx) => (
@@ -281,11 +277,11 @@ export default function HomePage() {
         {/* Login prompt */}
         {!user && searchTags.length === 0 && (
           <div className="mt-14 max-w-lg mx-auto text-center">
-            <div className="bg-white border border-cream-200 rounded-3xl px-6 py-6 shadow-soft">
-              <p className="text-sm text-cream-600">
-                <strong className="text-pine-600">Skapa ett gratis konto</strong> för att söka bland
+            <div className="card-dark px-6 py-6">
+              <p className="text-sm text-zinc-400">
+                <strong className="text-accent-400">Skapa ett gratis konto</strong> för att söka bland
                 tusentals recept, spara favoriter och jämföra priser.{' '}
-                <Link href="/register" className="text-action-400 font-semibold underline underline-offset-2">
+                <Link href="/register" className="text-accent-400 font-semibold underline underline-offset-2">
                   Registrera dig
                 </Link>
               </p>
@@ -307,20 +303,14 @@ export default function HomePage() {
   );
 }
 
-function FeatureCard({ icon, title, text, color }) {
-  const colors = {
-    action: 'bg-action-50 text-action-400',
-    pine: 'bg-pine-50 text-pine-500',
-    gold: 'bg-gold-50 text-gold-500',
-  };
+function FeatureCard({ icon, title, text }) {
   return (
-    <div className="bg-white rounded-3xl border border-cream-100 p-5 shadow-soft
-                  hover:shadow-medium hover:-translate-y-0.5 transition-all duration-300">
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-3 ${colors[color]}`}>
+    <div className="card-elevated p-5 hover:shadow-medium hover:-translate-y-0.5 transition-all duration-300">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-accent-400/10 text-accent-400">
         {icon}
       </div>
-      <h3 className="font-semibold text-cream-800 text-sm mb-1">{title}</h3>
-      <p className="text-xs text-cream-400 leading-relaxed">{text}</p>
+      <h3 className="font-semibold text-zinc-100 text-sm mb-1">{title}</h3>
+      <p className="text-xs text-zinc-500 leading-relaxed">{text}</p>
     </div>
   );
 }

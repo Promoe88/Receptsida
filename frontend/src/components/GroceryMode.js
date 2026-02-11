@@ -1,13 +1,13 @@
 // ============================================
-// GroceryMode — Shopping list grouped by aisle
-// Premium shopping assistant view
+// GroceryMode — Route Optimizer shopping UI
+// Dark theme, grouped by department
 // ============================================
 
 'use client';
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Check, X, MapPin, Store } from 'lucide-react';
+import { ShoppingBag, Check, X, MapPin, Store, Route } from 'lucide-react';
 import { groupByAisle, getCheapestStore } from '../data/recipes';
 
 export function GroceryMode({ recipe, onClose }) {
@@ -40,7 +40,7 @@ export function GroceryMode({ recipe, onClose }) {
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-pine-800/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-void/80 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
       <motion.div
@@ -48,22 +48,24 @@ export function GroceryMode({ recipe, onClose }) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="relative w-full max-w-lg max-h-[90vh] bg-cream-50 rounded-t-3xl sm:rounded-3xl
-                  overflow-hidden z-10 flex flex-col"
+        className="relative w-full max-w-lg max-h-[90vh] bg-surface rounded-t-2xl sm:rounded-2xl
+                  overflow-hidden z-10 flex flex-col border border-zinc-800/60"
       >
         {/* Header */}
-        <div className="bg-pine-600 text-white px-6 py-5">
+        <div className="bg-surface-300 px-6 py-5 border-b border-zinc-800">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <ShoppingBag size={20} />
+              <div className="w-10 h-10 rounded-xl bg-accent-400/15 flex items-center justify-center">
+                <Route size={20} className="text-accent-400" />
+              </div>
               <div>
-                <h2 className="font-display text-xl">Inköpslista</h2>
-                <p className="text-pine-200 text-xs mt-0.5">{recipe.title}</p>
+                <h2 className="font-display text-xl text-zinc-50">Route Optimizer</h2>
+                <p className="text-zinc-500 text-xs mt-0.5">{recipe.title}</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-white/10 transition-colors"
+              className="p-2 rounded-xl hover:bg-surface-200 text-zinc-500 transition-colors"
             >
               <X size={18} />
             </button>
@@ -71,26 +73,26 @@ export function GroceryMode({ recipe, onClose }) {
 
           {/* Progress bar */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-white rounded-full"
+                className="h-full bg-accent-400 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
-            <span className="text-xs font-medium text-pine-100 tabular-nums">
+            <span className="text-xs font-mono text-zinc-400 tabular-nums">
               {checkedCount}/{totalItems}
             </span>
           </div>
 
           {/* Store recommendation */}
           {cheapest && (
-            <div className="mt-3 flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2">
-              <Store size={14} className="text-pine-200" />
-              <span className="text-xs text-pine-100">
-                Handla hos <strong className="text-white">{cheapest.storeName}</strong> — totalt{' '}
-                <strong className="text-white">{cheapest.price} kr</strong>
+            <div className="mt-3 flex items-center gap-2 bg-accent-400/10 border border-accent-400/20 rounded-xl px-3 py-2">
+              <Store size={14} className="text-accent-400" />
+              <span className="text-xs text-zinc-400">
+                Handla hos <strong className="text-accent-400">{cheapest.storeName}</strong> — totalt{' '}
+                <strong className="text-accent-400 font-mono">{cheapest.price} kr</strong>
               </span>
             </div>
           )}
@@ -98,12 +100,13 @@ export function GroceryMode({ recipe, onClose }) {
 
         {/* Aisle list */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          {aisleGroups.map((aisle) => (
+          {aisleGroups.map((aisle, aisleIdx) => (
             <div key={aisle.name}>
               {/* Aisle header */}
               <div className="flex items-center gap-2 mb-2.5">
-                <MapPin size={13} className="text-cream-400" />
-                <span className="section-label">{aisle.name}</span>
+                <MapPin size={13} className="text-zinc-600" />
+                <span className="label-sm">{aisle.name}</span>
+                <div className="flex-1 h-px bg-zinc-800/60" />
               </div>
 
               {/* Items */}
@@ -117,34 +120,31 @@ export function GroceryMode({ recipe, onClose }) {
                       layout
                       whileTap={{ scale: 0.97 }}
                       onClick={() => toggle(key)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
                                 transition-all duration-200 border
                                 ${isDone
-                                  ? 'bg-cream-100 border-cream-200 opacity-50'
-                                  : 'bg-white border-cream-100 shadow-soft'
+                                  ? 'bg-surface-300/50 border-zinc-800/40 opacity-50'
+                                  : 'bg-surface-300 border-zinc-800/60 hover:border-zinc-700'
                                 }`}
                     >
-                      {/* Checkbox */}
                       <span className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center
                                       flex-shrink-0 transition-all duration-200
                         ${isDone
-                          ? 'bg-pine-500 border-pine-500 text-white'
-                          : 'border-cream-300'
+                          ? 'bg-accent-400 border-accent-400 text-void'
+                          : 'border-zinc-600'
                         }`}>
                         {isDone && <Check size={11} strokeWidth={3} />}
                       </span>
 
-                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <span className={`text-sm font-medium transition-all
-                          ${isDone ? 'line-through text-cream-400' : 'text-cream-800'}`}>
+                          ${isDone ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>
                           {item.name}
                         </span>
                       </div>
 
-                      {/* Amount */}
-                      <span className={`text-xs font-medium flex-shrink-0
-                        ${isDone ? 'text-cream-300' : 'text-cream-500'}`}>
+                      <span className={`text-xs font-mono flex-shrink-0
+                        ${isDone ? 'text-zinc-700' : 'text-zinc-500'}`}>
                         {item.amount}
                       </span>
                     </motion.button>
@@ -160,11 +160,11 @@ export function GroceryMode({ recipe, onClose }) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 border-t border-cream-200 bg-white"
+            className="p-4 border-t border-zinc-800 bg-surface-300"
           >
             <button
               onClick={onClose}
-              className="w-full btn-pine py-3.5 rounded-2xl font-semibold"
+              className="w-full btn-accent py-3.5 rounded-xl font-semibold"
             >
               Allt inhandlat!
             </button>
