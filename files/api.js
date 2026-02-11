@@ -1,0 +1,181 @@
+// ============================================
+// API Client — Typed HTTP client for backend
+// ============================================
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+class ApiError extends Error {
+  constructor(status, code, message) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+// ── Token management ──
+
+let accessToken = null;
+let refreshToken = null;
+
+export function setTokens(access, refresh) {
+  accessToken = access;
+  refreshToken = refresh;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('mk_refresh', refresh);
+  }
+}
+
+export function clearTokens() {
+  accessToken = null;
+  refreshToken = null;
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('mk_refresh');
+  }
+}
+
+export function getStoredRefreshToken() {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('mk_refresh');
+  }
+  return null;
+}
+
+// ── Core fetch wrapper with auto-refresh ──
+
+async function apiFetch(path, options = {}) {
+  const url = `${API_URL}${path}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
+  let response = await fetch(url, { ...options, headers });
+
+  // Auto-refresh on 401
+  if (response.status === 401 && refreshToken) {
+    const refreshed = await tryRefresh();
+    if (refreshed) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+      response = await fetch(url, { ...options, headers });
+    }
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(
+      response.status,
+      body.error || 'unknown',
+      body.message || 'Något gick fel'
+    );
+  }
+
+  return response.json();
+}
+
+async function tryRefresh() {
+  try {
+    const res = await fetch(`${API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!res.ok) {
+      clearTokens();
+      return false;
+    }
+
+    const data = await res.json();
+    setTokens(data.accessToken, data.refreshToken);
+    return true;
+  } catch {
+    clearTokens();
+    return false;
+  }
+}
+
+// ── Auth API ──
+
+export const auth = {
+  async register(email, password, name, householdSize) {
+    const data = await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name, householdSize }),
+    });
+    setTokens(data.accessToken, data.refreshToken);
+    return data.user;
+  },
+
+  async login(email, password) {
+    const data = await apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    setTokens(data.accessToken, data.refreshToken);
+    return data.user;
+  },
+
+  async logout() {
+    try {
+      await apiFetch('/auth/logout', { method: 'POST' });
+    } finally {
+      clearTokens();
+    }
+  },
+
+  async me() {
+    return apiFetch('/auth/me');
+  },
+
+  async initFromStorage() {
+    const stored = getStoredRefreshToken();
+    if (!stored) return null;
+
+    refreshToken = stored;
+    const refreshed = await tryRefresh();
+    if (!refreshed) return null;
+
+    return auth.me();
+  },
+};
+
+// ── Recipe API ──
+
+export const recipes = {
+  async search(query, householdSize, preferences) {
+    return apiFetch('/recipes/search', {
+      method: 'POST',
+      body: JSON.stringify({ query, householdSize, preferences }),
+    });
+  },
+
+  async get(id) {
+    return apiFetch(`/recipes/${id}`);
+  },
+
+  async history(page = 1, limit = 20) {
+    return apiFetch(`/recipes/history?page=${page}&limit=${limit}`);
+  },
+
+  async toggleFavorite(id) {
+    return apiFetch(`/recipes/${id}/save`, { method: 'POST' });
+  },
+
+  async favorites() {
+    return apiFetch('/recipes/favorites/list');
+  },
+};
+
+// ── Lexicon API ──
+
+export const lexicon = {
+  async suggest(query) {
+    return apiFetch(`/lexicon/suggest?q=${encodeURIComponent(query)}`);
+  },
+};
+
+export default { auth, recipes, lexicon };

@@ -1,0 +1,296 @@
+// ============================================
+// Recipe Routes — Search, History, Favorites
+// ============================================
+
+import { Router } from 'express';
+import { prisma } from '../config/db.js';
+import { requireAuth } from '../middleware/auth.js';
+import { recipeSearchRateLimit } from '../middleware/rateLimit.js';
+import { validate, recipeSearchSchema } from '../middleware/validate.js';
+import { asyncHandler, AppError } from '../middleware/errorHandler.js';
+import { searchRecipes, generateCacheKey, estimateApiCost } from '../services/claude.js';
+import { parseIngredients } from '../services/lexicon.js';
+
+const router = Router();
+
+// ──────────────────────────────────────────
+// POST /recipes/search — Main AI recipe search
+// ──────────────────────────────────────────
+router.post(
+  '/search',
+  requireAuth,
+  recipeSearchRateLimit,
+  validate(recipeSearchSchema),
+  asyncHandler(async (req, res) => {
+    const { query, householdSize, preferences } = req.validated;
+    const effectiveHouseholdSize =
+      householdSize || (await getUserHouseholdSize(req.user.id));
+
+    // Parse ingredients from the query
+    const parsed = await parseIngredients(query);
+
+    // Search for recipes (uses cache if available)
+    const result = await searchRecipes(query, effectiveHouseholdSize, preferences || {});
+
+    // Save search to DB (async, don't block response)
+    const cacheKey = generateCacheKey(query, effectiveHouseholdSize);
+
+    saveSearchToDB(req.user.id, query, parsed, effectiveHouseholdSize, cacheKey, result).catch(
+      (err) => console.error('Failed to save search:', err.message)
+    );
+
+    // Update quota
+    updateSearchQuota(req.user.id).catch((err) =>
+      console.error('Failed to update quota:', err.message)
+    );
+
+    res.json({
+      recipes: result.recipes,
+      shopping_list: result.shopping_list,
+      sources: result.sources,
+      cached: result.cached,
+      parsed_ingredients: parsed,
+      meta: {
+        query,
+        householdSize: effectiveHouseholdSize,
+        recipeCount: result.recipes.length,
+      },
+    });
+  })
+);
+
+// ──────────────────────────────────────────
+// GET /recipes/history — User's search history
+// ──────────────────────────────────────────
+router.get(
+  '/history',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 20, 50);
+    const skip = (page - 1) * limit;
+
+    const [searches, total] = await Promise.all([
+      prisma.recipeSearch.findMany({
+        where: { userId: req.user.id },
+        include: {
+          recipes: {
+            select: {
+              id: true,
+              title: true,
+              timeMinutes: true,
+              difficulty: true,
+              servings: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.recipeSearch.count({ where: { userId: req.user.id } }),
+    ]);
+
+    res.json({
+      searches,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  })
+);
+
+// ──────────────────────────────────────────
+// GET /recipes/:id — Get a specific recipe
+// ──────────────────────────────────────────
+router.get(
+  '/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: req.params.id },
+      include: {
+        ingredients: { orderBy: { sortOrder: 'asc' } },
+        steps: { orderBy: { sortOrder: 'asc' } },
+        tools: true,
+        favorites: {
+          where: { userId: req.user.id },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!recipe) {
+      throw new AppError(404, 'not_found', 'Receptet hittades inte.');
+    }
+
+    res.json({
+      ...recipe,
+      isFavorite: recipe.favorites.length > 0,
+      favorites: undefined,
+    });
+  })
+);
+
+// ──────────────────────────────────────────
+// POST /recipes/:id/save — Toggle favorite
+// ──────────────────────────────────────────
+router.post(
+  '/:id/save',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const recipeId = req.params.id;
+    const userId = req.user.id;
+
+    // Check if recipe exists
+    const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } });
+    if (!recipe) {
+      throw new AppError(404, 'not_found', 'Receptet hittades inte.');
+    }
+
+    // Toggle favorite
+    const existing = await prisma.favorite.findUnique({
+      where: { userId_recipeId: { userId, recipeId } },
+    });
+
+    if (existing) {
+      await prisma.favorite.delete({ where: { id: existing.id } });
+      return res.json({ saved: false, message: 'Recept borttaget från favoriter.' });
+    }
+
+    await prisma.favorite.create({ data: { userId, recipeId } });
+    res.json({ saved: true, message: 'Recept sparat som favorit!' });
+  })
+);
+
+// ──────────────────────────────────────────
+// GET /recipes/favorites/list — Get user favorites
+// ──────────────────────────────────────────
+router.get(
+  '/favorites/list',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const favorites = await prisma.favorite.findMany({
+      where: { userId: req.user.id },
+      include: {
+        recipe: {
+          include: {
+            ingredients: { orderBy: { sortOrder: 'asc' } },
+            steps: { orderBy: { sortOrder: 'asc' } },
+            tools: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({
+      favorites: favorites.map((f) => ({
+        ...f.recipe,
+        savedAt: f.createdAt,
+      })),
+    });
+  })
+);
+
+// ──────────────────────────────────────────
+// Helper functions
+// ──────────────────────────────────────────
+
+async function getUserHouseholdSize(userId) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { householdSize: true },
+  });
+  return user?.householdSize || 1;
+}
+
+async function saveSearchToDB(userId, query, parsed, householdSize, cacheKey, result) {
+  const search = await prisma.recipeSearch.create({
+    data: {
+      userId,
+      query,
+      ingredients: parsed.recognized.map((r) => r.canonical),
+      householdSize,
+      cacheKey,
+      resultCount: result.recipes.length,
+      apiCostEstimate: result.cached ? 0 : estimateApiCost(),
+    },
+  });
+
+  // Save individual recipes
+  for (const recipe of result.recipes) {
+    const slug = recipe.title
+      .toLowerCase()
+      .replace(/[åä]/g, 'a')
+      .replace(/ö/g, 'o')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    await prisma.recipe.create({
+      data: {
+        searchId: search.id,
+        title: recipe.title,
+        slug: `${slug}-${search.id.slice(0, 6)}`,
+        sourceName: recipe.source_name || null,
+        sourceUrl: recipe.source_url || null,
+        timeMinutes: recipe.time_minutes,
+        difficulty: recipe.difficulty,
+        servings: recipe.servings,
+        costEstimate: recipe.cost_estimate || null,
+        tips: recipe.tips || null,
+        ingredients: {
+          create: recipe.ingredients.map((ing, idx) => ({
+            name: ing.name,
+            amount: ing.amount,
+            userHas: ing.have || false,
+            sortOrder: idx,
+          })),
+        },
+        steps: {
+          create: recipe.steps.map((step, idx) => ({
+            sortOrder: idx,
+            content: step,
+          })),
+        },
+        tools: {
+          create: recipe.tools.map((tool) => ({
+            name: tool,
+          })),
+        },
+      },
+    });
+  }
+}
+
+async function updateSearchQuota(userId) {
+  const quota = await prisma.searchQuota.findUnique({
+    where: { userId },
+  });
+
+  if (!quota) {
+    await prisma.searchQuota.create({
+      data: { userId, searchesUsed: 1, periodStart: new Date() },
+    });
+    return;
+  }
+
+  // Reset if period expired (1 hour)
+  const hourAgo = new Date(Date.now() - 3600000);
+  if (quota.periodStart < hourAgo) {
+    await prisma.searchQuota.update({
+      where: { userId },
+      data: { searchesUsed: 1, periodStart: new Date() },
+    });
+  } else {
+    await prisma.searchQuota.update({
+      where: { userId },
+      data: { searchesUsed: { increment: 1 } },
+    });
+  }
+}
+
+export default router;

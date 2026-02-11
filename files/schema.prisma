@@ -1,0 +1,180 @@
+// ============================================
+// MatKompass — Database Schema
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────
+// Auth & Users
+// ──────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  name          String?
+  householdSize Int      @default(1) @map("household_size")
+  plan          Plan     @default(FREE)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  refreshTokens RefreshToken[]
+  searches      RecipeSearch[]
+  favorites     Favorite[]
+  searchQuota   SearchQuota?
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model SearchQuota {
+  id             String   @id @default(cuid())
+  userId         String   @unique @map("user_id")
+  searchesUsed   Int      @default(0) @map("searches_used")
+  periodStart    DateTime @default(now()) @map("period_start")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("search_quotas")
+}
+
+enum Plan {
+  FREE
+  PREMIUM
+  ADMIN
+}
+
+// ──────────────────────────────────────────
+// Recipes & Search
+// ──────────────────────────────────────────
+
+model RecipeSearch {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  query          String
+  ingredients    String[] // Parsed ingredient list
+  householdSize  Int      @map("household_size")
+  cacheKey       String   @map("cache_key")
+  resultCount    Int      @default(0) @map("result_count")
+  apiCostEstimate Float?  @map("api_cost_estimate")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipes Recipe[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([cacheKey])
+  @@map("recipe_searches")
+}
+
+model Recipe {
+  id            String   @id @default(cuid())
+  searchId      String   @map("search_id")
+  title         String
+  slug          String
+  sourceName    String?  @map("source_name")
+  sourceUrl     String?  @map("source_url")
+  timeMinutes   Int      @map("time_minutes")
+  difficulty    String
+  servings      Int
+  costEstimate  String?  @map("cost_estimate")
+  tips          String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  search      RecipeSearch   @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  ingredients Ingredient[]
+  steps       Step[]
+  tools       Tool[]
+  favorites   Favorite[]
+
+  @@index([slug])
+  @@index([searchId])
+  @@map("recipes")
+}
+
+model Ingredient {
+  id       String  @id @default(cuid())
+  recipeId String  @map("recipe_id")
+  name     String
+  amount   String
+  userHas  Boolean @default(false) @map("user_has")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@map("ingredients")
+}
+
+model Step {
+  id        String @id @default(cuid())
+  recipeId  String @map("recipe_id")
+  sortOrder Int    @map("sort_order")
+  content   String
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@map("steps")
+}
+
+model Tool {
+  id       String @id @default(cuid())
+  recipeId String @map("recipe_id")
+  name     String
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@map("tools")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  recipeId  String   @map("recipe_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
+  @@map("favorites")
+}
+
+// ──────────────────────────────────────────
+// Lexicon — Ingredient dictionary
+// ──────────────────────────────────────────
+
+model LexiconEntry {
+  id        String   @id @default(cuid())
+  word      String   @unique
+  canonical String   // Normalized form: "kycklingfilé" → "kyckling"
+  category  String   // "protein", "grönsak", "mejeri", "krydda", etc.
+  synonyms  String[] // ["kycklingbröst", "kycklingfilé", "chicken"]
+  emoji     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([canonical])
+  @@index([category])
+  @@map("lexicon")
+}
