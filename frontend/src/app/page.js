@@ -1,26 +1,30 @@
 // ============================================
-// Home Page — Magic Search + Bento Grid Results
+// Home Page — Premium Decision Engine
+// Daily Recommendation + Smart Fridge + Bento Grid
 // ============================================
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '../lib/store';
 import { useRecipeSearch, useFavorites } from '../hooks/useRecipes';
+import { DailyRecommendation } from '../components/DailyRecommendation';
+import { SmartFridge } from '../components/SmartFridge';
 import { HeroSearch } from '../components/HeroSearch';
 import { RecipeGridCard } from '../components/RecipeGridCard';
 import { RecipeDetail } from '../components/RecipeDetail';
-import { PriceComparison } from '../components/PriceComparison';
 import { RecipeCard } from '../components/RecipeCard';
 import { SearchBar } from '../components/SearchBar';
 import { ShoppingList } from '../components/ShoppingList';
 import { LoadingState } from '../components/LoadingState';
 import { SourceBanner } from '../components/SourceBanner';
-import { MOCK_RECIPES, filterRecipesByIngredients } from '../data/recipes';
+import { MOCK_RECIPES, getDailyRecommendation, filterRecipesByIngredients } from '../data/recipes';
 import {
-  ArrowLeft, Sparkles, ShieldCheck, Zap, Search,
-  ChefHat, TrendingDown, LayoutGrid, Store,
+  ArrowLeft, Sparkles, TrendingDown, ChefHat, ShieldCheck,
+  Search, LayoutGrid, Zap,
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
   const { user } = useAuthStore();
@@ -28,23 +32,27 @@ export default function HomePage() {
   const { toggleFavorite } = useFavorites();
   const [lastQuery, setLastQuery] = useState('');
 
-  // Local mock search state
+  // Local state
   const [searchTags, setSearchTags] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [smartFridgeMeals, setSmartFridgeMeals] = useState([]);
 
-  // Filtered mock recipes
+  const dailyRecipe = useMemo(() => getDailyRecommendation(), []);
+
   const filteredRecipes = useMemo(
     () => filterRecipesByIngredients(searchTags),
     [searchTags]
   );
 
-  // Handle the magic search (local mock filtering)
-  function handleMagicSearch(tags) {
+  const handleMagicSearch = useCallback((tags) => {
     setSearchTags(tags);
     setSelectedRecipe(null);
-  }
+  }, []);
 
-  // Handle full API search (for logged-in users)
+  const handleMealsFound = useCallback((meals) => {
+    setSmartFridgeMeals(meals);
+  }, []);
+
   function handleApiSearch(query, householdSize) {
     if (!user) {
       window.location.href = '/login?redirect=/';
@@ -54,7 +62,6 @@ export default function HomePage() {
     search(query, householdSize);
   }
 
-  // Reset everything
   function handleReset() {
     setSearchTags([]);
     setSelectedRecipe(null);
@@ -66,7 +73,7 @@ export default function HomePage() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-          <h2 className="font-display text-2xl sm:text-3xl text-warm-800">
+          <h2 className="font-display text-2xl sm:text-3xl text-cream-800">
             Recept för &ldquo;{lastQuery}&rdquo;
           </h2>
           <button onClick={handleReset} className="btn-secondary text-sm !py-2">
@@ -74,13 +81,10 @@ export default function HomePage() {
             Ny sökning
           </button>
         </div>
-
         {results.cached && (
-          <div className="badge-green mb-4">Cachad sökning — inga extra API-anrop</div>
+          <div className="badge-green mb-4">Cachad sökning</div>
         )}
-
         <SourceBanner sources={results.sources} />
-
         <div className="space-y-5">
           {results.recipes.map((recipe, idx) => (
             <RecipeCard
@@ -90,7 +94,6 @@ export default function HomePage() {
             />
           ))}
         </div>
-
         {results.shopping_list?.length > 0 && (
           <div className="mt-6">
             <ShoppingList items={results.shopping_list} />
@@ -100,184 +103,224 @@ export default function HomePage() {
     );
   }
 
-  // ── Loading view ──
-  if (loading) {
-    return <LoadingState />;
-  }
+  if (loading) return <LoadingState />;
 
-  // ── Main view: Magic Search + Bento Grid ──
+  // ── Main premium view ──
   return (
     <div className="min-h-screen">
-      {/* Hero + Magic Search */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <HeroSearch onSearch={handleMagicSearch} loading={false} />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20">
+
+        {/* ── Top section: Daily + SmartFridge ── */}
+        <div className="grid lg:grid-cols-5 gap-5 mb-10">
+          <div className="lg:col-span-3">
+            <DailyRecommendation
+              recipe={dailyRecipe}
+              onSelect={setSelectedRecipe}
+            />
+          </div>
+          <div className="lg:col-span-2">
+            <SmartFridge
+              onMealsFound={handleMealsFound}
+              onRecipeSelect={setSelectedRecipe}
+            />
+          </div>
+        </div>
+
+        {/* ── Smart Fridge Results ── */}
+        <AnimatePresence>
+          {smartFridgeMeals.length > 0 && searchTags.length === 0 && (
+            <motion.section
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-12 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 rounded-2xl bg-pine-50 flex items-center justify-center">
+                  <ChefHat size={18} className="text-pine-500" />
+                </div>
+                <div>
+                  <h2 className="font-display text-xl text-cream-800">
+                    Recept du kan laga nu
+                  </h2>
+                  <p className="text-xs text-cream-400 mt-0.5">Baserat på ditt kylskåp</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {smartFridgeMeals.slice(0, 6).map((recipe, idx) => (
+                  <RecipeGridCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onClick={setSelectedRecipe}
+                    index={idx}
+                  />
+                ))}
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* ── Magic Search ── */}
+        <section className="mb-12">
+          <HeroSearch onSearch={handleMagicSearch} loading={false} />
+        </section>
+
+        {/* ── Search Results Grid ── */}
+        <AnimatePresence>
+          {searchTags.length > 0 && filteredRecipes.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-12"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-2xl bg-action-50 flex items-center justify-center">
+                    <LayoutGrid size={18} className="text-action-400" />
+                  </div>
+                  <div>
+                    <h2 className="font-display text-xl text-cream-800">
+                      {filteredRecipes.length} recept hittade
+                    </h2>
+                    <p className="text-xs text-cream-400 mt-0.5">
+                      Baserat på {searchTags.join(', ')}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleReset}
+                  className="text-sm text-cream-400 hover:text-action-400 transition-colors font-medium"
+                >
+                  Rensa
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredRecipes.map((recipe, idx) => (
+                  <RecipeGridCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    onClick={setSelectedRecipe}
+                    index={idx}
+                  />
+                ))}
+              </div>
+              {user && (
+                <div className="mt-8 p-6 bg-white rounded-3xl border border-cream-100 shadow-soft text-center">
+                  <Sparkles size={20} className="text-action-400 mx-auto mb-2" />
+                  <p className="text-sm text-cream-600 mb-4">
+                    Vill du ha <strong>fler recept</strong> från hela webben?
+                  </p>
+                  <SearchBar onSearch={handleApiSearch} loading={loading} />
+                </div>
+              )}
+            </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* ── No search results ── */}
+        {searchTags.length > 0 && filteredRecipes.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="max-w-md mx-auto py-12 text-center"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-cream-100 flex items-center justify-center mx-auto mb-4">
+              <Search size={22} className="text-cream-400" />
+            </div>
+            <h3 className="font-display text-xl text-cream-800 mb-2">Inga recept matchade</h3>
+            <p className="text-sm text-cream-400 mb-5">Prova andra ingredienser.</p>
+            <button onClick={handleReset} className="btn-secondary text-sm">Prova igen</button>
+          </motion.div>
+        )}
+
+        {/* ── Features grid ── */}
+        {searchTags.length === 0 && smartFridgeMeals.length === 0 && (
+          <>
+            <div className="grid sm:grid-cols-3 gap-4 mb-14">
+              <FeatureCard
+                icon={<Zap size={18} />}
+                title="Noll beslutströtthet"
+                text="Säg vad du har, vi löser middagen."
+                color="action"
+              />
+              <FeatureCard
+                icon={<TrendingDown size={18} />}
+                title="Bästa priset"
+                text="Prisjämför ICA, Willys, Coop och Lidl automatiskt."
+                color="pine"
+              />
+              <FeatureCard
+                icon={<ShieldCheck size={18} />}
+                title="Verifierade recept"
+                text="Alla recept testade och kvalitetsgranskade."
+                color="gold"
+              />
+            </div>
+            <section>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-9 h-9 rounded-2xl bg-gold-50 flex items-center justify-center">
+                  <ChefHat size={18} className="text-gold-500" />
+                </div>
+                <h2 className="font-display text-xl text-cream-800">Populära recept</h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {MOCK_RECIPES.slice(0, 3).map((recipe, idx) => (
+                  <RecipeGridCard
+                    key={recipe.id}
+                    recipe={{ ...recipe, matchScore: 0 }}
+                    onClick={setSelectedRecipe}
+                    index={idx}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* Login prompt */}
+        {!user && searchTags.length === 0 && (
+          <div className="mt-14 max-w-lg mx-auto text-center">
+            <div className="bg-white border border-cream-200 rounded-3xl px-6 py-6 shadow-soft">
+              <p className="text-sm text-cream-600">
+                <strong className="text-pine-600">Skapa ett gratis konto</strong> för att söka bland
+                tusentals recept, spara favoriter och jämföra priser.{' '}
+                <Link href="/register" className="text-action-400 font-semibold underline underline-offset-2">
+                  Registrera dig
+                </Link>
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Results section */}
-      {searchTags.length > 0 && filteredRecipes.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-16 animate-fade-up">
-          {/* Section header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-brand-50 flex items-center justify-center">
-                <LayoutGrid size={18} className="text-brand-400" />
-              </div>
-              <div>
-                <h2 className="font-display text-2xl text-warm-800">
-                  {filteredRecipes.length} recept hittade
-                </h2>
-                <p className="text-xs text-warm-400 mt-0.5">
-                  Baserat på {searchTags.join(', ')}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleReset}
-              className="text-sm text-warm-400 hover:text-brand-400 transition-colors font-medium"
-            >
-              Rensa
-            </button>
-          </div>
-
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRecipes.map((recipe) => (
-              <RecipeGridCard
-                key={recipe.id}
-                recipe={recipe}
-                onClick={setSelectedRecipe}
-              />
-            ))}
-          </div>
-
-          {/* Prompt for full AI search */}
-          <div className="mt-10 text-center">
-            <div className="inline-flex flex-col items-center gap-3 bg-white rounded-2xl
-                          border border-warm-200 px-8 py-6 shadow-soft">
-              <Sparkles size={20} className="text-brand-400" />
-              <p className="text-sm text-warm-600 max-w-sm">
-                Vill du ha <strong>fler recept</strong> från hela webben, anpassade efter ditt hushåll?
-              </p>
-              <SearchBar onSearch={handleApiSearch} loading={loading} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* No results message */}
-      {searchTags.length > 0 && filteredRecipes.length === 0 && (
-        <div className="max-w-md mx-auto px-4 py-16 text-center animate-fade-up">
-          <div className="w-16 h-16 rounded-2xl bg-warm-100 flex items-center justify-center mx-auto mb-4">
-            <Search size={24} className="text-warm-400" />
-          </div>
-          <h3 className="font-display text-xl text-warm-800 mb-2">Inga recept matchade</h3>
-          <p className="text-sm text-warm-400 mb-6">
-            Prova att lägga till fler ingredienser eller andra kombinationer.
-          </p>
-          <button
-            onClick={handleReset}
-            className="btn-secondary text-sm"
-          >
-            Prova igen
-          </button>
-        </div>
-      )}
-
-      {/* Features section — only when no search active */}
-      {searchTags.length === 0 && (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-20">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <FeatureCard
-              icon={<Search size={20} />}
-              title="Smart sökning"
-              description="Skriv in vad du har — vi matchar recepten automatiskt."
-              color="brand"
-            />
-            <FeatureCard
-              icon={<TrendingDown size={20} />}
-              title="Bästa priset"
-              description="Jämför priser hos ICA, Willys, Coop och Lidl i realtid."
-              color="forest"
-            />
-            <FeatureCard
-              icon={<ChefHat size={20} />}
-              title="Klassiska recept"
-              description="Sveriges mest älskade rätter — från köttbullar till lax i ugn."
-              color="gold"
-            />
-            <FeatureCard
-              icon={<ShieldCheck size={20} />}
-              title="Ingen reklam"
-              description="Ren, enkel design. Bara du och maten."
-              color="warm"
-            />
-          </div>
-
-          {/* Popular recipes preview */}
-          <div className="mt-16">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-gold-50 flex items-center justify-center">
-                <Store size={18} className="text-gold-400" />
-              </div>
-              <h2 className="font-display text-2xl text-warm-800">Populära recept</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {MOCK_RECIPES.slice(0, 3).map((recipe) => (
-                <RecipeGridCard
-                  key={recipe.id}
-                  recipe={{ ...recipe, matchScore: 0 }}
-                  onClick={setSelectedRecipe}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Login prompt */}
-      {!user && searchTags.length === 0 && (
-        <div className="max-w-lg mx-auto px-4 pb-20 text-center">
-          <div className="bg-brand-50/40 border border-brand-100 rounded-2xl px-6 py-5">
-            <p className="text-sm text-warm-600">
-              <strong className="text-brand-400">Skapa ett gratis konto</strong> för att söka bland
-              tusentals recept, spara favoriter och jämföra priser.{' '}
-              <a href="/register" className="text-brand-400 font-semibold underline underline-offset-2">
-                Registrera dig
-              </a>
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Recipe detail modal */}
-      {selectedRecipe && (
-        <RecipeDetail
-          recipe={selectedRecipe}
-          onClose={() => setSelectedRecipe(null)}
-        />
-      )}
+      <AnimatePresence>
+        {selectedRecipe && (
+          <RecipeDetail
+            recipe={selectedRecipe}
+            onClose={() => setSelectedRecipe(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-// ── Feature Card ──
-function FeatureCard({ icon, title, description, color }) {
-  const colorMap = {
-    brand: 'bg-brand-50 text-brand-400',
-    forest: 'bg-forest-50 text-forest-400',
-    gold: 'bg-gold-50 text-gold-400',
-    warm: 'bg-warm-100 text-warm-500',
+function FeatureCard({ icon, title, text, color }) {
+  const colors = {
+    action: 'bg-action-50 text-action-400',
+    pine: 'bg-pine-50 text-pine-500',
+    gold: 'bg-gold-50 text-gold-500',
   };
-
   return (
-    <div className="bg-white rounded-2xl border border-warm-200 p-5 hover:shadow-soft
-                  transition-all duration-300 hover:-translate-y-0.5">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${colorMap[color]}`}>
+    <div className="bg-white rounded-3xl border border-cream-100 p-5 shadow-soft
+                  hover:shadow-medium hover:-translate-y-0.5 transition-all duration-300">
+      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-3 ${colors[color]}`}>
         {icon}
       </div>
-      <h3 className="font-semibold text-warm-800 text-sm mb-1">{title}</h3>
-      <p className="text-xs text-warm-400 leading-relaxed">{description}</p>
+      <h3 className="font-semibold text-cream-800 text-sm mb-1">{title}</h3>
+      <p className="text-xs text-cream-400 leading-relaxed">{text}</p>
     </div>
   );
 }

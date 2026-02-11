@@ -1,103 +1,102 @@
 // ============================================
-// RecipeGridCard — Compact card for Bento Grid
-// Shows best price badge + match percentage
+// RecipeGridCard — Premium Bento Grid card
+// Glassmorphism, verified badge, price trend
 // ============================================
 
 'use client';
 
-import { useState } from 'react';
-import { Clock, Users, TrendingDown, ChefHat, Tag } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Clock, Users, Star, ShieldCheck, TrendingDown } from 'lucide-react';
 import { getCheapestStore } from '../data/recipes';
+import { PriceBadge } from './PriceBadge';
 
-export function RecipeGridCard({ recipe, onClick }) {
-  const [isHovered, setIsHovered] = useState(false);
+export function RecipeGridCard({ recipe, onClick, index = 0 }) {
   const cheapest = recipe.cheapestStore || getCheapestStore(recipe.pricing);
 
-  // Color based on match score
-  function getMatchColor(score) {
-    if (score >= 75) return 'bg-forest-50 text-forest-500 border-forest-200';
-    if (score >= 50) return 'bg-gold-50 text-gold-500 border-gold-200';
-    return 'bg-warm-50 text-warm-500 border-warm-200';
-  }
-
-  function getMatchLabel(score) {
-    if (score >= 75) return 'Perfekt match';
-    if (score >= 50) return 'Bra match';
-    return 'Delvis match';
-  }
-
   return (
-    <button
+    <motion.button
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       onClick={() => onClick?.(recipe)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`w-full text-left bg-white rounded-2xl border border-warm-200
-                 transition-all duration-300 overflow-hidden group
-                 hover:shadow-medium hover:-translate-y-1 hover:border-warm-300
-                 focus:outline-none focus:ring-2 focus:ring-brand-400/20 focus:border-brand-400`}
+      className="w-full text-left bg-white rounded-3xl border border-cream-100
+               shadow-soft overflow-hidden group
+               hover:shadow-strong hover:border-cream-200
+               focus:outline-none focus:ring-2 focus:ring-action-400/20
+               transition-shadow duration-300"
     >
-      {/* Top section — Colored accent based on match */}
-      <div className="relative p-5 pb-4">
-        {/* Match % badge — top right */}
-        {recipe.matchScore > 0 && (
-          <div className={`absolute top-4 right-4 px-2.5 py-1 rounded-xl text-xs font-bold
-                         border ${getMatchColor(recipe.matchScore)}`}>
-            {recipe.matchScore}%
-          </div>
-        )}
+      {/* Top accent bar */}
+      <div className={`h-1 w-full ${recipe.matchScore >= 75
+        ? 'bg-gradient-to-r from-pine-400 to-pine-300'
+        : recipe.matchScore >= 50
+          ? 'bg-gradient-to-r from-gold-400 to-gold-300'
+          : 'bg-gradient-to-r from-cream-200 to-cream-100'
+      }`} />
 
-        {/* Recipe icon placeholder */}
-        <div className="w-11 h-11 rounded-2xl bg-brand-50 flex items-center justify-center mb-4
-                      group-hover:scale-105 transition-transform duration-300">
-          <ChefHat size={22} className="text-brand-400" />
+      <div className="p-5">
+        {/* Top row — badges */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            {recipe.verified && (
+              <span className="inline-flex items-center gap-1 bg-pine-600 text-white
+                           text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                <ShieldCheck size={10} /> Verifierad
+              </span>
+            )}
+            {recipe.matchScore > 0 && (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg
+                ${recipe.matchScore >= 75
+                  ? 'bg-pine-50 text-pine-600'
+                  : recipe.matchScore >= 50
+                    ? 'bg-gold-50 text-gold-600'
+                    : 'bg-cream-100 text-cream-500'
+                }`}>
+                {recipe.matchScore}% match
+              </span>
+            )}
+          </div>
+          {recipe.rating && (
+            <span className="inline-flex items-center gap-1 text-[11px] text-gold-500 font-semibold">
+              <Star size={11} fill="currentColor" /> {recipe.rating}
+            </span>
+          )}
         </div>
 
-        {/* Title & description */}
-        <h3 className="font-display text-xl text-warm-800 mb-1.5 leading-tight">
+        {/* Title */}
+        <h3 className="font-display text-lg text-cream-800 leading-tight mb-1.5
+                     group-hover:text-pine-600 transition-colors duration-200">
           {recipe.title}
         </h3>
-        <p className="text-sm text-warm-400 leading-relaxed line-clamp-2 font-light">
+
+        {/* Description */}
+        <p className="text-xs text-cream-500 leading-relaxed line-clamp-2 mb-4">
           {recipe.description}
         </p>
-      </div>
 
-      {/* Meta row */}
-      <div className="px-5 pb-4 flex flex-wrap items-center gap-3">
-        <span className="inline-flex items-center gap-1 text-xs text-warm-400">
-          <Clock size={12} />
-          {recipe.prepTime} min
-        </span>
-        <span className="inline-flex items-center gap-1 text-xs text-warm-400">
-          <Users size={12} />
-          {recipe.servings} port
-        </span>
-        <span className="inline-flex items-center gap-1 text-xs text-warm-400">
-          <Tag size={12} />
-          {recipe.difficulty}
-        </span>
-      </div>
-
-      {/* Bottom section — Price info */}
-      <div className="border-t border-warm-100 px-5 py-3.5 bg-warm-50/50
-                    flex items-center justify-between">
-        {cheapest && (
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-forest-500">
-              <TrendingDown size={14} />
-              <span className="text-sm font-bold">{cheapest.price} kr</span>
-            </div>
-            <span className="text-xs text-warm-400">
-              hos {cheapest.storeName}
-            </span>
-          </div>
-        )}
-
-        {recipe.matchScore > 0 && (
-          <span className="text-xs text-warm-400 font-medium hidden sm:block">
-            {getMatchLabel(recipe.matchScore)}
+        {/* Meta */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className="inline-flex items-center gap-1 text-[11px] text-cream-400 font-medium">
+            <Clock size={11} /> {recipe.prepTime} min
           </span>
-        )}
+          <span className="inline-flex items-center gap-1 text-[11px] text-cream-400 font-medium">
+            <Users size={11} /> {recipe.servings} port
+          </span>
+          <span className="text-[11px] text-cream-400 font-medium">
+            {recipe.difficulty}
+          </span>
+        </div>
+
+        {/* Price section */}
+        <div className="flex items-center justify-between pt-3 border-t border-cream-100">
+          <PriceBadge pricing={recipe.pricing} priceTrends={recipe.priceTrends} />
+          {cheapest && (
+            <span className="text-[10px] text-cream-400">
+              från {cheapest.price} kr
+            </span>
+          )}
+        </div>
       </div>
-    </button>
+    </motion.button>
   );
 }
