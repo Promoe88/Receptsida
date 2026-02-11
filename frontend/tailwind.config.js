@@ -57,22 +57,23 @@ module.exports = {
       borderRadius: {
         xl: '16px',
         '2xl': '20px',
+        '3xl': '24px',
       },
       boxShadow: {
-        soft: '0 2px 20px rgba(44,36,23,0.06)',
+        soft: '0 2px 20px rgba(44,36,23,0.05)',
         medium: '0 4px 30px rgba(44,36,23,0.08)',
         strong: '0 8px 40px rgba(44,36,23,0.1)',
         glow: '0 0 0 4px rgba(212,87,42,0.1)',
       },
       animation: {
-        'fade-up': 'fadeUp 0.6s ease forwards',
-        'fade-in': 'fadeIn 0.4s ease forwards',
+        'fade-up': 'fadeUp 0.5s ease forwards',
+        'fade-in': 'fadeIn 0.3s ease forwards',
         'slide-down': 'slideDown 0.3s ease forwards',
         'spin-slow': 'spin 1.5s linear infinite',
       },
       keyframes: {
         fadeUp: {
-          from: { opacity: '0', transform: 'translateY(20px)' },
+          from: { opacity: '0', transform: 'translateY(16px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
         fadeIn: {
@@ -80,7 +81,7 @@ module.exports = {
           to: { opacity: '1' },
         },
         slideDown: {
-          from: { opacity: '0', transform: 'translateY(-10px)' },
+          from: { opacity: '0', transform: 'translateY(-8px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
       },

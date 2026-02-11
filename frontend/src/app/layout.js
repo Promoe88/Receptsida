@@ -7,13 +7,13 @@ import { Navbar } from '../components/Navbar';
 import { AuthProvider } from '../components/AuthProvider';
 
 export const metadata = {
-  title: 'MatKompass — Vad har du i kylen?',
+  title: 'MatKompass — Sveriges mest användbara receptsida',
   description:
-    'Sveriges smartaste receptverktyg. Skriv in dina ingredienser — vi hittar perfekta recept anpassade efter dig.',
-  keywords: 'recept, matlagning, ingredienser, AI, Sverige, enkel mat',
+    'Hitta recept baserat på vad du har hemma. Jämför priser hos ICA, Willys, Coop och Lidl. Enkel, snabb och utan reklam.',
+  keywords: 'recept, matlagning, ingredienser, prisjämförelse, ICA, Willys, Coop, Lidl, Sverige',
   openGraph: {
-    title: 'MatKompass — Vad har du i kylen?',
-    description: 'AI-driven receptsökning baserad på dina ingredienser.',
+    title: 'MatKompass — Sveriges mest användbara receptsida',
+    description: 'Hitta recept baserat på vad du har hemma. Jämför priser hos svenska matbutiker.',
     type: 'website',
     locale: 'sv_SE',
   },
@@ -26,10 +26,15 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-warm-200 py-8 px-6 text-center">
-            <p className="text-sm text-warm-500">
-              © {new Date().getFullYear()} MatKompass — Byggt med kärlek för Sveriges matlagare
-            </p>
+          <footer className="border-t border-warm-200 py-10 px-6">
+            <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-warm-400 font-light">
+                MatKompass — Sveriges mest användbara receptsida
+              </p>
+              <p className="text-xs text-warm-300">
+                Priser uppdateras regelbundet. Faktiska priser kan variera.
+              </p>
+            </div>
           </footer>
         </AuthProvider>
       </body>
