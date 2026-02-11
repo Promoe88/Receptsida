@@ -1,6 +1,6 @@
 // ============================================
-// Claude AI Service — Recipe generation
-// with real web search
+// Claude AI Service — Universal recipe engine
+// Handles all query types + cooking assistant
 // ============================================
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -27,31 +27,19 @@ export function generateCacheKey(query, householdSize) {
 }
 
 // ──────────────────────────────────────────
-// Main search function
+// Main search function — universal entry point
 // ──────────────────────────────────────────
 
-/**
- * Searches for real recipes using Claude + web search,
- * then structures the results.
- *
- * @param {string} query - User's ingredient/recipe query
- * @param {number} householdSize - Number of people
- * @param {object} preferences - Optional dietary/time preferences
- * @returns {{ recipes: Array, shopping_list: Array, sources: Array, cached: boolean }}
- */
 export async function searchRecipes(query, householdSize = 1, preferences = {}) {
   const cacheKey = generateCacheKey(query, householdSize);
 
-  // Check cache first (24h TTL)
   const cached = await cacheGet(cacheKey);
   if (cached) {
     return { ...cached, cached: true };
   }
 
-  // ── Step 1: Search the web for real recipes ──
   const searchResult = await searchWebForRecipes(query, householdSize, preferences);
 
-  // ── Step 2: Structure the results as JSON ──
   const structured = await structureRecipes(
     searchResult.text,
     searchResult.sources,
@@ -67,53 +55,73 @@ export async function searchRecipes(query, householdSize = 1, preferences = {}) 
     cached: false,
   };
 
-  // Cache for 24 hours
   await cacheSet(cacheKey, result, 86400);
 
   return result;
 }
 
 // ──────────────────────────────────────────
-// Step 1: Web search via Claude
+// Step 1: Web search — universal prompt
 // ──────────────────────────────────────────
 
 async function searchWebForRecipes(query, householdSize, preferences) {
-  const dietaryStr = preferences.dietary?.length
-    ? `Kostpreferenser: ${preferences.dietary.join(', ')}.`
-    : '';
-  const timeStr = preferences.maxTimeMinutes
-    ? `Max tillagningstid: ${preferences.maxTimeMinutes} minuter.`
+  const constraints = [];
+  if (preferences.dietary?.length)
+    constraints.push(`Kostpreferenser: ${preferences.dietary.join(', ')}.`);
+  if (preferences.maxTimeMinutes)
+    constraints.push(`Max tillagningstid: ${preferences.maxTimeMinutes} minuter.`);
+  if (preferences.maxBudget)
+    constraints.push(`Maxbudget: ${preferences.maxBudget} kr.`);
+  if (preferences.occasion)
+    constraints.push(`Tillfälle: ${preferences.occasion}.`);
+  if (preferences.difficulty)
+    constraints.push(`Svårighetsgrad: ${preferences.difficulty}.`);
+
+  const constraintBlock = constraints.length > 0
+    ? `\nBEGRÄNSNINGAR:\n${constraints.join('\n')}`
     : '';
 
   const householdLabel = getHouseholdLabel(householdSize);
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 3000,
+    max_tokens: 4000,
     tools: [{ type: 'web_search_20250305', name: 'web_search' }],
     messages: [
       {
         role: 'user',
-        content: `Du är en svensk receptexpert. En användare (${householdLabel}) söker recept med: "${query}"
-${dietaryStr}
-${timeStr}
+        content: `Du är MatKompass — en svensk AI-receptassistent i världsklass. Tolka användarens fråga intelligent och hitta de bästa recepten.
 
-Sök på nätet efter 2–3 riktiga, enkla och snabba recept som använder dessa ingredienser. 
-Prioritera svenska receptsajter (ICA, Coop, Arla, Köket.se, Tasteline) men inkludera även internationella om de är relevanta.
+ANVÄNDARENS FRÅGA: "${query}"
+HUSHÅLL: ${householdLabel} (${householdSize} portioner)
+${constraintBlock}
 
-För varje recept du hittar, samla in:
+TOLKA FRÅGAN:
+- Ingredienser (t.ex. "kyckling, ris, grädde") → recept som använder dessa
+- Specifik rätt (t.ex. "lasagne") → bästa receptet
+- Huvudråvara (t.ex. "lax") → 2-3 varianter
+- Budget/pris (t.ex. "billig middag under 50kr") → prisvänliga alternativ
+- Tillfälle (t.ex. "festmiddag", "romantisk middag", "barnkalas") → passande recept
+- Tid (t.ex. "snabb lunch", "20 min") → snabba alternativ
+- Öppen fråga (t.ex. "vad ska jag laga?") → kreativa förslag
+- Diet (t.ex. "veganskt", "glutenfritt") → anpassade recept
+- Meal prep / veckomenyer → planera flera måltider
+
+Sök på nätet efter 2-3 riktiga recept. Prioritera svenska receptsajter men inkludera internationella om de är relevanta.
+
+För varje recept, samla in:
 - Receptnamn och källa (sajt + URL)
-- Fullständig ingredienslista med mängder
-- Tillvägagångssätt steg för steg
-- Vilka köksverktyg som behövs (stekpanna, ugn, mixer, etc.)
-- Ungefärlig tid
+- Fullständig ingredienslista med exakta mängder
+- Detaljerat tillvägagångssätt steg för steg (nybörjarvänligt)
+- Köksverktyg som behövs
+- Ungefärlig tid (förberedelse + tillagning)
+- Tips och varianter
 
-Ge en utförlig sammanställning av vad du hittar.`,
+Ge en utförlig sammanställning.`,
       },
     ],
   });
 
-  // Extract text and sources from response
   let text = '';
   const sources = [];
 
@@ -121,7 +129,6 @@ Ge en utförlig sammanställning av vad du hittar.`,
     if (block.type === 'text') {
       text += block.text + '\n';
     }
-    // Extract sources from web search results
     if (block.type === 'web_search_tool_result') {
       for (const sr of block.content || []) {
         if (sr.type === 'web_search_result') {
@@ -135,7 +142,6 @@ Ge en utförlig sammanställning av vad du hittar.`,
     }
   }
 
-  // Deduplicate sources
   const uniqueSources = [
     ...new Map(sources.map((s) => [s.url, s])).values(),
   ].slice(0, 8);
@@ -149,17 +155,15 @@ Ge en utförlig sammanställning av vad du hittar.`,
 
 async function structureRecipes(searchText, sources, query, householdSize, preferences) {
   const householdLabel = getHouseholdLabel(householdSize);
-  const sourcesStr = sources
-    .map((s) => `- ${s.title}: ${s.url}`)
-    .join('\n');
+  const sourcesStr = sources.map((s) => `- ${s.title}: ${s.url}`).join('\n');
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 4000,
+    max_tokens: 5000,
     messages: [
       {
         role: 'user',
-        content: `Baserat på följande receptdata från en webbsökning, skapa strukturerade recept.
+        content: `Baserat på följande receptdata, skapa strukturerade recept.
 
 RECEPTDATA:
 ${searchText}
@@ -167,42 +171,47 @@ ${searchText}
 KÄLLOR:
 ${sourcesStr}
 
-ANVÄNDARENS INGREDIENSER: ${query}
-HUSHÅLL: ${householdLabel} (${householdSize} portioner om inget annat anges)
+SÖKNING: ${query}
+HUSHÅLL: ${householdLabel} (${householdSize} portioner)
 
 REGLER:
-- Anpassa portioner till hushållet
-- Markera ingredienser användaren sannolikt redan har (have: true) baserat på deras sökning
-- Inkludera ALLA köksverktyg som behövs
-- Stegen ska vara tydliga och detaljerade
-- Kostnadsuppskattningar i SEK baserat på svenska matpriser
-- Om receptet kommer från en specifik källa, ange source_name och source_url
+- Anpassa ALLA portioner till ${householdSize} portioner
+- Markera ingredienser användaren sannolikt redan har (have: true)
+- Inkludera ALLA köksverktyg
+- Stegen ska vara MYCKET detaljerade — nybörjarvänliga
+- Varje steg = EN tydlig instruktion
+- Om ett steg har en väntetid (t.ex. "stek i 5 min"), inkludera duration_seconds
+- Kostnadsuppskattningar i SEK (aktuella svenska priser)
+- Kategorisera varje ingrediens efter butikshylla (aisle)
+- Ge tips och varianter
 
-Svara ENBART med giltig JSON (ingen markdown, inga backticks, inget annat):
+Svara ENBART med giltig JSON (ingen markdown, inga backticks):
 {
   "recipes": [
     {
       "title": "Receptnamn",
+      "description": "Kort lockande beskrivning",
       "source_name": "ICA",
       "source_url": "https://...",
       "time_minutes": 20,
       "difficulty": "Enkel",
       "servings": ${householdSize},
       "cost_estimate": "ca 45 kr",
+      "occasion": "vardag",
       "ingredients": [
-        { "name": "Kyckling", "amount": "300g", "have": true },
-        { "name": "Grädde", "amount": "2 dl", "have": false }
+        { "name": "Kyckling", "amount": "300g", "have": true, "aisle": "Kött & Fisk", "est_price": null },
+        { "name": "Grädde", "amount": "2 dl", "have": false, "aisle": "Mejeri", "est_price": "15 kr" }
       ],
       "tools": ["Stekpanna", "Skärbräda", "Kniv"],
       "steps": [
-        "Skär kycklingen i bitar och krydda med salt och peppar.",
-        "Hetta upp stekpannan på medelhög värme med en skvätt olja."
+        { "text": "Skär kycklingen i bitar.", "duration_seconds": null },
+        { "text": "Stek kycklingen i 5 minuter.", "duration_seconds": 300 }
       ],
-      "tips": "Byt ut grädde mot kokosmjölk för en nyttigare variant."
+      "tips": "Tips och varianter här."
     }
   ],
   "shopping_list": [
-    { "name": "Grädde", "amount": "2 dl", "est_price": "15 kr" }
+    { "name": "Grädde", "amount": "2 dl", "est_price": "15 kr", "aisle": "Mejeri" }
   ]
 }`,
       },
@@ -219,13 +228,69 @@ Svara ENBART med giltig JSON (ingen markdown, inga backticks, inget annat):
   try {
     return JSON.parse(cleanJSON);
   } catch {
-    // Try to extract JSON object
     const match = cleanJSON.match(/\{[\s\S]*\}/);
     if (match) {
       return JSON.parse(match[0]);
     }
     throw new Error('Failed to parse recipe JSON from AI response');
   }
+}
+
+// ──────────────────────────────────────────
+// Cooking Assistant — real-time Q&A
+// ──────────────────────────────────────────
+
+export async function askCookingAssistant(recipe, question, conversationHistory = []) {
+  const ingredientList = (recipe.ingredients || [])
+    .map((i) => `${i.amount} ${i.name}`)
+    .join(', ');
+
+  const stepList = (recipe.steps || [])
+    .map((s, i) => `${i + 1}. ${typeof s === 'string' ? s : s.text || s.content || ''}`)
+    .join('\n');
+
+  const messages = [
+    {
+      role: 'user',
+      content: `Du är en erfaren svensk kock som hjälper en hemmalagare i realtid. Du är som en varm, professionell kompis i köket.
+
+RECEPT: ${recipe.title}
+INGREDIENSER: ${ingredientList}
+STEG:
+${stepList}
+${recipe.tips ? `TIPS: ${recipe.tips}` : ''}
+
+REGLER:
+- Svara alltid på svenska
+- Var kortfattad men tydlig (max 2-3 meningar)
+- Ge exakta svar för timing/temperatur
+- Varna proaktivt om något kan gå fel
+- Ge alternativ om användaren saknar något
+- Var uppmuntrande och personlig (du/dig)
+- Om frågan inte handlar om matlagning, styr tillbaka vänligt`,
+    },
+    ...conversationHistory.slice(-6).map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    })),
+    {
+      role: 'user',
+      content: question,
+    },
+  ];
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 500,
+    messages,
+  });
+
+  const answer = response.content
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text)
+    .join('\n');
+
+  return { answer };
 }
 
 // ──────────────────────────────────────────
@@ -239,13 +304,6 @@ function getHouseholdLabel(size) {
   return `${size} personer (stor familj)`;
 }
 
-/**
- * Estimate API cost for a search (for tracking)
- */
 export function estimateApiCost() {
-  // Rough estimate: 2 API calls per search
-  // Claude Sonnet: ~$3/M input, ~$15/M output
-  // ~2000 input tokens + ~2000 output tokens per call × 2 calls
-  // ≈ $0.012 + $0.06 = ~$0.07 per search
   return 0.07;
 }

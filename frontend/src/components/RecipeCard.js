@@ -1,5 +1,5 @@
 // ============================================
-// RecipeCard — Dark theme full recipe display
+// RecipeCard — API-driven recipe display card
 // ============================================
 
 'use client';
@@ -8,10 +8,11 @@ import { useState } from 'react';
 import {
   Clock, BarChart3, Users, Coins, ExternalLink,
   Heart, Check, ShoppingCart, Wrench, ListOrdered,
-  Lightbulb,
+  Lightbulb, Play, ShoppingBag,
 } from 'lucide-react';
+import { getStepText } from '../data/recipes';
 
-export function RecipeCard({ recipe, onToggleFavorite }) {
+export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
   const [checkedIngredients, setCheckedIngredients] = useState(new Set());
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -56,6 +57,10 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
             </p>
           )}
 
+          {recipe.description && (
+            <p className="text-sm text-zinc-400 mt-2 line-clamp-2">{recipe.description}</p>
+          )}
+
           {/* Meta badges */}
           <div className="flex flex-wrap gap-2 mt-3">
             <span className="badge-surface">
@@ -75,24 +80,48 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
           </div>
         </div>
 
-        {onToggleFavorite && (
-          <button
-            onClick={handleFavorite}
-            className={`p-2.5 rounded-xl border-2 transition-all duration-200
-              ${isFavorite
-                ? 'border-red-400/30 bg-red-400/10 text-red-400'
-                : 'border-zinc-800 text-zinc-500 hover:border-red-400/30 hover:text-red-400'
-              }`}
-          >
-            <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
-          </button>
-        )}
+        <div className="flex flex-col gap-2">
+          {onToggleFavorite && (
+            <button
+              onClick={handleFavorite}
+              className={`p-2.5 rounded-xl border-2 transition-all duration-200
+                ${isFavorite
+                  ? 'border-red-400/30 bg-red-400/10 text-red-400'
+                  : 'border-zinc-800 text-zinc-500 hover:border-red-400/30 hover:text-red-400'
+                }`}
+            >
+              <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Action buttons */}
+      {onSelect && (
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <button
+            onClick={() => onSelect(recipe)}
+            className="flex items-center justify-center gap-2 bg-accent-400 text-void
+                     py-3 rounded-xl font-semibold text-sm hover:bg-accent-300
+                     transition-colors active:scale-[0.97] shadow-glow-sm"
+          >
+            <Play size={16} /> Börja laga
+          </button>
+          <button
+            onClick={() => onSelect(recipe)}
+            className="flex items-center justify-center gap-2 bg-surface-300 text-zinc-200
+                     py-3 rounded-xl font-semibold text-sm border border-zinc-800
+                     hover:border-zinc-600 transition-colors active:scale-[0.97]"
+          >
+            <ShoppingBag size={16} /> Visa detaljer
+          </button>
+        </div>
+      )}
+
       {/* Ingredients */}
-      <Section icon={<ShoppingCart size={16} />} title="Ingredienser" color="accent">
+      <Section icon={<ShoppingCart size={16} />} title="Ingredienser">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {recipe.ingredients.map((ing, idx) => (
+          {(recipe.ingredients || []).map((ing, idx) => (
             <button
               key={idx}
               onClick={() => toggleIngredient(idx)}
@@ -119,7 +148,9 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
                 <span className="text-zinc-400">{ing.name}</span>
               </span>
               {!ing.have && (
-                <span className="text-xs text-accent-400 font-medium font-mono">köp</span>
+                <span className="text-xs text-accent-400 font-medium font-mono">
+                  {ing.est_price || 'köp'}
+                </span>
               )}
             </button>
           ))}
@@ -127,24 +158,26 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
       </Section>
 
       {/* Tools */}
-      <Section icon={<Wrench size={16} />} title="Verktyg som behövs" color="surface">
-        <div className="flex flex-wrap gap-2">
-          {recipe.tools.map((tool, idx) => (
-            <span
-              key={idx}
-              className="bg-surface-300 text-zinc-300 px-3.5 py-1.5 rounded-lg text-sm font-medium
-                       border border-zinc-800/60"
-            >
-              {typeof tool === 'string' ? tool : tool.name}
-            </span>
-          ))}
-        </div>
-      </Section>
+      {recipe.tools?.length > 0 && (
+        <Section icon={<Wrench size={16} />} title="Verktyg som behövs">
+          <div className="flex flex-wrap gap-2">
+            {recipe.tools.map((tool, idx) => (
+              <span
+                key={idx}
+                className="bg-surface-300 text-zinc-300 px-3.5 py-1.5 rounded-lg text-sm font-medium
+                         border border-zinc-800/60"
+              >
+                {typeof tool === 'string' ? tool : tool.name}
+              </span>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Steps */}
-      <Section icon={<ListOrdered size={16} />} title="Tillvägagångssätt" color="accent">
+      <Section icon={<ListOrdered size={16} />} title="Tillvägagångssätt">
         <ol className="space-y-0 divide-y divide-zinc-800/60">
-          {recipe.steps.map((step, idx) => (
+          {(recipe.steps || []).map((step, idx) => (
             <li key={idx} className="flex gap-4 py-3.5">
               <span
                 className="w-7 h-7 bg-accent-400 text-void rounded-full flex items-center justify-center
@@ -153,7 +186,7 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
                 {idx + 1}
               </span>
               <p className="text-sm text-zinc-300 leading-relaxed flex-1">
-                {typeof step === 'string' ? step : step.content}
+                {getStepText(step)}
               </p>
             </li>
           ))}
@@ -173,7 +206,7 @@ export function RecipeCard({ recipe, onToggleFavorite }) {
   );
 }
 
-function Section({ icon, title, color, children }) {
+function Section({ icon, title, children }) {
   return (
     <div className="mt-6">
       <h4 className="flex items-center gap-2.5 font-semibold text-sm text-zinc-200 mb-3">

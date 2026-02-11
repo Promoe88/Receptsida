@@ -1,27 +1,35 @@
 // ============================================
-// GroceryMode — Route Optimizer shopping UI
-// Dark theme, grouped by department
+// GroceryMode — Voice-controlled shopping assistant
+// Guides through store by aisle, check off items
 // ============================================
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Check, X, MapPin, Store, Route } from 'lucide-react';
-import { groupByAisle, getCheapestStore } from '../data/recipes';
+import { ShoppingBag, Check, X, MapPin, Route, Volume2, VolumeX, Mic, MicOff } from 'lucide-react';
+import { groupByAisle } from '../data/recipes';
+import { useSpeech, useVoiceInput } from '../hooks/useVoice';
 
 export function GroceryMode({ recipe, onClose }) {
   const [checked, setChecked] = useState(new Set());
+  const [currentAisle, setCurrentAisle] = useState(0);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const { speak, stop: stopSpeech, isSpeaking } = useSpeech();
+  const { isListening, supported: voiceSupported, startListening, stopListening } = useVoiceInput();
 
-  const aisleGroups = useMemo(
-    () => groupByAisle(recipe.ingredients),
-    [recipe.ingredients]
-  );
+  // Build shopping list from recipe ingredients (only items not already owned)
+  const shoppingItems = useMemo(() => {
+    const items = (recipe.ingredients || []).filter((i) => !i.have);
+    return items.length > 0 ? items : recipe.ingredients || [];
+  }, [recipe.ingredients]);
 
-  const cheapest = getCheapestStore(recipe.pricing);
-  const totalItems = recipe.ingredients.length;
+  const aisleGroups = useMemo(() => groupByAisle(shoppingItems), [shoppingItems]);
+
+  const totalItems = shoppingItems.length;
   const checkedCount = checked.size;
   const progress = totalItems > 0 ? (checkedCount / totalItems) * 100 : 0;
+  const allDone = checkedCount === totalItems && totalItems > 0;
 
   function toggle(key) {
     setChecked((prev) => {
@@ -30,6 +38,64 @@ export function GroceryMode({ recipe, onClose }) {
       else next.add(key);
       return next;
     });
+  }
+
+  // Voice: announce current aisle
+  const announceAisle = useCallback((aisleIdx) => {
+    if (!voiceEnabled || !aisleGroups[aisleIdx]) return;
+    const aisle = aisleGroups[aisleIdx];
+    const itemNames = aisle.items.map((i) => `${i.amount} ${i.name}`).join(', ');
+    speak(`Gå till ${aisle.name}. Du behöver: ${itemNames}.`);
+  }, [voiceEnabled, aisleGroups, speak]);
+
+  // Announce first aisle when voice is enabled
+  useEffect(() => {
+    if (voiceEnabled && aisleGroups.length > 0) {
+      announceAisle(0);
+    }
+  }, [voiceEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Voice commands: "klar", "nästa", "check"
+  const handleVoiceCommand = useCallback((transcript) => {
+    const lower = transcript.toLowerCase();
+    if (lower.includes('nästa') || lower.includes('next')) {
+      if (currentAisle < aisleGroups.length - 1) {
+        setCurrentAisle((prev) => {
+          const next = prev + 1;
+          announceAisle(next);
+          return next;
+        });
+      }
+    } else if (lower.includes('klar') || lower.includes('check') || lower.includes('bocka')) {
+      // Check off all items in current aisle
+      const aisle = aisleGroups[currentAisle];
+      if (aisle) {
+        setChecked((prev) => {
+          const next = new Set(prev);
+          aisle.items.forEach((_, idx) => {
+            next.add(`${aisle.name}-${idx}`);
+          });
+          return next;
+        });
+        speak(`Alla varor i ${aisle.name} avbockade.`);
+      }
+    } else if (lower.includes('tillbaka') || lower.includes('back')) {
+      if (currentAisle > 0) {
+        setCurrentAisle((prev) => {
+          const next = prev - 1;
+          announceAisle(next);
+          return next;
+        });
+      }
+    }
+  }, [currentAisle, aisleGroups, announceAisle, speak]);
+
+  function toggleVoiceListening() {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening(handleVoiceCommand);
+    }
   }
 
   return (
@@ -59,16 +125,27 @@ export function GroceryMode({ recipe, onClose }) {
                 <Route size={20} className="text-accent-400" />
               </div>
               <div>
-                <h2 className="font-display text-xl text-zinc-50">Route Optimizer</h2>
+                <h2 className="font-display text-xl text-zinc-50">Inköpslista</h2>
                 <p className="text-zinc-500 text-xs mt-0.5">{recipe.title}</p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl hover:bg-surface-200 text-zinc-500 transition-colors"
-            >
-              <X size={18} />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Voice toggle */}
+              <button
+                onClick={() => { setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeech(); }}
+                className={`p-2 rounded-xl transition-all ${voiceEnabled
+                  ? 'bg-accent-400/15 text-accent-400'
+                  : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl hover:bg-surface-200 text-zinc-500 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Progress bar */}
@@ -86,30 +163,44 @@ export function GroceryMode({ recipe, onClose }) {
             </span>
           </div>
 
-          {/* Store recommendation */}
-          {cheapest && (
-            <div className="mt-3 flex items-center gap-2 bg-accent-400/10 border border-accent-400/20 rounded-xl px-3 py-2">
-              <Store size={14} className="text-accent-400" />
-              <span className="text-xs text-zinc-400">
-                Handla hos <strong className="text-accent-400">{cheapest.storeName}</strong> — totalt{' '}
-                <strong className="text-accent-400 font-mono">{cheapest.price} kr</strong>
-              </span>
+          {/* Aisle navigation */}
+          {aisleGroups.length > 1 && (
+            <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+              {aisleGroups.map((aisle, idx) => {
+                const allChecked = aisle.items.every((_, i) => checked.has(`${aisle.name}-${i}`));
+                return (
+                  <button
+                    key={aisle.name}
+                    onClick={() => { setCurrentAisle(idx); announceAisle(idx); }}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+                              border transition-all whitespace-nowrap
+                      ${idx === currentAisle
+                        ? 'bg-accent-400/15 text-accent-300 border-accent-400/30'
+                        : allChecked
+                          ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'
+                          : 'bg-surface text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                      }`}
+                  >
+                    <span>{aisle.icon}</span>
+                    {aisle.name}
+                    {allChecked && <Check size={10} />}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* Aisle list */}
+        {/* Items list */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
           {aisleGroups.map((aisle, aisleIdx) => (
-            <div key={aisle.name}>
-              {/* Aisle header */}
+            <div key={aisle.name} className={aisleIdx !== currentAisle ? 'opacity-40' : ''}>
               <div className="flex items-center gap-2 mb-2.5">
                 <MapPin size={13} className="text-zinc-600" />
-                <span className="label-sm">{aisle.name}</span>
+                <span className="label-sm">{aisle.icon} {aisle.name}</span>
                 <div className="flex-1 h-px bg-zinc-800/60" />
               </div>
 
-              {/* Items */}
               <div className="space-y-1.5">
                 {aisle.items.map((item, idx) => {
                   const key = `${aisle.name}-${idx}`;
@@ -147,6 +238,12 @@ export function GroceryMode({ recipe, onClose }) {
                         ${isDone ? 'text-zinc-700' : 'text-zinc-500'}`}>
                         {item.amount}
                       </span>
+
+                      {item.est_price && (
+                        <span className="text-xs text-accent-400 font-mono flex-shrink-0">
+                          {item.est_price}
+                        </span>
+                      )}
                     </motion.button>
                   );
                 })}
@@ -155,21 +252,43 @@ export function GroceryMode({ recipe, onClose }) {
           ))}
         </div>
 
-        {/* Bottom action */}
-        {checkedCount === totalItems && totalItems > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 border-t border-zinc-800 bg-surface-300"
-          >
+        {/* Bottom: voice control + done */}
+        <div className="p-4 border-t border-zinc-800 bg-surface-300 flex items-center gap-3">
+          {voiceSupported && (
+            <button
+              onClick={toggleVoiceListening}
+              className={`p-3 rounded-xl transition-all flex-shrink-0
+                ${isListening
+                  ? 'bg-red-500/20 text-red-400 animate-pulse border border-red-500/30'
+                  : 'bg-surface text-zinc-500 hover:text-accent-400 border border-zinc-800'
+                }`}
+            >
+              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+            </button>
+          )}
+
+          {allDone ? (
             <button
               onClick={onClose}
-              className="w-full btn-accent py-3.5 rounded-xl font-semibold"
+              className="flex-1 btn-accent py-3.5 rounded-xl font-semibold"
             >
               Allt inhandlat!
             </button>
-          </motion.div>
-        )}
+          ) : isListening ? (
+            <div className="flex-1 text-center">
+              <p className="text-xs text-zinc-500">
+                Säg <strong className="text-accent-400">"klar"</strong> för att bocka av,{' '}
+                <strong className="text-accent-400">"nästa"</strong> för nästa hylla
+              </p>
+            </div>
+          ) : (
+            <div className="flex-1 text-center">
+              <p className="text-[10px] text-zinc-600 font-mono">
+                Tryck på varor för att bocka av
+              </p>
+            </div>
+          )}
+        </div>
       </motion.div>
     </motion.div>
   );

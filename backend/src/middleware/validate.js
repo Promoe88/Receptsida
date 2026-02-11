@@ -65,8 +65,37 @@ export const recipeSearchSchema = z.object({
       dietary: z
         .array(z.enum(['vegetarisk', 'vegan', 'glutenfri', 'laktosfri', 'lchf']))
         .optional(),
+      maxBudget: z.number().int().min(10).max(2000).optional(),
+      occasion: z
+        .enum(['vardag', 'fest', 'romantisk', 'barnkalas', 'brunch', 'meal-prep'])
+        .optional(),
     })
     .optional(),
+});
+
+// ──────────────────────────────────────────
+// Cooking assistant schemas
+// ──────────────────────────────────────────
+
+export const cookingAskSchema = z.object({
+  recipe: z.object({
+    title: z.string().min(1),
+    ingredients: z.array(z.object({
+      name: z.string(),
+      amount: z.string(),
+    })).optional().default([]),
+    steps: z.array(z.union([
+      z.string(),
+      z.object({ text: z.string() }),
+      z.object({ content: z.string() }),
+    ])).optional().default([]),
+    tips: z.string().optional(),
+  }),
+  question: z.string().min(1, 'Ställ en fråga').max(500),
+  conversationHistory: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string(),
+  })).optional().default([]),
 });
 
 // ──────────────────────────────────────────

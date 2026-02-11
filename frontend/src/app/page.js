@@ -1,28 +1,22 @@
 // ============================================
-// Home Page — Dark Command Interface
-// Daily Recommendation + Smart Fridge + Intelligence Grid
+// Home Page — Search-first AI recipe platform
+// No mock data: everything flows through AI search
 // ============================================
 
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '../lib/store';
 import { useRecipeSearch, useFavorites } from '../hooks/useRecipes';
-import { DailyRecommendation } from '../components/DailyRecommendation';
-import { SmartFridge } from '../components/SmartFridge';
 import { HeroSearch } from '../components/HeroSearch';
-import { RecipeGridCard } from '../components/RecipeGridCard';
-import { RecipeDetail } from '../components/RecipeDetail';
 import { RecipeCard } from '../components/RecipeCard';
-import { SearchBar } from '../components/SearchBar';
+import { RecipeDetail } from '../components/RecipeDetail';
 import { ShoppingList } from '../components/ShoppingList';
 import { LoadingState } from '../components/LoadingState';
 import { SourceBanner } from '../components/SourceBanner';
-import { MOCK_RECIPES, getDailyRecommendation, filterRecipesByIngredients } from '../data/recipes';
 import {
-  ArrowLeft, Sparkles, TrendingDown, ChefHat, ShieldCheck,
-  Search, LayoutGrid, Zap, Terminal,
+  ArrowLeft, Zap, TrendingDown, ShieldCheck, ChefHat,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -31,43 +25,23 @@ export default function HomePage() {
   const { results, loading, error, search, reset } = useRecipeSearch();
   const { toggleFavorite } = useFavorites();
   const [lastQuery, setLastQuery] = useState('');
-
-  const [searchTags, setSearchTags] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [smartFridgeMeals, setSmartFridgeMeals] = useState([]);
 
-  const dailyRecipe = useMemo(() => getDailyRecommendation(), []);
-
-  const filteredRecipes = useMemo(
-    () => filterRecipesByIngredients(searchTags),
-    [searchTags]
-  );
-
-  const handleMagicSearch = useCallback((tags) => {
-    setSearchTags(tags);
-    setSelectedRecipe(null);
-  }, []);
-
-  const handleMealsFound = useCallback((meals) => {
-    setSmartFridgeMeals(meals);
-  }, []);
-
-  function handleApiSearch(query, householdSize) {
+  function handleSearch(query, householdSize, preferences) {
     if (!user) {
       window.location.href = '/login?redirect=/';
       return;
     }
     setLastQuery(query);
-    search(query, householdSize);
+    search(query, householdSize, preferences);
   }
 
   function handleReset() {
-    setSearchTags([]);
     setSelectedRecipe(null);
     reset();
   }
 
-  // API Results view
+  // Results view
   if (results) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
@@ -80,207 +54,127 @@ export default function HomePage() {
             Ny sökning
           </button>
         </div>
+
         {results.cached && (
           <div className="badge-emerald mb-4">Cachad sökning</div>
         )}
+
         <SourceBanner sources={results.sources} />
+
+        {error && (
+          <div className="bg-red-400/10 border border-red-400/20 text-red-400 px-4 py-3 rounded-xl text-sm mb-4">
+            {error}
+          </div>
+        )}
+
         <div className="space-y-5">
           {results.recipes.map((recipe, idx) => (
             <RecipeCard
               key={idx}
               recipe={recipe}
               onToggleFavorite={user ? toggleFavorite : null}
+              onSelect={setSelectedRecipe}
             />
           ))}
         </div>
+
         {results.shopping_list?.length > 0 && (
           <div className="mt-6">
             <ShoppingList items={results.shopping_list} />
           </div>
         )}
+
+        {/* Recipe detail modal */}
+        <AnimatePresence>
+          {selectedRecipe && (
+            <RecipeDetail
+              recipe={selectedRecipe}
+              onClose={() => setSelectedRecipe(null)}
+            />
+          )}
+        </AnimatePresence>
       </div>
     );
   }
 
+  // Loading view
   if (loading) return <LoadingState />;
 
-  // Main dark command interface
+  // Main search-first interface
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-20">
 
-        {/* Top section: Daily + SmartFridge */}
-        <div className="grid lg:grid-cols-5 gap-5 mb-10">
-          <div className="lg:col-span-3">
-            <DailyRecommendation
-              recipe={dailyRecipe}
-              onSelect={setSelectedRecipe}
-            />
-          </div>
-          <div className="lg:col-span-2">
-            <SmartFridge
-              onMealsFound={handleMealsFound}
-              onRecipeSelect={setSelectedRecipe}
-            />
-          </div>
-        </div>
-
-        {/* Smart Fridge Results */}
-        <AnimatePresence>
-          {smartFridgeMeals.length > 0 && searchTags.length === 0 && (
-            <motion.section
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-12 overflow-hidden"
-            >
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
-                  <ChefHat size={18} className="text-accent-400" />
-                </div>
-                <div>
-                  <h2 className="font-display text-xl text-zinc-100">
-                    Recept du kan laga nu
-                  </h2>
-                  <p className="text-xs text-zinc-500 mt-0.5 font-mono">Baserat på ditt kylskåp</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {smartFridgeMeals.slice(0, 6).map((recipe, idx) => (
-                  <RecipeGridCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    onClick={setSelectedRecipe}
-                    index={idx}
-                  />
-                ))}
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        {/* Command Search */}
-        <section className="mb-12">
-          <HeroSearch onSearch={handleMagicSearch} loading={false} />
+        {/* Hero search — THE core product */}
+        <section className="mb-16">
+          <HeroSearch onSearch={handleSearch} loading={loading} />
         </section>
 
-        {/* Search Results Grid */}
-        <AnimatePresence>
-          {searchTags.length > 0 && filteredRecipes.length > 0 && (
-            <motion.section
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-12"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
-                    <LayoutGrid size={18} className="text-accent-400" />
-                  </div>
-                  <div>
-                    <h2 className="font-display text-xl text-zinc-100">
-                      {filteredRecipes.length} recept hittade
-                    </h2>
-                    <p className="text-xs text-zinc-500 mt-0.5 font-mono">
-                      Baserat på {searchTags.join(', ')}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleReset}
-                  className="text-sm text-zinc-500 hover:text-accent-400 transition-colors font-medium"
-                >
-                  Rensa
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredRecipes.map((recipe, idx) => (
-                  <RecipeGridCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    onClick={setSelectedRecipe}
-                    index={idx}
-                  />
-                ))}
-              </div>
-              {user && (
-                <div className="mt-8 p-6 card-dark text-center">
-                  <Sparkles size={20} className="text-accent-400 mx-auto mb-2" />
-                  <p className="text-sm text-zinc-400 mb-4">
-                    Vill du ha <strong className="text-zinc-200">fler recept</strong> från hela webben?
-                  </p>
-                  <SearchBar onSearch={handleApiSearch} loading={loading} />
-                </div>
-              )}
-            </motion.section>
-          )}
-        </AnimatePresence>
-
-        {/* No search results */}
-        {searchTags.length > 0 && filteredRecipes.length === 0 && (
+        {error && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="max-w-md mx-auto py-12 text-center"
+            className="max-w-2xl mx-auto mb-8"
           >
-            <div className="w-14 h-14 rounded-xl bg-surface-300 flex items-center justify-center mx-auto mb-4 border border-zinc-800">
-              <Search size={22} className="text-zinc-500" />
+            <div className="bg-red-400/10 border border-red-400/20 text-red-400 px-4 py-3 rounded-xl text-sm text-center">
+              {error}
             </div>
-            <h3 className="font-display text-xl text-zinc-100 mb-2">Inga recept matchade</h3>
-            <p className="text-sm text-zinc-500 mb-5">Prova andra ingredienser.</p>
-            <button onClick={handleReset} className="btn-surface text-sm">Prova igen</button>
           </motion.div>
         )}
 
         {/* Features grid */}
-        {searchTags.length === 0 && smartFridgeMeals.length === 0 && (
-          <>
-            <div className="grid sm:grid-cols-3 gap-4 mb-14">
-              <FeatureCard
-                icon={<Zap size={18} />}
-                title="Noll beslutströtthet"
-                text="Säg vad du har, vi löser middagen."
-              />
-              <FeatureCard
-                icon={<TrendingDown size={18} />}
-                title="Bästa priset"
-                text="Prisjämför ICA, Willys, Coop och Lidl automatiskt."
-              />
-              <FeatureCard
-                icon={<ShieldCheck size={18} />}
-                title="Verifierade recept"
-                text="Alla recept testade och kvalitetsgranskade."
-              />
+        <div className="grid sm:grid-cols-3 gap-4 mb-14 max-w-3xl mx-auto">
+          <FeatureCard
+            icon={<Zap size={18} />}
+            title="Noll beslutströtthet"
+            text="Säg vad du har, vi löser middagen med AI."
+          />
+          <FeatureCard
+            icon={<TrendingDown size={18} />}
+            title="Röststyrt"
+            text="Handla och laga med röstguide. Handsfree i köket."
+          />
+          <FeatureCard
+            icon={<ShieldCheck size={18} />}
+            title="AI-kockassistent"
+            text="Ställ frågor under matlagningen. Som en kock i örat."
+          />
+        </div>
+
+        {/* How it works */}
+        <section className="max-w-2xl mx-auto mb-14">
+          <div className="flex items-center gap-3 mb-6 justify-center">
+            <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
+              <ChefHat size={18} className="text-accent-400" />
             </div>
-            <section>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
-                  <ChefHat size={18} className="text-accent-400" />
-                </div>
-                <h2 className="font-display text-xl text-zinc-100">Populära recept</h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {MOCK_RECIPES.slice(0, 3).map((recipe, idx) => (
-                  <RecipeGridCard
-                    key={recipe.id}
-                    recipe={{ ...recipe, matchScore: 0 }}
-                    onClick={setSelectedRecipe}
-                    index={idx}
-                  />
-                ))}
-              </div>
-            </section>
-          </>
-        )}
+            <h2 className="font-display text-xl text-zinc-100">Så funkar det</h2>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <StepCard
+              number="1"
+              title="Sök"
+              text="Skriv vad du har hemma, en maträtt, eller din budget. AI hittar recepten."
+            />
+            <StepCard
+              number="2"
+              title="Handla"
+              text="Röststyrd inköpslista som guidar dig genom butiken, hylla för hylla."
+            />
+            <StepCard
+              number="3"
+              title="Laga"
+              text="Steg-för-steg med timer och AI-kock som svarar på dina frågor live."
+            />
+          </div>
+        </section>
 
         {/* Login prompt */}
-        {!user && searchTags.length === 0 && (
-          <div className="mt-14 max-w-lg mx-auto text-center">
+        {!user && (
+          <div className="max-w-lg mx-auto text-center">
             <div className="card-dark px-6 py-6">
               <p className="text-sm text-zinc-400">
                 <strong className="text-accent-400">Skapa ett gratis konto</strong> för att söka bland
-                tusentals recept, spara favoriter och jämföra priser.{' '}
+                tusentals recept, spara favoriter och få röststyrd matlagningshjälp.{' '}
                 <Link href="/register" className="text-accent-400 font-semibold underline underline-offset-2">
                   Registrera dig
                 </Link>
@@ -289,16 +183,6 @@ export default function HomePage() {
           </div>
         )}
       </div>
-
-      {/* Recipe detail modal */}
-      <AnimatePresence>
-        {selectedRecipe && (
-          <RecipeDetail
-            recipe={selectedRecipe}
-            onClose={() => setSelectedRecipe(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -308,6 +192,19 @@ function FeatureCard({ icon, title, text }) {
     <div className="card-elevated p-5 hover:shadow-medium hover:-translate-y-0.5 transition-all duration-300">
       <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-accent-400/10 text-accent-400">
         {icon}
+      </div>
+      <h3 className="font-semibold text-zinc-100 text-sm mb-1">{title}</h3>
+      <p className="text-xs text-zinc-500 leading-relaxed">{text}</p>
+    </div>
+  );
+}
+
+function StepCard({ number, title, text }) {
+  return (
+    <div className="card-dark p-5 text-center">
+      <div className="w-10 h-10 rounded-full bg-accent-400 text-void flex items-center justify-center
+                    font-bold text-lg mx-auto mb-3 shadow-glow-sm">
+        {number}
       </div>
       <h3 className="font-semibold text-zinc-100 text-sm mb-1">{title}</h3>
       <p className="text-xs text-zinc-500 leading-relaxed">{text}</p>
