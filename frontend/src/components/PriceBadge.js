@@ -1,14 +1,12 @@
 // ============================================
-// PriceBadge — Compact price comparison with sparkline
-// Shows cheapest price + trend indicator
+// PriceBadge — Dark theme price + sparkline
 // ============================================
 
 'use client';
 
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { TrendingDown, TrendingUp } from 'lucide-react';
 
-// Mini SVG sparkline
-function Sparkline({ data, color = '#4A7C59', width = 48, height = 16 }) {
+function Sparkline({ data, color = '#34D399', width = 48, height = 16 }) {
   if (!data || data.length < 2) return null;
 
   const min = Math.min(...data);
@@ -46,7 +44,7 @@ export function PriceBadge({ pricing, priceTrends, compact = false }) {
 
   if (compact) {
     return (
-      <div className="price-badge">
+      <div className="price-accent">
         <TrendingDown size={12} />
         <span>{cheapest.price} kr</span>
       </div>
@@ -54,28 +52,25 @@ export function PriceBadge({ pricing, priceTrends, compact = false }) {
   }
 
   return (
-    <div className="inline-flex items-center gap-2.5 bg-white border border-cream-200
-                  rounded-2xl px-3.5 py-2 shadow-soft">
-      {/* Price */}
+    <div className="inline-flex items-center gap-2.5 bg-surface-300 border border-zinc-800
+                  rounded-xl px-3.5 py-2">
       <div className="text-right">
-        <span className="text-sm font-bold text-pine-600 tabular-nums">{cheapest.price} kr</span>
-        <span className="text-[10px] text-cream-400 block">{cheapest.storeName}</span>
+        <span className="text-sm font-bold text-accent-400 tabular-nums font-mono">{cheapest.price} kr</span>
+        <span className="text-[10px] text-zinc-500 block">{cheapest.storeName}</span>
       </div>
 
-      {/* Sparkline */}
       {priceTrends && priceTrends.length > 1 && (
         <Sparkline
           data={priceTrends}
-          color={trendValue <= 0 ? '#4A7C59' : '#E65F2B'}
+          color={trendValue <= 0 ? '#34D399' : '#FF5C00'}
           width={40}
           height={14}
         />
       )}
 
-      {/* Trend indicator */}
       {trendValue !== 0 && (
-        <div className={`flex items-center gap-0.5 text-[10px] font-bold
-          ${trendValue < 0 ? 'text-pine-500' : 'text-action-400'}`}
+        <div className={`flex items-center gap-0.5 text-[10px] font-bold font-mono
+          ${trendValue < 0 ? 'text-emerald-400' : 'text-accent-400'}`}
         >
           {trendValue < 0 ? <TrendingDown size={10} /> : <TrendingUp size={10} />}
           <span>{Math.abs(trendValue)}%</span>
@@ -85,15 +80,14 @@ export function PriceBadge({ pricing, priceTrends, compact = false }) {
   );
 }
 
-// Full-width price comparison for recipe detail
 export function PriceTrendCard({ ingredient, trend, weeklyChange }) {
   return (
     <div className="flex items-center justify-between py-2">
-      <span className="text-sm text-cream-700">{ingredient}</span>
+      <span className="text-sm text-zinc-300">{ingredient}</span>
       <div className="flex items-center gap-2">
         {weeklyChange && (
-          <span className={`text-[10px] font-bold
-            ${weeklyChange < 0 ? 'text-pine-500' : 'text-action-400'}`}>
+          <span className={`text-[10px] font-bold font-mono
+            ${weeklyChange < 0 ? 'text-emerald-400' : 'text-accent-400'}`}>
             {weeklyChange < 0 ? '' : '+'}{weeklyChange}%
           </span>
         )}

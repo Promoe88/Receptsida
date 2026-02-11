@@ -1,5 +1,5 @@
 // ============================================
-// Favorites Page
+// Favorites Page — Dark theme
 // ============================================
 
 'use client';
@@ -22,8 +22,8 @@ export default function FavoritesPage() {
   if (authLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <div className="skeleton w-48 h-8 mx-auto mb-4" />
-        <div className="skeleton w-64 h-4 mx-auto" />
+        <div className="h-8 w-48 bg-surface-300 rounded-lg animate-pulse mx-auto mb-4" />
+        <div className="h-4 w-64 bg-surface-300 rounded-lg animate-pulse mx-auto" />
       </div>
     );
   }
@@ -31,10 +31,10 @@ export default function FavoritesPage() {
   if (!user) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
-        <Heart size={48} className="text-warm-300 mx-auto mb-4" />
-        <h2 className="font-display text-2xl text-warm-800 mb-2">Logga in för favoriter</h2>
-        <p className="text-warm-500 mb-6">Du behöver ett konto för att spara recept.</p>
-        <Link href="/login?redirect=/favoriter" className="btn-primary inline-block">
+        <Heart size={48} className="text-zinc-600 mx-auto mb-4" />
+        <h2 className="font-display text-2xl text-zinc-100 mb-2">Logga in för favoriter</h2>
+        <p className="text-zinc-500 mb-6">Du behöver ett konto för att spara recept.</p>
+        <Link href="/login?redirect=/favoriter" className="btn-accent inline-block">
           Logga in
         </Link>
       </div>
@@ -43,27 +43,27 @@ export default function FavoritesPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="font-display text-3xl text-warm-800 mb-2">Mina favoriter</h1>
-      <p className="text-warm-500 mb-8">Dina sparade recept samlade på ett ställe.</p>
+      <h1 className="font-display text-3xl text-zinc-100 mb-2">Mina favoriter</h1>
+      <p className="text-zinc-500 mb-8">Dina sparade recept samlade på ett ställe.</p>
 
       {loading ? (
         <div className="space-y-4">
           {[1, 2].map((i) => (
-            <div key={i} className="card">
-              <div className="skeleton w-48 h-6 mb-3" />
-              <div className="skeleton w-full h-4 mb-2" />
-              <div className="skeleton w-3/4 h-4" />
+            <div key={i} className="card-dark p-6">
+              <div className="h-6 w-48 bg-surface-300 rounded-lg animate-pulse mb-3" />
+              <div className="h-4 w-full bg-surface-300 rounded-lg animate-pulse mb-2" />
+              <div className="h-4 w-3/4 bg-surface-300 rounded-lg animate-pulse" />
             </div>
           ))}
         </div>
       ) : favorites.length === 0 ? (
         <div className="text-center py-16">
-          <Heart size={48} className="text-warm-200 mx-auto mb-4" />
-          <h3 className="font-display text-xl text-warm-600 mb-2">Inga favoriter ännu</h3>
-          <p className="text-warm-400 mb-6">
+          <Heart size={48} className="text-zinc-700 mx-auto mb-4" />
+          <h3 className="font-display text-xl text-zinc-300 mb-2">Inga favoriter ännu</h3>
+          <p className="text-zinc-500 mb-6">
             Sök efter recept och klicka på hjärtat för att spara dem här.
           </p>
-          <Link href="/" className="btn-primary inline-block">
+          <Link href="/" className="btn-accent inline-block">
             Sök recept
           </Link>
         </div>

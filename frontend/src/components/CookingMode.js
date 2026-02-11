@@ -1,6 +1,6 @@
 // ============================================
-// CookingMode — Full-screen cooking overlay
-// Large typography, progress bars, countdown timers
+// CookingMode — HUD-style cooking interface
+// Dark theme, large typography, countdown timers
 // ============================================
 
 'use client';
@@ -8,8 +8,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  X, ChevronLeft, ChevronRight, Timer, Play, Pause,
-  RotateCcw, Check, ChefHat,
+  X, ChevronLeft, ChevronRight, Play, Pause,
+  RotateCcw, Check, Terminal,
 } from 'lucide-react';
 
 function formatTime(seconds) {
@@ -53,10 +53,10 @@ function CountdownTimer({ duration, onComplete }) {
       {/* Circle timer */}
       <div className="relative w-28 h-28">
         <svg className="w-28 h-28 -rotate-90" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="#F3EBD9" strokeWidth="4" />
+          <circle cx="40" cy="40" r="36" fill="none" stroke="#27272A" strokeWidth="4" />
           <circle
             cx="40" cy="40" r="36" fill="none"
-            stroke={remaining === 0 ? '#4A7C59' : '#E65F2B'}
+            stroke={remaining === 0 ? '#34D399' : '#FF5C00'}
             strokeWidth="4"
             strokeLinecap="round"
             className="timer-ring"
@@ -67,9 +67,9 @@ function CountdownTimer({ duration, onComplete }) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold text-cream-800 tabular-nums font-body">
+          <span className="text-2xl font-bold text-zinc-100 tabular-nums font-mono">
             {remaining === 0 ? (
-              <Check size={28} className="text-pine-500" />
+              <Check size={28} className="text-emerald-400" />
             ) : (
               formatTime(remaining)
             )}
@@ -81,14 +81,14 @@ function CountdownTimer({ duration, onComplete }) {
       <div className="flex items-center gap-3">
         <button
           onClick={() => { setRemaining(duration); setIsRunning(false); }}
-          className="p-2.5 rounded-xl bg-cream-100 text-cream-500 hover:bg-cream-200 transition-colors"
+          className="p-2.5 rounded-xl bg-surface-300 text-zinc-500 hover:bg-surface-200 hover:text-zinc-300 transition-colors border border-zinc-800"
         >
           <RotateCcw size={16} />
         </button>
         <button
           onClick={() => setIsRunning(!isRunning)}
-          className={`p-3.5 rounded-2xl text-white transition-all
-            ${isRunning ? 'bg-cream-400 hover:bg-cream-500' : 'bg-action-400 hover:bg-action-500'}`}
+          className={`p-3.5 rounded-xl text-void transition-all shadow-glow-sm
+            ${isRunning ? 'bg-zinc-500 hover:bg-zinc-400' : 'bg-accent-400 hover:bg-accent-300'}`}
         >
           {isRunning ? <Pause size={20} /> : <Play size={20} />}
         </button>
@@ -117,7 +117,6 @@ export function CookingMode({ recipe, onClose }) {
     if (currentStep > 0) setCurrentStep((s) => s - 1);
   }, [currentStep]);
 
-  // Handle keyboard navigation
   useEffect(() => {
     function handleKey(e) {
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
@@ -136,29 +135,31 @@ export function CookingMode({ recipe, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="cooking-mode flex flex-col"
+      className="hud-mode flex flex-col"
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-cream-200">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
         <div className="flex items-center gap-3">
-          <ChefHat size={20} className="text-pine-500" />
+          <div className="w-8 h-8 rounded-lg bg-accent-400/15 flex items-center justify-center">
+            <Terminal size={16} className="text-accent-400" />
+          </div>
           <div>
-            <h2 className="text-sm font-semibold text-cream-800">{recipe.title}</h2>
-            <p className="text-xs text-cream-400">Matlagningsläge</p>
+            <h2 className="text-sm font-semibold text-zinc-200">{recipe.title}</h2>
+            <p className="text-xs text-zinc-600 font-mono">HUD // Matlagningsläge</p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-2 rounded-xl hover:bg-cream-100 text-cream-400 transition-colors"
+          className="p-2 rounded-xl hover:bg-surface-200 text-zinc-500 transition-colors"
         >
           <X size={20} />
         </button>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-cream-100">
+      <div className="h-0.5 bg-zinc-800">
         <motion.div
-          className="h-full bg-pine-500"
+          className="h-full bg-accent-400"
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.3 }}
         />
@@ -166,28 +167,28 @@ export function CookingMode({ recipe, onClose }) {
 
       {/* Step content */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 max-w-2xl mx-auto w-full">
-        {/* Step indicator */}
+        {/* Step indicator dots */}
         <div className="flex items-center gap-2 mb-8">
           {steps.map((_, idx) => (
             <div
               key={idx}
               className={`w-2.5 h-2.5 rounded-full transition-all duration-300
                 ${idx === currentStep
-                  ? 'bg-action-400 scale-125'
+                  ? 'bg-accent-400 scale-125 shadow-glow-sm'
                   : completedSteps.has(idx)
-                    ? 'bg-pine-400'
-                    : 'bg-cream-200'
+                    ? 'bg-emerald-400'
+                    : 'bg-zinc-800'
                 }`}
             />
           ))}
         </div>
 
         {/* Step number */}
-        <span className="section-label mb-4">
+        <span className="label-sm text-accent-400 mb-4 font-mono">
           Steg {currentStep + 1} av {totalSteps}
         </span>
 
-        {/* Step text — large, readable */}
+        {/* Step text — large HUD typography */}
         <AnimatePresence mode="wait">
           <motion.p
             key={currentStep}
@@ -195,7 +196,7 @@ export function CookingMode({ recipe, onClose }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="font-display text-2xl sm:text-3xl lg:text-4xl text-cream-800
+            className="font-display text-2xl sm:text-3xl lg:text-4xl text-zinc-100
                      text-center leading-snug max-w-xl"
           >
             {stepText}
@@ -219,30 +220,34 @@ export function CookingMode({ recipe, onClose }) {
       </div>
 
       {/* Navigation */}
-      <div className="border-t border-cream-200 px-6 py-4 flex items-center justify-between
-                    bg-white/80 backdrop-blur-md">
+      <div className="border-t border-zinc-800 px-6 py-4 flex items-center justify-between
+                    bg-surface/80 backdrop-blur-md">
         <button
           onClick={goPrev}
           disabled={currentStep === 0}
-          className="flex items-center gap-2 text-sm font-medium text-cream-500
+          className="flex items-center gap-2 text-sm font-medium text-zinc-500
                    disabled:opacity-30 disabled:cursor-not-allowed
-                   hover:text-cream-800 transition-colors px-4 py-2.5 rounded-xl"
+                   hover:text-zinc-200 transition-colors px-4 py-2.5 rounded-xl"
         >
           <ChevronLeft size={18} />
           Föregående
         </button>
 
+        <div className="text-[10px] text-zinc-700 font-mono hidden sm:block">
+          Piltangenter eller mellanslag för att navigera
+        </div>
+
         {currentStep === totalSteps - 1 ? (
           <button
             onClick={onClose}
-            className="btn-pine px-8"
+            className="btn-accent px-8"
           >
             Klar!
           </button>
         ) : (
           <button
             onClick={goNext}
-            className="flex items-center gap-2 btn-primary px-6"
+            className="btn-accent flex items-center gap-2 px-6"
           >
             Nästa steg
             <ChevronRight size={18} />
