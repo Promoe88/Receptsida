@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   html {
@@ -10,14 +10,14 @@
   }
 
   body {
-    @apply bg-warm-50 text-warm-800 font-body antialiased;
+    @apply bg-cream-50 text-cream-800 font-body antialiased;
   }
 
   /* Subtle grain texture overlay */
   body::before {
     content: '';
     @apply fixed inset-0 pointer-events-none z-[9999];
-    opacity: 0.02;
+    opacity: 0.015;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   }
 }
@@ -25,34 +25,55 @@
 @layer components {
   /* ── Buttons ── */
   .btn-primary {
-    @apply bg-brand-400 text-white px-6 py-3 rounded-2xl font-semibold
-           hover:bg-brand-500 transition-all duration-200
+    @apply bg-action-400 text-white px-6 py-3 rounded-2xl font-semibold text-sm
+           hover:bg-action-500 transition-all duration-200
            disabled:opacity-50 disabled:cursor-not-allowed
-           active:scale-[0.98];
+           active:scale-[0.97] shadow-sm hover:shadow-md;
   }
 
   .btn-secondary {
-    @apply bg-white text-warm-800 px-6 py-3 rounded-2xl font-semibold
-           border border-warm-200 hover:border-brand-400 hover:text-brand-400
-           transition-all duration-200 active:scale-[0.98];
+    @apply bg-white text-cream-800 px-6 py-3 rounded-2xl font-semibold text-sm
+           border border-cream-200 hover:border-pine-400 hover:text-pine-600
+           transition-all duration-200 active:scale-[0.97];
   }
 
   .btn-ghost {
-    @apply text-warm-500 px-4 py-2 rounded-xl font-medium
-           hover:bg-warm-100 hover:text-warm-800
+    @apply text-cream-500 px-4 py-2 rounded-xl font-medium text-sm
+           hover:bg-cream-100 hover:text-cream-800
            transition-all duration-200;
+  }
+
+  .btn-pine {
+    @apply bg-pine-600 text-white px-6 py-3 rounded-2xl font-semibold text-sm
+           hover:bg-pine-500 transition-all duration-200
+           active:scale-[0.97] shadow-sm;
+  }
+
+  /* ── Glass Card ── */
+  .glass {
+    @apply bg-white/60 backdrop-blur-xl border border-white/30 shadow-glass;
+  }
+
+  .glass-dark {
+    @apply bg-pine-600/80 backdrop-blur-xl border border-white/10;
   }
 
   /* ── Card ── */
   .card {
-    @apply bg-white rounded-2xl shadow-soft border border-warm-200 p-6;
+    @apply bg-white rounded-2xl shadow-soft border border-cream-200 p-6;
+  }
+
+  .card-premium {
+    @apply bg-white rounded-3xl shadow-medium border border-cream-100 p-6
+           hover:shadow-strong hover:-translate-y-0.5
+           transition-all duration-300;
   }
 
   /* ── Input ── */
   .input-field {
-    @apply w-full px-4 py-3 bg-white border border-warm-200 rounded-2xl
-           font-body text-warm-800 placeholder:text-warm-400
-           focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10
+    @apply w-full px-4 py-3 bg-white border border-cream-200 rounded-2xl
+           font-body text-cream-800 placeholder:text-cream-400
+           focus:outline-none focus:border-pine-400 focus:ring-4 focus:ring-pine-400/10
            transition-all duration-200;
   }
 
@@ -62,36 +83,51 @@
   }
 
   .badge-green {
-    @apply badge bg-forest-50 text-forest-400;
+    @apply badge bg-pine-50 text-pine-500;
   }
 
   .badge-gold {
-    @apply badge bg-gold-50 text-gold-400;
+    @apply badge bg-gold-50 text-gold-500;
   }
 
   .badge-brand {
-    @apply badge bg-brand-50 text-brand-400;
+    @apply badge bg-action-50 text-action-500;
+  }
+
+  .badge-verified {
+    @apply badge bg-pine-600 text-white;
+  }
+
+  /* ── Price Badge ── */
+  .price-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl
+           bg-action-400 text-white text-xs font-bold shadow-price;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    @apply text-[10px] font-bold uppercase tracking-[0.15em] text-cream-400;
   }
 }
 
 /* ── Autocomplete ── */
 .autocomplete-dropdown {
-  @apply absolute top-full left-0 right-0 mt-1 bg-white border border-warm-200
-         rounded-2xl shadow-strong z-50 overflow-hidden;
+  @apply absolute top-full left-0 right-0 mt-1 bg-white/90 backdrop-blur-xl
+         border border-cream-200 rounded-2xl shadow-strong z-50 overflow-hidden;
 }
 
 .autocomplete-item {
   @apply px-4 py-3 cursor-pointer flex items-center gap-3 text-sm
-         hover:bg-warm-50 transition-colors duration-100;
+         hover:bg-cream-50 transition-colors duration-100;
 }
 
 .autocomplete-item:not(:last-child) {
-  @apply border-b border-warm-100;
+  @apply border-b border-cream-100;
 }
 
 /* ── Loading skeleton ── */
 .skeleton {
-  @apply bg-warm-100 animate-pulse rounded-xl;
+  @apply bg-cream-100 animate-pulse rounded-xl;
 }
 
 /* ── Recipe card hover ── */
@@ -99,7 +135,7 @@
   @apply transition-all duration-300 hover:shadow-medium hover:-translate-y-0.5;
 }
 
-/* ── Line clamp utility ── */
+/* ── Line clamp ── */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -107,9 +143,16 @@
   overflow: hidden;
 }
 
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ── Custom scrollbar ── */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -117,10 +160,20 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E5DDD0;
+  background: #E8DCC3;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #D4C8B5;
+  background: #D4C4A0;
+}
+
+/* ── Cooking mode - full screen ── */
+.cooking-mode {
+  @apply fixed inset-0 z-[60] bg-cream-50;
+}
+
+/* ── Timer ring ── */
+.timer-ring {
+  transition: stroke-dashoffset 1s linear;
 }
