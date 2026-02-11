@@ -1,5 +1,5 @@
 // ============================================
-// ShoppingList — Dark theme aggregated shopping list
+// ShoppingList — Warm bright aggregated shopping list
 // ============================================
 
 'use client';
@@ -29,21 +29,21 @@ export function ShoppingList({ items }) {
   const allChecked = checked.size === items.length;
 
   return (
-    <div className="card-dark border-accent-400/15 p-6">
+    <div className="card p-6">
       <div className="flex justify-between items-start flex-wrap gap-3">
         <div>
-          <h3 className="font-display text-xl text-zinc-100 flex items-center gap-2">
-            <ShoppingBag size={22} className="text-accent-400" />
+          <h3 className="font-display text-xl text-warm-800 flex items-center gap-2">
+            <ShoppingBag size={22} className="text-sage-500" />
             Inköpslista
           </h3>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-warm-500 mt-1">
             {allChecked
               ? 'Allt inhandlat!'
               : `${items.length - checked.size} av ${items.length} varor kvar`}
           </p>
         </div>
         {totalEst > 0 && (
-          <div className="bg-accent-400/10 border border-accent-400/20 px-4 py-2 rounded-xl font-semibold text-accent-400 text-sm font-mono">
+          <div className="bg-terra-50 border border-terra-200/50 px-4 py-2 rounded-2xl font-semibold text-terra-500 text-sm">
             ~{totalEst} kr
           </div>
         )}
@@ -54,26 +54,28 @@ export function ShoppingList({ items }) {
           <button
             key={idx}
             onClick={() => toggle(idx)}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-left
-                      bg-surface-300 border border-zinc-800/60 transition-all duration-150 group
-                      ${checked.has(idx) ? 'opacity-40' : 'hover:border-zinc-700'}`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm text-left
+                      border transition-all duration-150 group
+                      ${checked.has(idx)
+                        ? 'bg-cream-200/50 border-warm-200/40 opacity-50'
+                        : 'bg-white border-warm-200 hover:border-sage-300 hover:shadow-soft'}`}
           >
             <span
-              className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
+              className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center flex-shrink-0
                         transition-all duration-150
                 ${checked.has(idx)
-                  ? 'bg-accent-400 border-accent-400 text-void'
-                  : 'border-zinc-600 group-hover:border-zinc-500'
+                  ? 'bg-sage-400 border-sage-400 text-white'
+                  : 'border-warm-300 group-hover:border-sage-400'
                 }`}
             >
               {checked.has(idx) && <Check size={12} strokeWidth={3} />}
             </span>
             <span className="flex-1">
-              <strong className="font-medium text-zinc-200">{item.amount}</strong>{' '}
-              <span className={checked.has(idx) ? 'line-through text-zinc-600' : 'text-zinc-400'}>{item.name}</span>
+              <strong className="font-medium text-warm-800">{item.amount}</strong>{' '}
+              <span className={checked.has(idx) ? 'line-through text-warm-400' : 'text-warm-600'}>{item.name}</span>
             </span>
             {item.est_price && (
-              <span className="text-xs text-accent-400 font-medium font-mono">{item.est_price}</span>
+              <span className="text-xs text-terra-400 font-semibold">{item.est_price}</span>
             )}
           </button>
         ))}

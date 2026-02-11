@@ -1,6 +1,6 @@
 // ============================================
-// RecipeDetail — Dark theme recipe modal
-// With cooking mode + grocery mode launchers
+// RecipeDetail — Bright warm recipe modal
+// Soft UI, cooking + grocery launchers
 // ============================================
 
 'use client';
@@ -8,12 +8,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  X, Clock, Users, Star, ShieldCheck,
+  X, Clock, Users, ExternalLink,
   ShoppingCart, ListOrdered, Play, ShoppingBag, Check,
+  Lightbulb, Wrench, Coins,
 } from 'lucide-react';
-import { PriceComparison } from './PriceComparison';
 import { CookingMode } from './CookingMode';
 import { GroceryMode } from './GroceryMode';
+import { getStepText } from '../data/recipes';
 
 export function RecipeDetail({ recipe, onClose }) {
   const [showCookingMode, setShowCookingMode] = useState(false);
@@ -35,8 +36,6 @@ export function RecipeDetail({ recipe, onClose }) {
     return <CookingMode recipe={recipe} onClose={() => setShowCookingMode(false)} />;
   }
 
-  const stepText = (step) => (typeof step === 'string' ? step : step?.text || '');
-
   return (
     <>
       <AnimatePresence>
@@ -50,7 +49,7 @@ export function RecipeDetail({ recipe, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-void/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-warm-800/30 backdrop-blur-sm"
           onClick={onClose}
         />
 
@@ -59,40 +58,39 @@ export function RecipeDetail({ recipe, onClose }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="relative w-full max-w-2xl max-h-[92vh] bg-surface rounded-t-2xl sm:rounded-2xl
-                    overflow-hidden z-10 flex flex-col border border-zinc-800/60"
+          className="relative w-full max-w-2xl max-h-[92vh] bg-white rounded-t-3xl sm:rounded-3xl
+                    overflow-hidden z-10 flex flex-col shadow-strong"
         >
           {/* Header */}
-          <div className="sticky top-0 bg-surface/90 backdrop-blur-xl border-b border-zinc-800
-                        px-6 py-4 flex items-start justify-between z-10">
+          <div className="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-warm-100
+                        px-6 py-5 flex items-start justify-between z-10">
             <div className="flex-1 pr-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                {recipe.verified && (
-                  <span className="badge-emerald text-[10px] py-0.5 px-2">
-                    <ShieldCheck size={10} /> Verifierad
-                  </span>
+              <h2 className="font-display text-2xl sm:text-3xl text-warm-800">{recipe.title}</h2>
+              {recipe.source_name && (
+                <p className="text-sm text-warm-500 mt-1 flex items-center gap-1.5">
+                  Källa:{' '}
+                  {recipe.source_url ? (
+                    <a href={recipe.source_url} target="_blank" rel="noopener noreferrer"
+                      className="text-sage-500 font-medium hover:underline inline-flex items-center gap-1">
+                      {recipe.source_name} <ExternalLink size={12} />
+                    </a>
+                  ) : (
+                    <span className="font-medium">{recipe.source_name}</span>
+                  )}
+                </p>
+              )}
+              <div className="flex items-center gap-3 mt-3 flex-wrap">
+                <span className="badge-warm"><Clock size={12} /> {recipe.time_minutes || recipe.prepTime} min</span>
+                <span className="badge-warm"><Users size={12} /> {recipe.servings} port</span>
+                <span className="badge-sage">{recipe.difficulty}</span>
+                {recipe.cost_estimate && (
+                  <span className="badge-terra"><Coins size={12} /> {recipe.cost_estimate}</span>
                 )}
-                {recipe.rating && (
-                  <span className="inline-flex items-center gap-1 text-[11px] text-accent-300 font-semibold font-mono">
-                    <Star size={11} fill="currentColor" /> {recipe.rating}
-                  </span>
-                )}
-              </div>
-              <h2 className="font-display text-2xl sm:text-3xl text-zinc-50">{recipe.title}</h2>
-              <div className="flex items-center gap-3 mt-2">
-                <span className="inline-flex items-center gap-1 text-xs text-zinc-500 font-mono">
-                  <Clock size={12} /> {recipe.prepTime} min
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs text-zinc-500 font-mono">
-                  <Users size={12} /> {recipe.servings} port
-                </span>
-                <span className="text-xs text-zinc-600 font-mono">{recipe.difficulty}</span>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-surface-200 text-zinc-500 hover:text-zinc-300
-                       transition-colors flex-shrink-0"
+              className="p-2 rounded-xl hover:bg-cream-200 text-warm-400 hover:text-warm-700 transition-colors flex-shrink-0"
             >
               <X size={20} />
             </button>
@@ -100,106 +98,114 @@ export function RecipeDetail({ recipe, onClose }) {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto">
-            <div className="px-6 py-5 space-y-6">
-              {/* Description */}
-              <p className="text-zinc-400 leading-relaxed font-light text-sm">
-                {recipe.description}
-              </p>
-
-              {/* Match score */}
-              {recipe.matchScore > 0 && (
-                <div className="flex items-center gap-3 bg-accent-400/10 rounded-xl px-4 py-3 border border-accent-400/20">
-                  <div className="w-12 h-12 rounded-xl bg-accent-400 text-void flex items-center justify-center
-                               font-bold text-lg font-mono">
-                    {recipe.matchScore}%
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-100">Ingrediensmatchning</p>
-                    <p className="text-xs text-zinc-500">{recipe.matchScore}% av ingredienserna har du hemma</p>
-                  </div>
-                </div>
+            <div className="px-6 py-6 space-y-6">
+              {recipe.description && (
+                <p className="text-warm-600 leading-relaxed text-sm">{recipe.description}</p>
               )}
 
               {/* Action buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setShowCookingMode(true)}
-                  className="flex items-center justify-center gap-2 bg-accent-400 text-void
-                           py-3.5 rounded-xl font-semibold text-sm hover:bg-accent-300
-                           transition-colors active:scale-[0.97] shadow-glow-sm"
+                  className="btn-primary flex items-center justify-center gap-2 py-3.5"
                 >
-                  <Play size={16} />
-                  Börja laga
+                  <Play size={16} /> Börja laga
                 </button>
                 <button
                   onClick={() => setShowGroceryMode(true)}
-                  className="flex items-center justify-center gap-2 bg-surface-300 text-zinc-200
-                           py-3.5 rounded-xl font-semibold text-sm border border-zinc-800
-                           hover:border-zinc-600 transition-colors active:scale-[0.97]"
+                  className="btn-outline flex items-center justify-center gap-2 py-3.5"
                 >
-                  <ShoppingBag size={16} />
-                  Handla
+                  <ShoppingBag size={16} /> Handla
                 </button>
               </div>
 
-              {/* Price comparison */}
-              <PriceComparison pricing={recipe.pricing} title={recipe.title} />
-
               {/* Ingredients */}
               <div>
-                <h3 className="flex items-center gap-2.5 text-sm font-semibold text-zinc-200 mb-3">
-                  <span className="w-7 h-7 rounded-lg bg-accent-400/10 text-accent-400 flex items-center justify-center">
-                    <ShoppingCart size={13} />
+                <h3 className="flex items-center gap-2.5 text-sm font-semibold text-warm-800 mb-3">
+                  <span className="w-8 h-8 rounded-xl bg-cream-200 text-sage-500 flex items-center justify-center">
+                    <ShoppingCart size={14} />
                   </span>
                   Ingredienser
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                  {recipe.ingredients.map((ing, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2.5 bg-surface-300 rounded-xl px-3.5 py-2.5 text-sm
-                               border border-zinc-800/60"
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {(recipe.ingredients || []).map((ing, idx) => (
+                    <div key={idx}
+                      className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm border
+                        ${ing.have ? 'bg-cream-200 border-warm-200/60' : 'bg-sage-50/50 border-sage-200/40'}`}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent-400 flex-shrink-0" />
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0
+                        ${ing.have ? 'bg-sage-400' : 'bg-terra-400'}`} />
                       <span className="flex-1">
-                        <strong className="font-medium text-zinc-200">{ing.amount}</strong>{' '}
-                        <span className="text-zinc-400">{ing.name}</span>
+                        <strong className="font-medium text-warm-800">{ing.amount}</strong>{' '}
+                        <span className="text-warm-600">{ing.name}</span>
                       </span>
+                      {!ing.have && ing.est_price && (
+                        <span className="text-xs text-terra-400 font-semibold">{ing.est_price}</span>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
 
+              {/* Tools */}
+              {recipe.tools?.length > 0 && (
+                <div>
+                  <h3 className="flex items-center gap-2.5 text-sm font-semibold text-warm-800 mb-3">
+                    <span className="w-8 h-8 rounded-xl bg-cream-200 text-sage-500 flex items-center justify-center">
+                      <Wrench size={14} />
+                    </span>
+                    Verktyg
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {recipe.tools.map((tool, idx) => (
+                      <span key={idx} className="bg-cream-200 text-warm-600 px-4 py-2 rounded-2xl text-sm font-medium">
+                        {typeof tool === 'string' ? tool : tool.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Steps */}
               <div>
-                <h3 className="flex items-center gap-2.5 text-sm font-semibold text-zinc-200 mb-3">
-                  <span className="w-7 h-7 rounded-lg bg-accent-400/10 text-accent-400 flex items-center justify-center">
-                    <ListOrdered size={13} />
+                <h3 className="flex items-center gap-2.5 text-sm font-semibold text-warm-800 mb-3">
+                  <span className="w-8 h-8 rounded-xl bg-cream-200 text-sage-500 flex items-center justify-center">
+                    <ListOrdered size={14} />
                   </span>
                   Gör så här
                 </h3>
-                <ol className="space-y-0 divide-y divide-zinc-800/60">
-                  {recipe.steps.map((step, idx) => (
-                    <li key={idx} className="flex gap-4 py-3.5">
+                <ol className="space-y-0 divide-y divide-warm-100">
+                  {(recipe.steps || []).map((step, idx) => (
+                    <li key={idx} className="flex gap-4 py-4">
                       <button
                         onClick={() => toggleStep(idx)}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center
+                        className={`w-8 h-8 rounded-full flex items-center justify-center
                                   text-xs font-bold flex-shrink-0 mt-0.5 transition-all duration-200
                                   ${checkedSteps.has(idx)
-                                    ? 'bg-emerald-500 text-void'
-                                    : 'bg-accent-400 text-void hover:bg-accent-300'
+                                    ? 'bg-sage-400 text-white'
+                                    : 'bg-sage-100 text-sage-700 hover:bg-sage-200'
                                   }`}
                       >
                         {checkedSteps.has(idx) ? <Check size={12} strokeWidth={3} /> : idx + 1}
                       </button>
                       <p className={`text-sm leading-relaxed flex-1 transition-all duration-200
-                        ${checkedSteps.has(idx) ? 'text-zinc-600 line-through' : 'text-zinc-300'}`}>
-                        {stepText(step)}
+                        ${checkedSteps.has(idx) ? 'text-warm-400 line-through' : 'text-warm-700'}`}>
+                        {getStepText(step)}
                       </p>
                     </li>
                   ))}
                 </ol>
               </div>
+
+              {/* Tips */}
+              {recipe.tips && (
+                <div className="p-4 bg-sage-50 rounded-2xl border border-sage-200/40 flex gap-3">
+                  <Lightbulb size={18} className="text-sage-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-warm-700">
+                    <strong className="font-semibold text-sage-600">Tips:</strong> {recipe.tips}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

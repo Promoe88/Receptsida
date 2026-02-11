@@ -1,20 +1,20 @@
 // ============================================
-// Recipe Routes — Search, History, Favorites
+// Recipe Routes — Search, History, Favorites, Cooking Assistant
 // ============================================
 
 import { Router } from 'express';
 import { prisma } from '../config/db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { recipeSearchRateLimit } from '../middleware/rateLimit.js';
-import { validate, recipeSearchSchema } from '../middleware/validate.js';
+import { validate, recipeSearchSchema, cookingAskSchema } from '../middleware/validate.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
-import { searchRecipes, generateCacheKey, estimateApiCost } from '../services/claude.js';
+import { searchRecipes, generateCacheKey, estimateApiCost, askCookingAssistant } from '../services/claude.js';
 import { parseIngredients } from '../services/lexicon.js';
 
 const router = Router();
 
 // ──────────────────────────────────────────
-// POST /recipes/search — Main AI recipe search
+// POST /recipes/search — Universal AI recipe search
 // ──────────────────────────────────────────
 router.post(
   '/search',
@@ -26,20 +26,16 @@ router.post(
     const effectiveHouseholdSize =
       householdSize || (await getUserHouseholdSize(req.user.id));
 
-    // Parse ingredients from the query
     const parsed = await parseIngredients(query);
 
-    // Search for recipes (uses cache if available)
     const result = await searchRecipes(query, effectiveHouseholdSize, preferences || {});
 
-    // Save search to DB (async, don't block response)
     const cacheKey = generateCacheKey(query, effectiveHouseholdSize);
 
     saveSearchToDB(req.user.id, query, parsed, effectiveHouseholdSize, cacheKey, result).catch(
       (err) => console.error('Failed to save search:', err.message)
     );
 
-    // Update quota
     updateSearchQuota(req.user.id).catch((err) =>
       console.error('Failed to update quota:', err.message)
     );
@@ -55,6 +51,24 @@ router.post(
         householdSize: effectiveHouseholdSize,
         recipeCount: result.recipes.length,
       },
+    });
+  })
+);
+
+// ──────────────────────────────────────────
+// POST /recipes/cooking/ask — Cooking assistant Q&A
+// ──────────────────────────────────────────
+router.post(
+  '/cooking/ask',
+  requireAuth,
+  validate(cookingAskSchema),
+  asyncHandler(async (req, res) => {
+    const { recipe, question, conversationHistory } = req.validated;
+
+    const result = await askCookingAssistant(recipe, question, conversationHistory || []);
+
+    res.json({
+      answer: result.answer,
     });
   })
 );
@@ -145,13 +159,11 @@ router.post(
     const recipeId = req.params.id;
     const userId = req.user.id;
 
-    // Check if recipe exists
     const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } });
     if (!recipe) {
       throw new AppError(404, 'not_found', 'Receptet hittades inte.');
     }
 
-    // Toggle favorite
     const existing = await prisma.favorite.findUnique({
       where: { userId_recipeId: { userId, recipeId } },
     });
@@ -197,7 +209,7 @@ router.get(
 );
 
 // ──────────────────────────────────────────
-// Helper functions
+// Helpers
 // ──────────────────────────────────────────
 
 async function getUserHouseholdSize(userId) {
@@ -221,7 +233,6 @@ async function saveSearchToDB(userId, query, parsed, householdSize, cacheKey, re
     },
   });
 
-  // Save individual recipes
   for (const recipe of result.recipes) {
     const slug = recipe.title
       .toLowerCase()
@@ -253,12 +264,12 @@ async function saveSearchToDB(userId, query, parsed, householdSize, cacheKey, re
         steps: {
           create: recipe.steps.map((step, idx) => ({
             sortOrder: idx,
-            content: step,
+            content: typeof step === 'string' ? step : step.text || step.content || '',
           })),
         },
         tools: {
           create: recipe.tools.map((tool) => ({
-            name: tool,
+            name: typeof tool === 'string' ? tool : tool.name || '',
           })),
         },
       },
@@ -278,7 +289,6 @@ async function updateSearchQuota(userId) {
     return;
   }
 
-  // Reset if period expired (1 hour)
   const hourAgo = new Date(Date.now() - 3600000);
   if (quota.periodStart < hourAgo) {
     await prisma.searchQuota.update({

@@ -1,5 +1,5 @@
 // ============================================
-// Root Layout — Dark theme app shell
+// Root Layout — Modern Scandinavian Kitchen
 // ============================================
 
 import '../styles/globals.css';
@@ -7,13 +7,13 @@ import { Navbar } from '../components/Navbar';
 import { AuthProvider } from '../components/AuthProvider';
 
 export const metadata = {
-  title: 'MatKompass — Sveriges mest användbara receptsida',
+  title: 'MatKompass — Hitta recept, jämför priser, laga mat',
   description:
-    'Hitta recept baserat på vad du har hemma. Jämför priser hos ICA, Willys, Coop och Lidl. Ingen reklam, bara mat.',
+    'Hitta recept baserat på vad du har hemma. Jämför priser hos ICA, Willys, Coop och Lidl. Röststyrd matlagning med AI-kock.',
   keywords: 'recept, matlagning, ingredienser, prisjämförelse, ICA, Willys, Coop, Lidl, Sverige',
   openGraph: {
-    title: 'MatKompass — Sveriges mest användbara receptsida',
-    description: 'Hitta recept baserat på vad du har hemma. Jämför priser hos svenska matbutiker.',
+    title: 'MatKompass — Hitta recept, jämför priser, laga mat',
+    description: 'Hitta recept baserat på vad du har hemma. Röststyrd matlagning med AI-kockassistent.',
     type: 'website',
     locale: 'sv_SE',
   },
@@ -26,15 +26,15 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-zinc-800/60 py-10 px-6">
+          <footer className="border-t border-warm-200 py-10 px-6 bg-cream-200">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 bg-accent-400 rounded-md flex items-center justify-center">
-                  <span className="text-void text-[10px] font-bold">M</span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 bg-sage-400 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">M</span>
                 </div>
-                <p className="text-sm text-zinc-500 font-light">MatKompass</p>
+                <p className="text-sm text-warm-600 font-medium">MatKompass</p>
               </div>
-              <p className="text-[11px] text-zinc-600">
+              <p className="text-xs text-warm-400">
                 Priser uppdateras regelbundet. Faktiska priser kan variera.
               </p>
             </div>

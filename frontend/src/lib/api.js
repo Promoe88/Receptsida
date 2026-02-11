@@ -153,6 +153,13 @@ export const recipes = {
     });
   },
 
+  async askCookingAssistant(recipe, question, conversationHistory) {
+    return apiFetch('/recipes/cooking/ask', {
+      method: 'POST',
+      body: JSON.stringify({ recipe, question, conversationHistory }),
+    });
+  },
+
   async get(id) {
     return apiFetch(`/recipes/${id}`);
   },

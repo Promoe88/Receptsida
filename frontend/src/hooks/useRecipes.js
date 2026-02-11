@@ -138,3 +138,38 @@ export function useSearchHistory() {
 
   return { history, pagination, loading, loadHistory };
 }
+
+// ── useCookingAssistant ──
+export function useCookingAssistant(recipe) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const ask = useCallback(async (question) => {
+    if (!recipe || !question.trim()) return null;
+
+    const userMsg = { role: 'user', content: question };
+    setMessages((prev) => [...prev, userMsg]);
+    setLoading(true);
+
+    try {
+      const data = await recipes.askCookingAssistant(
+        { title: recipe.title, ingredients: recipe.ingredients, steps: recipe.steps, tips: recipe.tips },
+        question,
+        messages.slice(-6)
+      );
+      const assistantMsg = { role: 'assistant', content: data.answer };
+      setMessages((prev) => [...prev, assistantMsg]);
+      return data.answer;
+    } catch (err) {
+      const errorMsg = { role: 'assistant', content: 'Kunde inte svara just nu. Försök igen.' };
+      setMessages((prev) => [...prev, errorMsg]);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [recipe, messages]);
+
+  const clearMessages = useCallback(() => setMessages([]), []);
+
+  return { messages, loading, ask, clearMessages };
+}

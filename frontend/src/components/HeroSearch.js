@@ -1,201 +1,266 @@
 // ============================================
-// HeroSearch — Command-line AI search interface
-// Dark theme with Context Chips + terminal aesthetic
+// HeroSearch — Guided multi-step search hero
+// 70% viewport, warm Scandinavian aesthetic
+// Multi-step: Input -> Context Chips -> Search
 // ============================================
 
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Terminal, Zap } from 'lucide-react';
-
-const SUGGESTED_INGREDIENTS = [
-  { label: 'Kyckling', emoji: '🍗' },
-  { label: 'Lax', emoji: '🐟' },
-  { label: 'Pasta', emoji: '🍝' },
-  { label: 'Ris', emoji: '🍚' },
-  { label: 'Potatis', emoji: '🥔' },
-  { label: 'Ägg', emoji: '🥚' },
-  { label: 'Grädde', emoji: '🥛' },
-  { label: 'Lök', emoji: '🧅' },
-  { label: 'Vitlök', emoji: '🧄' },
-  { label: 'Paprika', emoji: '🫑' },
-  { label: 'Bacon', emoji: '🥓' },
-  { label: 'Falukorv', emoji: '🌭' },
-];
+import { Search, Mic, MicOff, Users, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import { useVoiceInput } from '../hooks/useVoice';
 
 const CONTEXT_CHIPS = [
-  { label: 'Familj (4p)', value: 'familj-4', icon: '👨‍👩‍👧‍👦' },
-  { label: 'Under 50kr', value: 'budget-50', icon: '💰' },
-  { label: 'Meal Prep', value: 'meal-prep', icon: '📦' },
-  { label: 'Date Night', value: 'date-night', icon: '🕯️' },
-  { label: 'Under 20min', value: 'quick-20', icon: '⚡' },
-  { label: 'Vegetariskt', value: 'vegetarian', icon: '🥬' },
+  { id: 'barnfamilj', label: 'Barnfamilj', icon: '👨‍👩‍👧‍👦', color: 'sage' },
+  { id: 'snabbt', label: 'Snabbt & Billigt', icon: '⚡', color: 'terra' },
+  { id: 'matlador', label: 'Matlådor', icon: '📦', color: 'sage' },
+  { id: 'fest', label: 'Festmåltid', icon: '🥂', color: 'terra' },
+  { id: 'vegetariskt', label: 'Vegetariskt', icon: '🌿', color: 'sage' },
+  { id: 'helg', label: 'Helgmiddag', icon: '🍷', color: 'terra' },
 ];
 
+const CONTEXT_MAP = {
+  barnfamilj: { occasion: 'vardag', maxBudget: 80, dietary: [] },
+  snabbt: { maxTimeMinutes: 20, maxBudget: 60 },
+  matlador: { occasion: 'meal-prep' },
+  fest: { occasion: 'fest' },
+  vegetariskt: { dietary: ['vegetarisk'] },
+  helg: { maxTimeMinutes: 60, occasion: 'fest' },
+};
+
 export function HeroSearch({ onSearch, loading }) {
-  const [tags, setTags] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const [activeChips, setActiveChips] = useState(new Set());
-  const [isFocused, setIsFocused] = useState(false);
+  const [query, setQuery] = useState('');
+  const [householdSize, setHouseholdSize] = useState(2);
+  const [selectedChips, setSelectedChips] = useState([]);
+  const [step, setStep] = useState(1); // 1 = input, 2 = context chips
   const inputRef = useRef(null);
+  const { isListening, transcript, supported: voiceSupported, startListening, stopListening } = useVoiceInput();
 
-  const addTag = useCallback(
-    (label) => {
-      const normalized = label.trim().toLowerCase();
-      if (!normalized) return;
-      if (tags.some((t) => t.toLowerCase() === normalized)) return;
-      setTags((prev) => [...prev, label.trim()]);
-      setInputValue('');
-      inputRef.current?.focus();
-    },
-    [tags]
-  );
+  const buildPreferences = useCallback(() => {
+    const prefs = {};
+    for (const chipId of selectedChips) {
+      const mapping = CONTEXT_MAP[chipId];
+      if (mapping) {
+        Object.entries(mapping).forEach(([key, value]) => {
+          if (key === 'dietary') {
+            prefs.dietary = [...(prefs.dietary || []), ...value];
+          } else {
+            prefs[key] = value;
+          }
+        });
+      }
+    }
+    return Object.keys(prefs).length > 0 ? prefs : undefined;
+  }, [selectedChips]);
 
-  function removeTag(index) {
-    setTags((prev) => prev.filter((_, i) => i !== index));
-  }
+  const handleSubmit = useCallback((e) => {
+    e?.preventDefault();
+    const searchQuery = query.trim() || transcript.trim();
+    if (!searchQuery || loading) return;
 
-  function toggleChip(chipValue) {
-    setActiveChips((prev) => {
-      const next = new Set(prev);
-      if (next.has(chipValue)) next.delete(chipValue);
-      else next.add(chipValue);
-      return next;
-    });
-  }
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
 
-  function handleKeyDown(e) {
-    if (e.key === 'Enter' && inputValue.trim()) { e.preventDefault(); addTag(inputValue); }
-    if (e.key === 'Backspace' && !inputValue && tags.length > 0) removeTag(tags.length - 1);
-    if (e.key === ',' && inputValue.trim()) { e.preventDefault(); addTag(inputValue); }
-  }
+    onSearch(searchQuery, householdSize, buildPreferences());
+  }, [query, transcript, householdSize, loading, onSearch, step, buildPreferences]);
 
-  function handleSubmit() {
-    const finalTags = [...tags];
-    if (inputValue.trim()) finalTags.push(inputValue.trim());
-    if (finalTags.length === 0) return;
-    onSearch(finalTags);
-  }
+  const handleDirectSearch = useCallback(() => {
+    const searchQuery = query.trim() || transcript.trim();
+    if (!searchQuery || loading) return;
+    onSearch(searchQuery, householdSize, buildPreferences());
+  }, [query, transcript, householdSize, loading, onSearch, buildPreferences]);
 
-  const suggestionsFiltered = SUGGESTED_INGREDIENTS.filter(
-    (s) => !tags.some((t) => t.toLowerCase() === s.label.toLowerCase())
-  );
+  const toggleChip = useCallback((chipId) => {
+    setSelectedChips((prev) =>
+      prev.includes(chipId)
+        ? prev.filter((c) => c !== chipId)
+        : [...prev, chipId]
+    );
+  }, []);
+
+  const handleVoice = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening((result) => {
+        setQuery(result);
+        setStep(2);
+      });
+    }
+  }, [isListening, stopListening, startListening]);
 
   return (
-    <div>
-      {/* Section label */}
-      <div className="flex items-center gap-2 mb-4">
-        <Terminal size={12} className="text-accent-400" />
-        <span className="label-sm text-accent-400">Sök ingredienser</span>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-2xl text-center"
+      >
+        {/* Title */}
+        <h1 className="font-display text-display-sm sm:text-display-md lg:text-display-lg text-warm-800 mb-4">
+          Vad lagar vi idag?
+        </h1>
+        <p className="text-warm-500 text-base sm:text-lg mb-10 max-w-md mx-auto leading-relaxed">
+          Skriv ingredienser, en maträtt, eller berätta vad du är sugen på.
+        </p>
 
-      {/* Context Chips */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {CONTEXT_CHIPS.map((chip) => {
-          const isActive = activeChips.has(chip.value);
-          return (
-            <motion.button
-              key={chip.value}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => toggleChip(chip.value)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
-                        border transition-all duration-200
-                        ${isActive
-                          ? 'bg-accent-400/15 text-accent-300 border-accent-400/30 shadow-glow-sm'
-                          : 'bg-surface-300 text-zinc-500 border-zinc-800 hover:border-zinc-600 hover:text-zinc-300'
-                        }`}
-            >
-              <span className="text-sm">{chip.icon}</span>
-              {chip.label}
-            </motion.button>
-          );
-        })}
-      </div>
+        {/* Search card */}
+        <motion.div
+          layout
+          className="card p-2 sm:p-3 relative"
+        >
+          <form onSubmit={handleSubmit}>
+            {/* Main input */}
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4">
+              <Search size={22} className="text-warm-400 flex-shrink-0" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={isListening ? transcript || query : query}
+                onChange={(e) => { setQuery(e.target.value); if (step === 2) setStep(1); }}
+                placeholder="kyckling, pasta, billig middag, festmåltid..."
+                className="flex-1 bg-transparent border-none outline-none text-warm-800
+                         placeholder:text-warm-400 text-base sm:text-lg font-body"
+                disabled={loading}
+                autoFocus
+              />
 
-      {/* Command search box */}
-      <div className={`bg-surface rounded-2xl border overflow-hidden
-                    transition-all duration-300 scan-line
-                    ${isFocused
-                      ? 'border-accent-400/40 shadow-glow'
-                      : 'border-zinc-800 shadow-soft'
-                    }`}>
-        {/* Tags + input */}
-        <div className="flex flex-wrap items-center gap-2 min-h-[52px] px-4 py-3">
-          <span className="text-accent-400 font-mono text-lg font-bold select-none">&gt;</span>
-
-          <AnimatePresence mode="popLayout">
-            {tags.map((tag, idx) => (
-              <motion.span
-                key={tag}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                layout
-                className="inline-flex items-center gap-1.5 bg-accent-400/15 text-accent-300
-                         px-3 py-1.5 rounded-lg text-sm font-medium border border-accent-400/25"
-              >
-                {tag}
+              {/* Voice button */}
+              {voiceSupported && (
                 <button
-                  onClick={() => removeTag(idx)}
-                  className="text-accent-400/50 hover:text-accent-300 transition-colors"
-                  aria-label={`Ta bort ${tag}`}
+                  type="button"
+                  onClick={handleVoice}
+                  className={`p-2.5 rounded-2xl transition-all duration-200 flex-shrink-0
+                    ${isListening
+                      ? 'bg-terra-100 text-terra-500 animate-pulse-soft'
+                      : 'text-warm-400 hover:text-sage-500 hover:bg-sage-50'
+                    }`}
                 >
-                  <X size={13} />
+                  {isListening ? <MicOff size={20} /> : <Mic size={20} />}
                 </button>
-              </motion.span>
-            ))}
+              )}
+
+              {/* Search/Next button */}
+              <button
+                type="submit"
+                disabled={loading || (!query.trim() && !transcript.trim())}
+                className="btn-primary !rounded-2xl !py-3 !px-5 flex items-center gap-2 disabled:opacity-30"
+              >
+                {loading ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : step === 1 ? (
+                  <ArrowRight size={18} />
+                ) : (
+                  <Search size={18} />
+                )}
+                <span className="hidden sm:inline">{loading ? 'Söker...' : step === 1 ? 'Nästa' : 'Sök recept'}</span>
+              </button>
+            </div>
+
+            {/* Household size bar */}
+            <div className="flex items-center gap-3 px-5 py-2.5 border-t border-warm-100">
+              <Users size={15} className="text-warm-400" />
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setHouseholdSize(n)}
+                    className={`w-8 h-8 rounded-xl text-xs font-semibold transition-all
+                      ${householdSize === n
+                        ? 'bg-sage-400 text-white shadow-sage-glow'
+                        : 'bg-cream-200 text-warm-500 hover:bg-sage-50 hover:text-sage-600'
+                      }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs text-warm-400 ml-1">
+                {householdSize === 1 ? 'person' : 'personer'}
+              </span>
+            </div>
+          </form>
+
+          {/* Step 2: Context chips */}
+          <AnimatePresence>
+            {step === 2 && query.trim() && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden border-t border-warm-100"
+              >
+                <div className="px-5 py-5">
+                  <p className="text-sm text-warm-500 mb-4 flex items-center gap-2">
+                    <Sparkles size={14} className="text-terra-400" />
+                    Välj kontext för bättre resultat
+                    <button
+                      onClick={handleDirectSearch}
+                      className="ml-auto text-xs text-sage-500 hover:text-sage-700 font-medium underline underline-offset-2"
+                    >
+                      Hoppa över
+                    </button>
+                  </p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {CONTEXT_CHIPS.map((chip) => {
+                      const active = selectedChips.includes(chip.id);
+                      return (
+                        <button
+                          key={chip.id}
+                          type="button"
+                          onClick={() => toggleChip(chip.id)}
+                          className={active
+                            ? (chip.color === 'terra' ? 'chip-terra' : 'chip-active')
+                            : 'chip'
+                          }
+                        >
+                          <span className="text-base">{chip.icon}</span>
+                          {chip.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Final search button */}
+                  <button
+                    onClick={handleDirectSearch}
+                    disabled={loading}
+                    className="btn-primary w-full mt-5 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <><Loader2 size={16} className="animate-spin" /> Söker recept...</>
+                    ) : (
+                      <><Search size={16} /> Hitta recept för &ldquo;{query.trim()}&rdquo;</>
+                    )}
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            placeholder={tags.length === 0 ? 'kyckling, grädde, ris...' : 'Lägg till fler...'}
-            className="flex-1 min-w-[120px] py-1.5 bg-transparent border-none outline-none
-                     text-zinc-100 placeholder:text-zinc-600 text-sm font-mono"
-            disabled={loading}
-          />
-        </div>
+        </motion.div>
 
-        {/* Divider + button */}
-        <div className="flex justify-between items-center px-4 py-3 border-t border-zinc-800/60 bg-surface-300/50">
-          <span className="text-[10px] text-zinc-600 font-mono">
-            {tags.length > 0 ? `${tags.length} ingredienser` : 'Enter för att lägga till'}
-          </span>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSubmit}
-            disabled={loading || (tags.length === 0 && !inputValue.trim())}
-            className="btn-accent !py-2 !px-5 !text-xs flex items-center gap-2"
-          >
-            <Zap size={13} />
-            Exekvera
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Ingredient suggestions */}
-      <div className="flex flex-wrap gap-1.5 mt-3">
-        {suggestionsFiltered.slice(0, 8).map((item) => (
-          <motion.button
-            key={item.label}
-            whileTap={{ scale: 0.93 }}
-            onClick={() => addTag(item.label)}
-            className="inline-flex items-center gap-1.5 bg-surface-300 border border-zinc-800
-                     px-2.5 py-1.5 rounded-lg text-xs text-zinc-500
-                     hover:border-zinc-600 hover:text-zinc-300 hover:bg-surface-200
-                     transition-all duration-200"
-          >
-            <Plus size={10} className="text-zinc-600" />
-            <span>{item.emoji}</span>
-            <span className="font-medium">{item.label}</span>
-          </motion.button>
-        ))}
-      </div>
+        {/* Voice listening indicator */}
+        <AnimatePresence>
+          {isListening && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mt-4 inline-flex items-center gap-2 bg-terra-50 border border-terra-200
+                       rounded-full px-4 py-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-terra-400 animate-pulse" />
+              <span className="text-sm text-terra-600 font-medium">Lyssnar...</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
