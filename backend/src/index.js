@@ -16,6 +16,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.js';
 import recipeRoutes from './routes/recipes.js';
 import lexiconRoutes from './routes/lexicon.js';
+import scraperRoutes from './routes/scraper.js';
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/api/', generalRateLimit);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/recipes', recipeRoutes);
 app.use('/api/v1/lexicon', lexiconRoutes);
+app.use('/api/v1/scraper', scraperRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {

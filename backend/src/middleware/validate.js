@@ -68,3 +68,36 @@ export const recipeSearchSchema = z.object({
     })
     .optional(),
 });
+
+// ──────────────────────────────────────────
+// Recipe generation schemas
+// ──────────────────────────────────────────
+
+export const generateRecipeSchema = z.object({
+  ingredients: z
+    .array(z.string().min(1).max(100))
+    .min(1, 'Ange minst en ingrediens')
+    .max(20, 'Max 20 ingredienser'),
+  servings: z.number().int().min(1).max(20).optional().default(4),
+  difficulty: z.enum(['Enkel', 'Medel', 'Avancerad']).optional().default('Medel'),
+  maxTimeMinutes: z.number().int().min(5).max(180).optional(),
+  dietary: z
+    .array(z.enum(['vegetarisk', 'vegan', 'glutenfri', 'laktosfri', 'lchf']))
+    .optional()
+    .default([]),
+  style: z
+    .enum(['frukost', 'lunch', 'middag', 'dessert', 'mellanmål'])
+    .optional()
+    .default('middag'),
+});
+
+export const suggestRecipesSchema = z.object({
+  ingredients: z
+    .array(z.string().min(1).max(100))
+    .min(1, 'Ange minst en ingrediens')
+    .max(20),
+  count: z.number().int().min(1).max(5).optional().default(3),
+  style: z
+    .enum(['frukost', 'lunch', 'middag', 'dessert', 'mellanmål'])
+    .optional(),
+});
