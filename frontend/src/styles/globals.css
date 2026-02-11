@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-warm-50 text-warm-800 font-body antialiased;
+  }
+
+  /* Subtle grain texture overlay */
+  body::before {
+    content: '';
+    @apply fixed inset-0 pointer-events-none z-[9999];
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-400 text-white px-6 py-3 rounded-xl font-semibold
+           hover:bg-brand-500 transition-colors duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-warm-800 px-6 py-3 rounded-xl font-semibold
+           border border-warm-200 hover:border-brand-400 hover:text-brand-400
+           transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply text-warm-500 px-4 py-2 rounded-lg font-medium
+           hover:bg-warm-100 hover:text-warm-800
+           transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-soft border border-warm-200 p-6;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-warm-200 rounded-xl
+           font-body text-warm-800 placeholder:text-warm-400
+           focus:outline-none focus:border-brand-400 focus:ring-4 focus:ring-brand-400/10
+           transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-green {
+    @apply badge bg-forest-50 text-forest-400;
+  }
+
+  .badge-gold {
+    @apply badge bg-gold-50 text-gold-400;
+  }
+
+  .badge-brand {
+    @apply badge bg-brand-50 text-brand-400;
+  }
+}
+
+/* Autocomplete dropdown */
+.autocomplete-dropdown {
+  @apply absolute top-full left-0 right-0 mt-1 bg-white border border-warm-200
+         rounded-xl shadow-strong z-50 overflow-hidden;
+}
+
+.autocomplete-item {
+  @apply px-4 py-3 cursor-pointer flex items-center gap-3 text-sm
+         hover:bg-warm-50 transition-colors duration-100;
+}
+
+.autocomplete-item:not(:last-child) {
+  @apply border-b border-warm-100;
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply bg-warm-100 animate-pulse rounded-lg;
+}
+
+/* Recipe card hover effect */
+.recipe-card-hover {
+  @apply transition-all duration-300 hover:shadow-medium hover:-translate-y-0.5;
+}
