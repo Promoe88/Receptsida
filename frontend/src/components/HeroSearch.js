@@ -1,48 +1,85 @@
 // ============================================
-// HeroSearch — Universal AI search interface
-// THE core product: handles all query types
+// HeroSearch — Guided multi-step search hero
+// 70% viewport, warm Scandinavian aesthetic
+// Multi-step: Input -> Context Chips -> Search
 // ============================================
 
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Mic, MicOff, Sparkles, Users, Clock, Coins, ChefHat, Loader2 } from 'lucide-react';
+import { Search, Mic, MicOff, Users, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import { useVoiceInput } from '../hooks/useVoice';
 
-const QUICK_PROMPTS = [
-  { label: 'Vad har du hemma?', query: '', placeholder: 'kyckling, ris, grädde...', icon: '🧊' },
-  { label: 'Billig vardagsmiddag', query: 'billig vardagsmiddag under 60kr för familj', icon: '💰' },
-  { label: 'Snabb lunch', query: 'snabb lunch under 20 minuter', icon: '⚡' },
-  { label: 'Festmiddag', query: 'festmiddag för 6 personer', icon: '🎉' },
-  { label: 'Vegetariskt', query: 'vegetarisk middag med protein', icon: '🥬' },
-  { label: 'Meal prep', query: 'meal prep för hela veckan', icon: '📦' },
+const CONTEXT_CHIPS = [
+  { id: 'barnfamilj', label: 'Barnfamilj', icon: '👨‍👩‍👧‍👦', color: 'sage' },
+  { id: 'snabbt', label: 'Snabbt & Billigt', icon: '⚡', color: 'terra' },
+  { id: 'matlador', label: 'Matlådor', icon: '📦', color: 'sage' },
+  { id: 'fest', label: 'Festmåltid', icon: '🥂', color: 'terra' },
+  { id: 'vegetariskt', label: 'Vegetariskt', icon: '🌿', color: 'sage' },
+  { id: 'helg', label: 'Helgmiddag', icon: '🍷', color: 'terra' },
 ];
+
+const CONTEXT_MAP = {
+  barnfamilj: { occasion: 'vardag', maxBudget: 80, dietary: [] },
+  snabbt: { maxTimeMinutes: 20, maxBudget: 60 },
+  matlador: { occasion: 'meal-prep' },
+  fest: { occasion: 'fest' },
+  vegetariskt: { dietary: ['vegetarisk'] },
+  helg: { maxTimeMinutes: 60, occasion: 'fest' },
+};
 
 export function HeroSearch({ onSearch, loading }) {
   const [query, setQuery] = useState('');
   const [householdSize, setHouseholdSize] = useState(2);
-  const [showOptions, setShowOptions] = useState(false);
-  const [preferences, setPreferences] = useState({});
+  const [selectedChips, setSelectedChips] = useState([]);
+  const [step, setStep] = useState(1); // 1 = input, 2 = context chips
   const inputRef = useRef(null);
   const { isListening, transcript, supported: voiceSupported, startListening, stopListening } = useVoiceInput();
+
+  const buildPreferences = useCallback(() => {
+    const prefs = {};
+    for (const chipId of selectedChips) {
+      const mapping = CONTEXT_MAP[chipId];
+      if (mapping) {
+        Object.entries(mapping).forEach(([key, value]) => {
+          if (key === 'dietary') {
+            prefs.dietary = [...(prefs.dietary || []), ...value];
+          } else {
+            prefs[key] = value;
+          }
+        });
+      }
+    }
+    return Object.keys(prefs).length > 0 ? prefs : undefined;
+  }, [selectedChips]);
 
   const handleSubmit = useCallback((e) => {
     e?.preventDefault();
     const searchQuery = query.trim() || transcript.trim();
     if (!searchQuery || loading) return;
-    onSearch(searchQuery, householdSize, preferences);
-  }, [query, transcript, householdSize, preferences, loading, onSearch]);
 
-  const handleQuickPrompt = useCallback((prompt) => {
-    if (prompt.query) {
-      setQuery(prompt.query);
-      onSearch(prompt.query, householdSize, preferences);
-    } else {
-      setQuery('');
-      inputRef.current?.focus();
+    if (step === 1) {
+      setStep(2);
+      return;
     }
-  }, [householdSize, preferences, onSearch]);
+
+    onSearch(searchQuery, householdSize, buildPreferences());
+  }, [query, transcript, householdSize, loading, onSearch, step, buildPreferences]);
+
+  const handleDirectSearch = useCallback(() => {
+    const searchQuery = query.trim() || transcript.trim();
+    if (!searchQuery || loading) return;
+    onSearch(searchQuery, householdSize, buildPreferences());
+  }, [query, transcript, householdSize, loading, onSearch, buildPreferences]);
+
+  const toggleChip = useCallback((chipId) => {
+    setSelectedChips((prev) =>
+      prev.includes(chipId)
+        ? prev.filter((c) => c !== chipId)
+        : [...prev, chipId]
+    );
+  }, []);
 
   const handleVoice = useCallback(() => {
     if (isListening) {
@@ -50,245 +87,179 @@ export function HeroSearch({ onSearch, loading }) {
     } else {
       startListening((result) => {
         setQuery(result);
-        // Auto-submit after voice input
-        setTimeout(() => {
-          onSearch(result, householdSize, preferences);
-        }, 300);
+        setStep(2);
       });
     }
-  }, [isListening, stopListening, startListening, householdSize, preferences, onSearch]);
-
-  const togglePref = useCallback((key, value) => {
-    setPreferences((prev) => {
-      const next = { ...prev };
-      if (key === 'dietary') {
-        const current = next.dietary || [];
-        next.dietary = current.includes(value)
-          ? current.filter((d) => d !== value)
-          : [...current, value];
-        if (next.dietary.length === 0) delete next.dietary;
-      } else if (next[key] === value) {
-        delete next[key];
-      } else {
-        next[key] = value;
-      }
-      return next;
-    });
-  }, []);
+  }, [isListening, stopListening, startListening]);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Hero text */}
-      <div className="text-center mb-8">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="inline-flex items-center gap-2 bg-accent-400/10 border border-accent-400/20 rounded-full px-4 py-1.5 mb-5">
-            <Sparkles size={14} className="text-accent-400" />
-            <span className="text-xs font-medium text-accent-400">AI-driven receptsökning</span>
-          </div>
-          <h1 className="font-display text-display-sm sm:text-display-md lg:text-display-lg text-zinc-50 mb-3">
-            Vad vill du laga?
-          </h1>
-          <p className="text-zinc-500 text-sm sm:text-base max-w-md mx-auto font-light">
-            Skriv ingredienser, en maträtt, eller berätta vad du är sugen på.
-            Vi löser resten.
-          </p>
-        </motion.div>
-      </div>
-
-      {/* Search box */}
-      <motion.form
-        onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 16 }}
+    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.5 }}
-        className="relative"
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-2xl text-center"
       >
-        <div className={`bg-surface rounded-2xl border overflow-hidden transition-all duration-300 scan-line
-                      ${loading ? 'border-accent-400/40 shadow-glow' : 'border-zinc-800 shadow-soft hover:border-zinc-700 focus-within:border-accent-400/40 focus-within:shadow-glow'}`}>
-          {/* Main input */}
-          <div className="flex items-center gap-3 px-5 py-4">
-            <Search size={20} className="text-zinc-600 flex-shrink-0" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={isListening ? transcript || query : query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="kyckling och ris, billig middag, pasta carbonara..."
-              className="flex-1 bg-transparent border-none outline-none text-zinc-100
-                       placeholder:text-zinc-600 text-base font-mono"
-              disabled={loading}
-              autoFocus
-            />
+        {/* Title */}
+        <h1 className="font-display text-display-sm sm:text-display-md lg:text-display-lg text-warm-800 mb-4">
+          Vad lagar vi idag?
+        </h1>
+        <p className="text-warm-500 text-base sm:text-lg mb-10 max-w-md mx-auto leading-relaxed">
+          Skriv ingredienser, en maträtt, eller berätta vad du är sugen på.
+        </p>
 
-            {/* Voice button */}
-            {voiceSupported && (
-              <button
-                type="button"
-                onClick={handleVoice}
-                className={`p-2.5 rounded-xl transition-all duration-200 flex-shrink-0
-                  ${isListening
-                    ? 'bg-red-500/20 text-red-400 animate-pulse border border-red-500/30'
-                    : 'text-zinc-500 hover:text-accent-400 hover:bg-surface-200'
-                  }`}
-              >
-                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-              </button>
-            )}
-          </div>
+        {/* Search card */}
+        <motion.div
+          layout
+          className="card p-2 sm:p-3 relative"
+        >
+          <form onSubmit={handleSubmit}>
+            {/* Main input */}
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4">
+              <Search size={22} className="text-warm-400 flex-shrink-0" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={isListening ? transcript || query : query}
+                onChange={(e) => { setQuery(e.target.value); if (step === 2) setStep(1); }}
+                placeholder="kyckling, pasta, billig middag, festmåltid..."
+                className="flex-1 bg-transparent border-none outline-none text-warm-800
+                         placeholder:text-warm-400 text-base sm:text-lg font-body"
+                disabled={loading}
+                autoFocus
+              />
 
-          {/* Options bar */}
-          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800/60 bg-surface-300/50">
-            <div className="flex items-center gap-3">
-              {/* Household size */}
-              <div className="flex items-center gap-2">
-                <Users size={14} className="text-zinc-600" />
-                <select
-                  value={householdSize}
-                  onChange={(e) => setHouseholdSize(parseInt(e.target.value))}
-                  className="bg-transparent text-xs text-zinc-400 font-mono border-none outline-none cursor-pointer"
+              {/* Voice button */}
+              {voiceSupported && (
+                <button
+                  type="button"
+                  onClick={handleVoice}
+                  className={`p-2.5 rounded-2xl transition-all duration-200 flex-shrink-0
+                    ${isListening
+                      ? 'bg-terra-100 text-terra-500 animate-pulse-soft'
+                      : 'text-warm-400 hover:text-sage-500 hover:bg-sage-50'
+                    }`}
                 >
-                  {[1,2,3,4,5,6,7,8].map((n) => (
-                    <option key={n} value={n}>{n} {n === 1 ? 'person' : 'pers'}</option>
-                  ))}
-                </select>
-              </div>
+                  {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                </button>
+              )}
 
-              <div className="w-px h-4 bg-zinc-800" />
-
-              {/* More options toggle */}
+              {/* Search/Next button */}
               <button
-                type="button"
-                onClick={() => setShowOptions(!showOptions)}
-                className="text-xs text-zinc-500 hover:text-accent-400 transition-colors font-medium"
+                type="submit"
+                disabled={loading || (!query.trim() && !transcript.trim())}
+                className="btn-primary !rounded-2xl !py-3 !px-5 flex items-center gap-2 disabled:opacity-30"
               >
-                {showOptions ? 'Färre val' : 'Fler val'}
+                {loading ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : step === 1 ? (
+                  <ArrowRight size={18} />
+                ) : (
+                  <Search size={18} />
+                )}
+                <span className="hidden sm:inline">{loading ? 'Söker...' : step === 1 ? 'Nästa' : 'Sök recept'}</span>
               </button>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading || (!query.trim() && !transcript.trim())}
-              className="btn-accent !py-2 !px-5 !text-xs flex items-center gap-2 disabled:opacity-40"
-            >
-              {loading ? (
-                <><Loader2 size={13} className="animate-spin" /> Söker...</>
-              ) : (
-                <><ChefHat size={13} /> Sök recept</>
-              )}
-            </button>
-          </div>
+            {/* Household size bar */}
+            <div className="flex items-center gap-3 px-5 py-2.5 border-t border-warm-100">
+              <Users size={15} className="text-warm-400" />
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setHouseholdSize(n)}
+                    className={`w-8 h-8 rounded-xl text-xs font-semibold transition-all
+                      ${householdSize === n
+                        ? 'bg-sage-400 text-white shadow-sage-glow'
+                        : 'bg-cream-200 text-warm-500 hover:bg-sage-50 hover:text-sage-600'
+                      }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <span className="text-xs text-warm-400 ml-1">
+                {householdSize === 1 ? 'person' : 'personer'}
+              </span>
+            </div>
+          </form>
 
-          {/* Extended options */}
+          {/* Step 2: Context chips */}
           <AnimatePresence>
-            {showOptions && (
+            {step === 2 && query.trim() && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden border-t border-zinc-800/60"
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden border-t border-warm-100"
               >
-                <div className="px-5 py-4 space-y-3">
-                  {/* Time */}
-                  <div className="flex items-center gap-3">
-                    <Clock size={13} className="text-zinc-600" />
-                    <span className="text-xs text-zinc-500 w-16">Tid:</span>
-                    <div className="flex gap-2">
-                      {[{ label: '20 min', val: 20 }, { label: '30 min', val: 30 }, { label: '60 min', val: 60 }].map((t) => (
-                        <button key={t.val} type="button" onClick={() => togglePref('maxTimeMinutes', t.val)}
-                          className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all
-                            ${preferences.maxTimeMinutes === t.val
-                              ? 'bg-accent-400/15 text-accent-300 border-accent-400/30'
-                              : 'bg-surface-300 text-zinc-500 border-zinc-800 hover:border-zinc-600'
-                            }`}>
-                          {t.label}
+                <div className="px-5 py-5">
+                  <p className="text-sm text-warm-500 mb-4 flex items-center gap-2">
+                    <Sparkles size={14} className="text-terra-400" />
+                    Välj kontext för bättre resultat
+                    <button
+                      onClick={handleDirectSearch}
+                      className="ml-auto text-xs text-sage-500 hover:text-sage-700 font-medium underline underline-offset-2"
+                    >
+                      Hoppa över
+                    </button>
+                  </p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {CONTEXT_CHIPS.map((chip) => {
+                      const active = selectedChips.includes(chip.id);
+                      return (
+                        <button
+                          key={chip.id}
+                          type="button"
+                          onClick={() => toggleChip(chip.id)}
+                          className={active
+                            ? (chip.color === 'terra' ? 'chip-terra' : 'chip-active')
+                            : 'chip'
+                          }
+                        >
+                          <span className="text-base">{chip.icon}</span>
+                          {chip.label}
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
 
-                  {/* Budget */}
-                  <div className="flex items-center gap-3">
-                    <Coins size={13} className="text-zinc-600" />
-                    <span className="text-xs text-zinc-500 w-16">Budget:</span>
-                    <div className="flex gap-2">
-                      {[{ label: '50 kr', val: 50 }, { label: '100 kr', val: 100 }, { label: '200 kr', val: 200 }].map((b) => (
-                        <button key={b.val} type="button" onClick={() => togglePref('maxBudget', b.val)}
-                          className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all
-                            ${preferences.maxBudget === b.val
-                              ? 'bg-accent-400/15 text-accent-300 border-accent-400/30'
-                              : 'bg-surface-300 text-zinc-500 border-zinc-800 hover:border-zinc-600'
-                            }`}>
-                          {b.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Diet */}
-                  <div className="flex items-center gap-3">
-                    <span className="text-zinc-600 w-4 text-center text-xs">🥬</span>
-                    <span className="text-xs text-zinc-500 w-16">Diet:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {['vegetarisk', 'vegan', 'glutenfri', 'laktosfri', 'lchf'].map((d) => (
-                        <button key={d} type="button" onClick={() => togglePref('dietary', d)}
-                          className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all capitalize
-                            ${(preferences.dietary || []).includes(d)
-                              ? 'bg-accent-400/15 text-accent-300 border-accent-400/30'
-                              : 'bg-surface-300 text-zinc-500 border-zinc-800 hover:border-zinc-600'
-                            }`}>
-                          {d}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Final search button */}
+                  <button
+                    onClick={handleDirectSearch}
+                    disabled={loading}
+                    className="btn-primary w-full mt-5 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <><Loader2 size={16} className="animate-spin" /> Söker recept...</>
+                    ) : (
+                      <><Search size={16} /> Hitta recept för &ldquo;{query.trim()}&rdquo;</>
+                    )}
+                  </button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
 
-        {/* Voice indicator */}
+        {/* Voice listening indicator */}
         <AnimatePresence>
           {isListening && (
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="absolute -top-12 left-1/2 -translate-x-1/2 bg-red-500/20 border border-red-500/30
-                       rounded-full px-4 py-1.5 flex items-center gap-2"
+              exit={{ opacity: 0 }}
+              className="mt-4 inline-flex items-center gap-2 bg-terra-50 border border-terra-200
+                       rounded-full px-4 py-2"
             >
-              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-              <span className="text-xs text-red-400 font-medium">Lyssnar...</span>
+              <span className="w-2 h-2 rounded-full bg-terra-400 animate-pulse" />
+              <span className="text-sm text-terra-600 font-medium">Lyssnar...</span>
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.form>
-
-      {/* Quick prompts */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="flex flex-wrap justify-center gap-2 mt-5"
-      >
-        {QUICK_PROMPTS.map((prompt) => (
-          <button
-            key={prompt.label}
-            onClick={() => handleQuickPrompt(prompt)}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 bg-surface-300 border border-zinc-800
-                     px-3 py-1.5 rounded-xl text-xs text-zinc-500
-                     hover:border-zinc-600 hover:text-zinc-300 hover:bg-surface-200
-                     transition-all duration-200 disabled:opacity-40"
-          >
-            <span>{prompt.icon}</span>
-            <span className="font-medium">{prompt.label}</span>
-          </button>
-        ))}
       </motion.div>
     </div>
   );

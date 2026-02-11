@@ -1,6 +1,6 @@
 // ============================================
-// GroceryMode — Voice-controlled shopping assistant
-// Guides through store by aisle, check off items
+// GroceryMode — Warm voice-controlled shopping
+// Guides through store by aisle, bright aesthetic
 // ============================================
 
 'use client';
@@ -18,7 +18,6 @@ export function GroceryMode({ recipe, onClose }) {
   const { speak, stop: stopSpeech, isSpeaking } = useSpeech();
   const { isListening, supported: voiceSupported, startListening, stopListening } = useVoiceInput();
 
-  // Build shopping list from recipe ingredients (only items not already owned)
   const shoppingItems = useMemo(() => {
     const items = (recipe.ingredients || []).filter((i) => !i.have);
     return items.length > 0 ? items : recipe.ingredients || [];
@@ -40,7 +39,6 @@ export function GroceryMode({ recipe, onClose }) {
     });
   }
 
-  // Voice: announce current aisle
   const announceAisle = useCallback((aisleIdx) => {
     if (!voiceEnabled || !aisleGroups[aisleIdx]) return;
     const aisle = aisleGroups[aisleIdx];
@@ -48,14 +46,12 @@ export function GroceryMode({ recipe, onClose }) {
     speak(`Gå till ${aisle.name}. Du behöver: ${itemNames}.`);
   }, [voiceEnabled, aisleGroups, speak]);
 
-  // Announce first aisle when voice is enabled
   useEffect(() => {
     if (voiceEnabled && aisleGroups.length > 0) {
       announceAisle(0);
     }
   }, [voiceEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Voice commands: "klar", "nästa", "check"
   const handleVoiceCommand = useCallback((transcript) => {
     const lower = transcript.toLowerCase();
     if (lower.includes('nästa') || lower.includes('next')) {
@@ -67,7 +63,6 @@ export function GroceryMode({ recipe, onClose }) {
         });
       }
     } else if (lower.includes('klar') || lower.includes('check') || lower.includes('bocka')) {
-      // Check off all items in current aisle
       const aisle = aisleGroups[currentAisle];
       if (aisle) {
         setChecked((prev) => {
@@ -91,11 +86,8 @@ export function GroceryMode({ recipe, onClose }) {
   }, [currentAisle, aisleGroups, announceAisle, speak]);
 
   function toggleVoiceListening() {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening(handleVoiceCommand);
-    }
+    if (isListening) stopListening();
+    else startListening(handleVoiceCommand);
   }
 
   return (
@@ -105,43 +97,40 @@ export function GroceryMode({ recipe, onClose }) {
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-void/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-warm-800/30 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Panel */}
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="relative w-full max-w-lg max-h-[90vh] bg-surface rounded-t-2xl sm:rounded-2xl
-                  overflow-hidden z-10 flex flex-col border border-zinc-800/60"
+        className="relative w-full max-w-lg max-h-[90vh] bg-white rounded-t-3xl sm:rounded-3xl
+                  overflow-hidden z-10 flex flex-col shadow-strong"
       >
         {/* Header */}
-        <div className="bg-surface-300 px-6 py-5 border-b border-zinc-800">
+        <div className="bg-cream-200/60 px-6 py-5 border-b border-warm-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-accent-400/15 flex items-center justify-center">
-                <Route size={20} className="text-accent-400" />
+              <div className="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center">
+                <Route size={20} className="text-sage-600" />
               </div>
               <div>
-                <h2 className="font-display text-xl text-zinc-50">Inköpslista</h2>
-                <p className="text-zinc-500 text-xs mt-0.5">{recipe.title}</p>
+                <h2 className="font-display text-xl text-warm-800">Inköpslista</h2>
+                <p className="text-warm-400 text-xs mt-0.5">{recipe.title}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* Voice toggle */}
               <button
                 onClick={() => { setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeech(); }}
                 className={`p-2 rounded-xl transition-all ${voiceEnabled
-                  ? 'bg-accent-400/15 text-accent-400'
-                  : 'text-zinc-500 hover:text-zinc-300'}`}
+                  ? 'bg-sage-100 text-sage-600'
+                  : 'text-warm-400 hover:text-warm-700'}`}
               >
                 {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
               </button>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl hover:bg-surface-200 text-zinc-500 transition-colors"
+                className="p-2 rounded-xl hover:bg-cream-200 text-warm-400 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -150,15 +139,15 @@ export function GroceryMode({ recipe, onClose }) {
 
           {/* Progress bar */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-cream-300 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-accent-400 rounded-full"
+                className="h-full bg-sage-400 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
-            <span className="text-xs font-mono text-zinc-400 tabular-nums">
+            <span className="text-xs font-semibold text-warm-500 tabular-nums">
               {checkedCount}/{totalItems}
             </span>
           </div>
@@ -172,13 +161,13 @@ export function GroceryMode({ recipe, onClose }) {
                   <button
                     key={aisle.name}
                     onClick={() => { setCurrentAisle(idx); announceAisle(idx); }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium
                               border transition-all whitespace-nowrap
                       ${idx === currentAisle
-                        ? 'bg-accent-400/15 text-accent-300 border-accent-400/30'
+                        ? 'bg-sage-100 text-sage-700 border-sage-300'
                         : allChecked
-                          ? 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20'
-                          : 'bg-surface text-zinc-500 border-zinc-800 hover:border-zinc-600'
+                          ? 'bg-sage-50 text-sage-500 border-sage-200/50'
+                          : 'bg-white text-warm-500 border-warm-200 hover:border-warm-300'
                       }`}
                   >
                     <span>{aisle.icon}</span>
@@ -196,9 +185,11 @@ export function GroceryMode({ recipe, onClose }) {
           {aisleGroups.map((aisle, aisleIdx) => (
             <div key={aisle.name} className={aisleIdx !== currentAisle ? 'opacity-40' : ''}>
               <div className="flex items-center gap-2 mb-2.5">
-                <MapPin size={13} className="text-zinc-600" />
-                <span className="label-sm">{aisle.icon} {aisle.name}</span>
-                <div className="flex-1 h-px bg-zinc-800/60" />
+                <MapPin size={13} className="text-warm-400" />
+                <span className="text-xs font-semibold text-warm-500 uppercase tracking-wider">
+                  {aisle.icon} {aisle.name}
+                </span>
+                <div className="flex-1 h-px bg-warm-200" />
               </div>
 
               <div className="space-y-1.5">
@@ -211,36 +202,36 @@ export function GroceryMode({ recipe, onClose }) {
                       layout
                       whileTap={{ scale: 0.97 }}
                       onClick={() => toggle(key)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left
                                 transition-all duration-200 border
                                 ${isDone
-                                  ? 'bg-surface-300/50 border-zinc-800/40 opacity-50'
-                                  : 'bg-surface-300 border-zinc-800/60 hover:border-zinc-700'
+                                  ? 'bg-cream-200/50 border-warm-200/40 opacity-50'
+                                  : 'bg-white border-warm-200 hover:border-sage-300 hover:shadow-soft'
                                 }`}
                     >
                       <span className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center
                                       flex-shrink-0 transition-all duration-200
                         ${isDone
-                          ? 'bg-accent-400 border-accent-400 text-void'
-                          : 'border-zinc-600'
+                          ? 'bg-sage-400 border-sage-400 text-white'
+                          : 'border-warm-300'
                         }`}>
                         {isDone && <Check size={11} strokeWidth={3} />}
                       </span>
 
                       <div className="flex-1 min-w-0">
                         <span className={`text-sm font-medium transition-all
-                          ${isDone ? 'line-through text-zinc-600' : 'text-zinc-200'}`}>
+                          ${isDone ? 'line-through text-warm-400' : 'text-warm-800'}`}>
                           {item.name}
                         </span>
                       </div>
 
-                      <span className={`text-xs font-mono flex-shrink-0
-                        ${isDone ? 'text-zinc-700' : 'text-zinc-500'}`}>
+                      <span className={`text-xs font-medium flex-shrink-0
+                        ${isDone ? 'text-warm-300' : 'text-warm-500'}`}>
                         {item.amount}
                       </span>
 
                       {item.est_price && (
-                        <span className="text-xs text-accent-400 font-mono flex-shrink-0">
+                        <span className="text-xs text-terra-400 font-semibold flex-shrink-0">
                           {item.est_price}
                         </span>
                       )}
@@ -253,14 +244,14 @@ export function GroceryMode({ recipe, onClose }) {
         </div>
 
         {/* Bottom: voice control + done */}
-        <div className="p-4 border-t border-zinc-800 bg-surface-300 flex items-center gap-3">
+        <div className="p-4 border-t border-warm-200 bg-cream-200/40 flex items-center gap-3">
           {voiceSupported && (
             <button
               onClick={toggleVoiceListening}
-              className={`p-3 rounded-xl transition-all flex-shrink-0
+              className={`p-3 rounded-2xl transition-all flex-shrink-0
                 ${isListening
-                  ? 'bg-red-500/20 text-red-400 animate-pulse border border-red-500/30'
-                  : 'bg-surface text-zinc-500 hover:text-accent-400 border border-zinc-800'
+                  ? 'bg-terra-100 text-terra-500 animate-pulse-soft border-2 border-terra-300'
+                  : 'bg-white text-warm-400 hover:text-sage-500 border-2 border-warm-200 hover:border-sage-300'
                 }`}
             >
               {isListening ? <MicOff size={18} /> : <Mic size={18} />}
@@ -270,20 +261,20 @@ export function GroceryMode({ recipe, onClose }) {
           {allDone ? (
             <button
               onClick={onClose}
-              className="flex-1 btn-accent py-3.5 rounded-xl font-semibold"
+              className="flex-1 btn-primary py-3.5 rounded-2xl font-semibold"
             >
               Allt inhandlat!
             </button>
           ) : isListening ? (
             <div className="flex-1 text-center">
-              <p className="text-xs text-zinc-500">
-                Säg <strong className="text-accent-400">"klar"</strong> för att bocka av,{' '}
-                <strong className="text-accent-400">"nästa"</strong> för nästa hylla
+              <p className="text-xs text-warm-500">
+                Säg <strong className="text-sage-600">&quot;klar&quot;</strong> för att bocka av,{' '}
+                <strong className="text-sage-600">&quot;nästa&quot;</strong> för nästa hylla
               </p>
             </div>
           ) : (
             <div className="flex-1 text-center">
-              <p className="text-[10px] text-zinc-600 font-mono">
+              <p className="text-[11px] text-warm-400">
                 Tryck på varor för att bocka av
               </p>
             </div>

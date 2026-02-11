@@ -1,6 +1,6 @@
 // ============================================
-// Home Page — Search-first AI recipe platform
-// No mock data: everything flows through AI search
+// Home Page — Modern Scandinavian Kitchen
+// Search hero (70vh) + Market Insight + Results
 // ============================================
 
 'use client';
@@ -16,9 +16,19 @@ import { ShoppingList } from '../components/ShoppingList';
 import { LoadingState } from '../components/LoadingState';
 import { SourceBanner } from '../components/SourceBanner';
 import {
-  ArrowLeft, Zap, TrendingDown, ShieldCheck, ChefHat,
+  ArrowLeft, Leaf, TrendingDown, Headphones, ChefHat,
+  ShoppingBag, Mic, Tag,
 } from 'lucide-react';
 import Link from 'next/link';
+
+// Market insight ticker items
+const TICKER_ITEMS = [
+  { text: 'Kycklingfilé 20% billigare på Willys just nu', tag: 'Erbjudande' },
+  { text: 'Laxfilé till bästa pris på Coop denna vecka', tag: 'Veckans fynd' },
+  { text: 'Säsongens bästa: Svensk sparris finns nu', tag: 'Säsong' },
+  { text: 'Pasta & ris till kampanjpris hos ICA', tag: 'Kampanj' },
+  { text: 'Ekologiska grönsaker 30% billigare på Lidl', tag: 'Eko-deal' },
+];
 
 export default function HomePage() {
   const { user } = useAuthStore();
@@ -46,28 +56,28 @@ export default function HomePage() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-          <h2 className="font-display text-2xl sm:text-3xl text-zinc-100">
+          <h2 className="font-display text-display-sm text-warm-800">
             Recept för &ldquo;{lastQuery}&rdquo;
           </h2>
-          <button onClick={handleReset} className="btn-surface text-sm !py-2">
+          <button onClick={handleReset} className="btn-outline text-sm !py-2">
             <ArrowLeft size={16} className="mr-1.5 inline" />
             Ny sökning
           </button>
         </div>
 
         {results.cached && (
-          <div className="badge-emerald mb-4">Cachad sökning</div>
+          <div className="badge-sage mb-4">Cachad sökning</div>
         )}
 
         <SourceBanner sources={results.sources} />
 
         {error && (
-          <div className="bg-red-400/10 border border-red-400/20 text-red-400 px-4 py-3 rounded-xl text-sm mb-4">
+          <div className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-3 rounded-2xl text-sm mb-4">
             {error}
           </div>
         )}
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           {results.recipes.map((recipe, idx) => (
             <RecipeCard
               key={idx}
@@ -79,12 +89,11 @@ export default function HomePage() {
         </div>
 
         {results.shopping_list?.length > 0 && (
-          <div className="mt-6">
+          <div className="mt-8">
             <ShoppingList items={results.shopping_list} />
           </div>
         )}
 
-        {/* Recipe detail modal */}
         <AnimatePresence>
           {selectedRecipe && (
             <RecipeDetail
@@ -97,117 +106,145 @@ export default function HomePage() {
     );
   }
 
-  // Loading view
   if (loading) return <LoadingState />;
 
   // Main search-first interface
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-20">
+      {/* Hero search — 70% viewport */}
+      <section>
+        <HeroSearch onSearch={handleSearch} loading={loading} />
+      </section>
 
-        {/* Hero search — THE core product */}
-        <section className="mb-16">
-          <HeroSearch onSearch={handleSearch} loading={loading} />
-        </section>
+      {/* Market Insight Ticker */}
+      <section className="py-4 bg-cream-200/60 border-y border-warm-200/50 overflow-hidden">
+        <div className="ticker-wrap">
+          <div className="ticker-content">
+            {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => (
+              <div key={idx} className="flex items-center gap-3 px-8 whitespace-nowrap">
+                <span className="badge-terra text-[10px] !py-0.5">{item.tag}</span>
+                <span className="text-sm text-warm-600">{item.text}</span>
+                <span className="text-warm-300">|</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        {error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="max-w-2xl mx-auto mb-8"
-          >
-            <div className="bg-red-400/10 border border-red-400/20 text-red-400 px-4 py-3 rounded-xl text-sm text-center">
-              {error}
-            </div>
-          </motion.div>
-        )}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="max-w-2xl mx-auto px-4 mt-8"
+        >
+          <div className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-3 rounded-2xl text-sm text-center">
+            {error}
+          </div>
+        </motion.div>
+      )}
 
-        {/* Features grid */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-14 max-w-3xl mx-auto">
-          <FeatureCard
-            icon={<Zap size={18} />}
-            title="Noll beslutströtthet"
-            text="Säg vad du har, vi löser middagen med AI."
-          />
-          <FeatureCard
-            icon={<TrendingDown size={18} />}
-            title="Röststyrt"
-            text="Handla och laga med röstguide. Handsfree i köket."
-          />
-          <FeatureCard
-            icon={<ShieldCheck size={18} />}
-            title="AI-kockassistent"
-            text="Ställ frågor under matlagningen. Som en kock i örat."
-          />
+      {/* How it works */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
+        <div className="text-center mb-10">
+          <h2 className="font-display text-display-sm text-warm-800 mb-3">
+            Från kylskåp till middagsbord
+          </h2>
+          <p className="text-warm-500 max-w-md mx-auto">
+            Tre steg. Noll beslutströtthet.
+          </p>
         </div>
 
-        {/* How it works */}
-        <section className="max-w-2xl mx-auto mb-14">
-          <div className="flex items-center gap-3 mb-6 justify-center">
-            <div className="w-9 h-9 rounded-xl bg-accent-400/10 flex items-center justify-center">
-              <ChefHat size={18} className="text-accent-400" />
-            </div>
-            <h2 className="font-display text-xl text-zinc-100">Så funkar det</h2>
+        <div className="grid sm:grid-cols-3 gap-6">
+          <StepCard
+            number="1"
+            icon={<ChefHat size={22} />}
+            title="Sök"
+            text="Skriv vad du har hemma, en maträtt, eller din budget. AI hittar de bästa recepten åt dig."
+          />
+          <StepCard
+            number="2"
+            icon={<ShoppingBag size={22} />}
+            title="Handla"
+            text="Röststyrd inköpslista som guidar dig genom butiken, hylla för hylla. Handsfree."
+          />
+          <StepCard
+            number="3"
+            icon={<Mic size={22} />}
+            title="Laga"
+            text="Steg-för-steg med timer och AI-kock som svarar på dina frågor. Som en kock i örat."
+          />
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="bg-cream-200/40 py-16 border-y border-warm-200/30">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="grid sm:grid-cols-3 gap-6">
+            <FeatureCard
+              icon={<Leaf size={20} className="text-sage-500" />}
+              title="Hållbar matlagning"
+              text="Minimera matsvinn genom att laga mat med vad du redan har."
+            />
+            <FeatureCard
+              icon={<TrendingDown size={20} className="text-terra-400" />}
+              title="Bästa priset"
+              text="Se pris per portion och jämför ICA, Willys, Coop & Lidl."
+            />
+            <FeatureCard
+              icon={<Headphones size={20} className="text-sage-500" />}
+              title="Röststyrt"
+              text="Handla och laga helt handsfree med röstkommandon."
+            />
           </div>
-          <div className="grid sm:grid-cols-3 gap-4">
-            <StepCard
-              number="1"
-              title="Sök"
-              text="Skriv vad du har hemma, en maträtt, eller din budget. AI hittar recepten."
-            />
-            <StepCard
-              number="2"
-              title="Handla"
-              text="Röststyrd inköpslista som guidar dig genom butiken, hylla för hylla."
-            />
-            <StepCard
-              number="3"
-              title="Laga"
-              text="Steg-för-steg med timer och AI-kock som svarar på dina frågor live."
-            />
+        </div>
+      </section>
+
+      {/* CTA */}
+      {!user && (
+        <section className="py-16">
+          <div className="max-w-lg mx-auto text-center px-4">
+            <div className="card p-8">
+              <div className="w-14 h-14 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <ChefHat size={28} className="text-sage-500" />
+              </div>
+              <h3 className="font-display text-2xl text-warm-800 mb-2">Börja laga smartare</h3>
+              <p className="text-warm-500 text-sm mb-6">
+                Skapa ett gratis konto för att söka bland tusentals recept, spara favoriter
+                och få röststyrd matlagningshjälp.
+              </p>
+              <Link href="/register" className="btn-primary inline-flex items-center gap-2">
+                Skapa konto gratis
+              </Link>
+            </div>
           </div>
         </section>
-
-        {/* Login prompt */}
-        {!user && (
-          <div className="max-w-lg mx-auto text-center">
-            <div className="card-dark px-6 py-6">
-              <p className="text-sm text-zinc-400">
-                <strong className="text-accent-400">Skapa ett gratis konto</strong> för att söka bland
-                tusentals recept, spara favoriter och få röststyrd matlagningshjälp.{' '}
-                <Link href="/register" className="text-accent-400 font-semibold underline underline-offset-2">
-                  Registrera dig
-                </Link>
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
 
 function FeatureCard({ icon, title, text }) {
   return (
-    <div className="card-elevated p-5 hover:shadow-medium hover:-translate-y-0.5 transition-all duration-300">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-accent-400/10 text-accent-400">
+    <div className="card-elevated p-6">
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-cream-200">
         {icon}
       </div>
-      <h3 className="font-semibold text-zinc-100 text-sm mb-1">{title}</h3>
-      <p className="text-xs text-zinc-500 leading-relaxed">{text}</p>
+      <h3 className="font-semibold text-warm-800 mb-1">{title}</h3>
+      <p className="text-sm text-warm-500 leading-relaxed">{text}</p>
     </div>
   );
 }
 
-function StepCard({ number, title, text }) {
+function StepCard({ number, icon, title, text }) {
   return (
-    <div className="card-dark p-5 text-center">
-      <div className="w-10 h-10 rounded-full bg-accent-400 text-void flex items-center justify-center
-                    font-bold text-lg mx-auto mb-3 shadow-glow-sm">
-        {number}
+    <div className="card p-6 text-center">
+      <div className="w-12 h-12 rounded-full bg-sage-400 text-white flex items-center justify-center
+                    mx-auto mb-4 shadow-sage-glow">
+        {icon}
       </div>
-      <h3 className="font-semibold text-zinc-100 text-sm mb-1">{title}</h3>
-      <p className="text-xs text-zinc-500 leading-relaxed">{text}</p>
+      <span className="text-xs font-semibold text-sage-400 uppercase tracking-widest">Steg {number}</span>
+      <h3 className="font-display text-xl text-warm-800 mt-1 mb-2">{title}</h3>
+      <p className="text-sm text-warm-500 leading-relaxed">{text}</p>
     </div>
   );
 }
