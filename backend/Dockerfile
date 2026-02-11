@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl curl
 
 WORKDIR /app
 
@@ -12,6 +12,7 @@ RUN npx prisma generate
 
 COPY src ./src
 
+ENV PORT=4000
 EXPOSE 4000
 
-CMD ["node", "--trace-warnings", "src/index.js"]
+CMD ["node", "src/index.js"]
