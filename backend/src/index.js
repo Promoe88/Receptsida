@@ -68,15 +68,19 @@ app.get('/api/health', async (req, res) => {
     checks.database = 'error';
   }
 
-  // Redis check
-  try {
-    await redis.ping();
-    checks.redis = 'ok';
-  } catch {
-    checks.redis = 'error';
+  // Redis check (optional)
+  if (redis) {
+    try {
+      await redis.ping();
+      checks.redis = 'ok';
+    } catch {
+      checks.redis = 'unavailable';
+    }
+  } else {
+    checks.redis = 'not_configured';
   }
 
-  const healthy = Object.values(checks).every((v) => v === 'ok');
+  const healthy = checks.database === 'ok';
 
   res.status(healthy ? 200 : 503).json({
     status: healthy ? 'healthy' : 'degraded',
@@ -103,16 +107,22 @@ app.use(errorHandler);
 
 async function start() {
   try {
-    // Connect Redis
-    await redis.connect();
-    console.log('✅ Redis connected');
+    // Connect Redis (optional)
+    if (redis) {
+      try {
+        await redis.connect();
+        console.log('✅ Redis connected');
+      } catch (err) {
+        console.warn('⚠️ Redis connection failed, continuing without cache:', err.message);
+      }
+    }
 
     // Verify DB connection
     await prisma.$connect();
     console.log('✅ Database connected');
 
     // Start Express
-    app.listen(config.PORT, () => {
+    app.listen(config.PORT, '0.0.0.0', () => {
       console.log(`\n🍳 MatKompass API running on port ${config.PORT}`);
       console.log(`   Environment: ${config.NODE_ENV}`);
       console.log(`   Health:      http://localhost:${config.PORT}/api/health`);
@@ -130,6 +140,6 @@ start();
 process.on('SIGTERM', async () => {
   console.log('Shutting down...');
   await prisma.$disconnect();
-  redis.disconnect();
+  if (redis) redis.disconnect();
   process.exit(0);
 });

@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy prisma schema and generate client
 COPY prisma ./prisma
@@ -17,4 +17,4 @@ COPY src ./src
 EXPOSE 4000
 
 # Run migrations and start
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]

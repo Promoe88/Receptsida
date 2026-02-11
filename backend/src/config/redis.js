@@ -5,22 +5,33 @@
 import Redis from 'ioredis';
 import { config, isDev } from './env.js';
 
-export const redis = new Redis(config.REDIS_URL, {
-  maxRetriesPerRequest: 3,
-  retryStrategy(times) {
-    if (times > 3) return null;
-    return Math.min(times * 200, 2000);
-  },
-  lazyConnect: true,
-});
+let redis = null;
+let redisAvailable = false;
 
-redis.on('connect', () => {
-  if (isDev) console.log('✅ Redis connected');
-});
+if (config.REDIS_URL && config.REDIS_URL.length > 0) {
+  redis = new Redis(config.REDIS_URL, {
+    maxRetriesPerRequest: 3,
+    retryStrategy(times) {
+      if (times > 3) return null;
+      return Math.min(times * 200, 2000);
+    },
+    lazyConnect: true,
+  });
 
-redis.on('error', (err) => {
-  console.error('❌ Redis error:', err.message);
-});
+  redis.on('connect', () => {
+    redisAvailable = true;
+    console.log('✅ Redis connected');
+  });
+
+  redis.on('error', (err) => {
+    redisAvailable = false;
+    console.error('❌ Redis error:', err.message);
+  });
+} else {
+  console.warn('⚠️ No REDIS_URL configured — running without cache');
+}
+
+export { redis, redisAvailable };
 
 // ──────────────────────────────────────────
 // Cache helpers
@@ -30,6 +41,7 @@ redis.on('error', (err) => {
  * Get cached value, parsed from JSON
  */
 export async function cacheGet(key) {
+  if (!redis || !redisAvailable) return null;
   try {
     const val = await redis.get(key);
     return val ? JSON.parse(val) : null;
@@ -42,6 +54,7 @@ export async function cacheGet(key) {
  * Set cache with TTL (seconds)
  */
 export async function cacheSet(key, value, ttlSeconds = 86400) {
+  if (!redis || !redisAvailable) return;
   try {
     await redis.setex(key, ttlSeconds, JSON.stringify(value));
   } catch (err) {
@@ -53,6 +66,7 @@ export async function cacheSet(key, value, ttlSeconds = 86400) {
  * Delete cache entry
  */
 export async function cacheDel(key) {
+  if (!redis || !redisAvailable) return;
   try {
     await redis.del(key);
   } catch (err) {
@@ -65,6 +79,10 @@ export async function cacheDel(key) {
  * Returns { allowed: boolean, remaining: number, resetIn: number }
  */
 export async function checkRateLimit(key, maxRequests, windowSeconds) {
+  if (!redis || !redisAvailable) {
+    return { allowed: true, remaining: maxRequests, resetIn: windowSeconds };
+  }
+
   const now = Date.now();
   const windowMs = windowSeconds * 1000;
   const windowStart = now - windowMs;
