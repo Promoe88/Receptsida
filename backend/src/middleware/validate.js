@@ -77,25 +77,47 @@ export const recipeSearchSchema = z.object({
 // Cooking assistant schemas
 // ──────────────────────────────────────────
 
-export const cookingAskSchema = z.object({
-  recipe: z.object({
-    title: z.string().min(1),
-    ingredients: z.array(z.object({
-      name: z.string(),
-      amount: z.string(),
-    })).optional().default([]),
-    steps: z.array(z.union([
-      z.string(),
-      z.object({ text: z.string() }),
-      z.object({ content: z.string() }),
-    ])).optional().default([]),
-    tips: z.string().optional(),
-  }),
-  question: z.string().min(1, 'Ställ en fråga').max(500),
-  conversationHistory: z.array(z.object({
-    role: z.enum(['user', 'assistant']),
-    content: z.string(),
+const recipePayload = z.object({
+  title: z.string().min(1),
+  ingredients: z.array(z.object({
+    name: z.string(),
+    amount: z.string(),
+    have: z.boolean().optional(),
+    aisle: z.string().optional(),
+    est_price: z.string().nullable().optional(),
   })).optional().default([]),
+  steps: z.array(z.union([
+    z.string(),
+    z.object({ text: z.string() }).passthrough(),
+    z.object({ content: z.string() }).passthrough(),
+  ])).optional().default([]),
+  tips: z.string().optional(),
+});
+
+const conversationHistoryArray = z.array(z.object({
+  role: z.enum(['user', 'assistant']),
+  content: z.string(),
+})).optional().default([]);
+
+export const cookingAskSchema = z.object({
+  recipe: recipePayload,
+  question: z.string().min(1, 'Ställ en fråga').max(500),
+  conversationHistory: conversationHistoryArray,
+  context: z.object({
+    currentStep: z.number().int().min(0).optional(),
+    totalSteps: z.number().int().min(1).optional(),
+    activeTimers: z.array(z.object({
+      label: z.string(),
+      remaining_seconds: z.number(),
+    })).optional(),
+    inputMode: z.enum(['voice', 'text']).optional(),
+  }).optional().default({}),
+});
+
+export const shoppingAskSchema = z.object({
+  recipe: recipePayload,
+  question: z.string().min(1, 'Ställ en fråga').max(500),
+  conversationHistory: conversationHistoryArray,
 });
 
 // ──────────────────────────────────────────

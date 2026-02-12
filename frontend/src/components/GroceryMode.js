@@ -5,18 +5,23 @@
 
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Check, X, MapPin, Route, Volume2, VolumeX, Mic, MicOff } from 'lucide-react';
+import { ShoppingBag, Check, X, MapPin, Route, Volume2, VolumeX, Mic, MicOff, MessageCircle, Send, Loader2 } from 'lucide-react';
 import { groupByAisle } from '../data/recipes';
 import { useSpeech, useVoiceInput } from '../hooks/useVoice';
+import { useShoppingAssistant } from '../hooks/useRecipes';
 
 export function GroceryMode({ recipe, onClose }) {
   const [checked, setChecked] = useState(new Set());
   const [currentAisle, setCurrentAisle] = useState(0);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [chatInput, setChatInput] = useState('');
   const { speak, stop: stopSpeech, isSpeaking } = useSpeech();
   const { isListening, supported: voiceSupported, startListening, stopListening } = useVoiceInput();
+  const { messages, loading: chatLoading, ask } = useShoppingAssistant(recipe);
+  const chatEndRef = useRef(null);
 
   const shoppingItems = useMemo(() => {
     const items = (recipe.ingredients || []).filter((i) => !i.have);
@@ -82,12 +87,26 @@ export function GroceryMode({ recipe, onClose }) {
           return next;
         });
       }
+    } else {
+      ask(transcript).then((answer) => { if (answer && voiceEnabled) speak(answer); });
+      setShowChat(true);
     }
-  }, [currentAisle, aisleGroups, announceAisle, speak]);
+  }, [currentAisle, aisleGroups, announceAisle, speak, ask, voiceEnabled]);
+
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   function toggleVoiceListening() {
     if (isListening) stopListening();
     else startListening(handleVoiceCommand);
+  }
+
+  async function handleSendChat(e) {
+    e?.preventDefault();
+    if (!chatInput.trim() || chatLoading) return;
+    const question = chatInput;
+    setChatInput('');
+    const answer = await ask(question);
+    if (answer && voiceEnabled) speak(answer);
   }
 
   return (
@@ -127,6 +146,19 @@ export function GroceryMode({ recipe, onClose }) {
                   : 'text-warm-400 hover:text-warm-700'}`}
               >
                 {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              </button>
+              <button
+                onClick={() => setShowChat(!showChat)}
+                className={`p-2 rounded-xl transition-all relative ${showChat
+                  ? 'bg-sage-100 text-sage-600'
+                  : 'text-warm-400 hover:text-warm-700'}`}
+              >
+                <MessageCircle size={18} />
+                {messages.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-terra-400 rounded-full text-white text-[9px] font-bold flex items-center justify-center">
+                    {messages.filter((m) => m.role === 'assistant').length}
+                  </span>
+                )}
               </button>
               <button
                 onClick={onClose}
@@ -242,6 +274,58 @@ export function GroceryMode({ recipe, onClose }) {
             </div>
           ))}
         </div>
+
+        {/* Chat panel */}
+        <AnimatePresence>
+          {showChat && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 240, opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="border-t border-warm-200 flex flex-col bg-cream-200/50 overflow-hidden"
+            >
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+                {messages.length === 0 && (
+                  <div className="text-center py-4">
+                    <ShoppingBag size={24} className="text-warm-300 mx-auto mb-2" />
+                    <p className="text-xs text-warm-400">Fråga om substitut, priser eller var du hittar varor!</p>
+                  </div>
+                )}
+                {messages.map((msg, idx) => (
+                  <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed
+                      ${msg.role === 'user'
+                        ? 'bg-sage-100 text-sage-800 rounded-br-sm'
+                        : 'bg-white text-warm-700 rounded-bl-sm shadow-soft'}`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white text-warm-400 px-3 py-2 rounded-2xl rounded-bl-sm shadow-soft flex items-center gap-2">
+                      <Loader2 size={14} className="animate-spin" />
+                      <span className="text-sm">Tänker...</span>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+              <form onSubmit={handleSendChat} className="px-3 py-2 border-t border-warm-200">
+                <div className="flex gap-2">
+                  <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Fråga inköpsguiden..." disabled={chatLoading}
+                    className="input flex-1 !rounded-2xl !py-2 text-sm" />
+                  <button type="submit" disabled={chatLoading || !chatInput.trim()}
+                    className="p-2 rounded-xl bg-sage-400 text-white hover:bg-sage-500 transition-colors disabled:opacity-40">
+                    <Send size={14} />
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Bottom: voice control + done */}
         <div className="p-4 border-t border-warm-200 bg-cream-200/40 flex items-center gap-3">

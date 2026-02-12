@@ -1,6 +1,6 @@
 // ============================================
-// Claude AI Service — Universal recipe engine
-// Handles all query types + cooking assistant
+// Claude AI Service — MatKompass recipe engine
+// Three-phase assistant: Recipe → Shopping → Cooking
 // ============================================
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -9,6 +9,22 @@ import { cacheGet, cacheSet } from '../config/redis.js';
 import crypto from 'crypto';
 
 const client = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
+
+// ──────────────────────────────────────────
+// MatKompass System Identity
+// ──────────────────────────────────────────
+
+const MATKOMPASS_IDENTITY = `Du är MatKompass — en professionell kockassistent som guidar användaren genom hela matlagningsprocessen, från idé till färdig rätt. Du kombinerar expertis från professionella kök med en varm, pedagogisk approach anpassad efter varje individ.
+
+Kärnprinciper:
+- Känn av användarens erfarenhet från hur de uttrycker sig
+- Nybörjare: Förklara varje steg, förklara termer ("sjud = när det bubblar svagt"), ge tidsuppskattningar, varna för vanliga misstag
+- Erfarna: Var koncis, föreslå variationer, nämn professionella tekniker
+- Fråga ALDRIG "vilken nivå är du?" — känn av det naturligt
+- Förstå fritext oavsett formulering
+- Hantera vaga önskemål genom att tolka stämning, tillfälle och ambitionsnivå
+- Föreslå alltid saker användaren inte tänkt på (tillbehör, dryck, alternativ)
+- Svara alltid på svenska`;
 
 // ──────────────────────────────────────────
 // Cache key generation
@@ -61,7 +77,7 @@ export async function searchRecipes(query, householdSize = 1, preferences = {}) 
 }
 
 // ──────────────────────────────────────────
-// Step 1: Web search — universal prompt
+// Fas 1: Receptrådgivaren — Web search
 // ──────────────────────────────────────────
 
 async function searchWebForRecipes(query, householdSize, preferences) {
@@ -86,17 +102,18 @@ async function searchWebForRecipes(query, householdSize, preferences) {
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4000,
+    system: `${MATKOMPASS_IDENTITY}
+
+Du agerar nu som RECEPTRÅDGIVAREN — du förstår vad användaren vill och hittar de bästa recepten.`,
     tools: [{ type: 'web_search_20250305', name: 'web_search' }],
     messages: [
       {
         role: 'user',
-        content: `Du är MatKompass — en svensk AI-receptassistent i världsklass. Tolka användarens fråga intelligent och hitta de bästa recepten.
-
-ANVÄNDARENS FRÅGA: "${query}"
+        content: `ANVÄNDARENS FRÅGA: "${query}"
 HUSHÅLL: ${householdLabel} (${householdSize} portioner)
 ${constraintBlock}
 
-TOLKA FRÅGAN:
+TOLKA FRÅGAN INTELLIGENT:
 - Ingredienser (t.ex. "kyckling, ris, grädde") → recept som använder dessa
 - Specifik rätt (t.ex. "lasagne") → bästa receptet
 - Huvudråvara (t.ex. "lax") → 2-3 varianter
@@ -105,6 +122,7 @@ TOLKA FRÅGAN:
 - Tid (t.ex. "snabb lunch", "20 min") → snabba alternativ
 - Öppen fråga (t.ex. "vad ska jag laga?") → kreativa förslag
 - Diet (t.ex. "veganskt", "glutenfritt") → anpassade recept
+- Stämning (t.ex. "jag vill impa på min dejt") → tolka ambitionsnivå
 - Meal prep / veckomenyer → planera flera måltider
 
 Sök på nätet efter 2-3 riktiga recept. Prioritera svenska receptsajter men inkludera internationella om de är relevanta.
@@ -115,7 +133,7 @@ För varje recept, samla in:
 - Detaljerat tillvägagångssätt steg för steg (nybörjarvänligt)
 - Köksverktyg som behövs
 - Ungefärlig tid (förberedelse + tillagning)
-- Tips och varianter
+- Tips, varianter och ersättningar
 
 Ge en utförlig sammanställning.`,
       },
@@ -150,7 +168,7 @@ Ge en utförlig sammanställning.`,
 }
 
 // ──────────────────────────────────────────
-// Step 2: Structure as JSON
+// Fas 1: Structure as rich JSON
 // ──────────────────────────────────────────
 
 async function structureRecipes(searchText, sources, query, householdSize, preferences) {
@@ -159,11 +177,12 @@ async function structureRecipes(searchText, sources, query, householdSize, prefe
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 5000,
+    max_tokens: 6000,
+    system: MATKOMPASS_IDENTITY,
     messages: [
       {
         role: 'user',
-        content: `Baserat på följande receptdata, skapa strukturerade recept.
+        content: `Baserat på följande receptdata, skapa strukturerade recept i MatKompass-format.
 
 RECEPTDATA:
 ${searchText}
@@ -176,42 +195,79 @@ HUSHÅLL: ${householdLabel} (${householdSize} portioner)
 
 REGLER:
 - Anpassa ALLA portioner till ${householdSize} portioner
-- Markera ingredienser användaren sannolikt redan har (have: true)
-- Inkludera ALLA köksverktyg
+- Markera ingredienser användaren sannolikt redan har (have: true) — salt, peppar, olja, smör
+- Inkludera ALLA köksverktyg med alternativ om möjligt
 - Stegen ska vara MYCKET detaljerade — nybörjarvänliga
 - Varje steg = EN tydlig instruktion
-- Om ett steg har en väntetid (t.ex. "stek i 5 min"), inkludera duration_seconds
+- Inkludera beginner_tip (för nybörjare) och pro_tip (för erfarna) på varje steg
+- Inkludera voice_cue — en version av steget optimerad för att lyssna på (naturligt tal, inga siffror/symboler)
+- Om ett steg har en väntetid (t.ex. "stek i 5 min"), inkludera duration_seconds och timer_needed: true
+- Ge warning på steg där något kan gå fel
 - Kostnadsuppskattningar i SEK (aktuella svenska priser)
 - Kategorisera varje ingrediens efter butikshylla (aisle)
-- Ge tips och varianter
+- Ge substitutes (ersättningar) för ingredienser där det är relevant
+- Inkludera drink_pairing, leftover_tips och scaling_notes
 
 Svara ENBART med giltig JSON (ingen markdown, inga backticks):
 {
   "recipes": [
     {
       "title": "Receptnamn",
-      "description": "Kort lockande beskrivning",
+      "description": "2-3 meningar som säljer rätten — hur den smakar, varför den passar",
       "source_name": "ICA",
       "source_url": "https://...",
-      "time_minutes": 20,
+      "time_minutes": 45,
       "difficulty": "Enkel",
       "servings": ${householdSize},
-      "cost_estimate": "ca 45 kr",
+      "cost_estimate": "ca 80-120 kr",
       "occasion": "vardag",
       "ingredients": [
-        { "name": "Kyckling", "amount": "300g", "have": true, "aisle": "Kött & Fisk", "est_price": null },
-        { "name": "Grädde", "amount": "2 dl", "have": false, "aisle": "Mejeri", "est_price": "15 kr" }
+        {
+          "name": "Kycklingfilé",
+          "amount": "600g",
+          "have": true,
+          "aisle": "Kött & Fisk",
+          "est_price": null,
+          "substitutes": ["Kalkonfilé", "Tofu (vegetariskt alternativ)"],
+          "tip": "Ta ut ur kylen 20 min innan tillagning"
+        }
+      ],
+      "equipment_needed": [
+        {
+          "item": "Stekpanna",
+          "essential": true,
+          "alternative": "Kan använda ugn istället, 200° i 25 min"
+        }
       ],
       "tools": ["Stekpanna", "Skärbräda", "Kniv"],
       "steps": [
-        { "text": "Skär kycklingen i bitar.", "duration_seconds": null },
-        { "text": "Stek kycklingen i 5 minuter.", "duration_seconds": 300 }
+        {
+          "text": "Skär kycklingen i bitar.",
+          "duration_seconds": null,
+          "timer_needed": false,
+          "beginner_tip": "Använd en vass kniv och skär med bestämda tag.",
+          "pro_tip": "Fjärilsöppna tjockare bitar för jämnare tillagning.",
+          "warning": null,
+          "voice_cue": "Börja med att ta fram kycklingen och en skärbräda. Skär filéerna i ungefär 2 centimeters tjocka skivor."
+        },
+        {
+          "text": "Stek kycklingen i 5 minuter per sida.",
+          "duration_seconds": 300,
+          "timer_needed": true,
+          "beginner_tip": "Rör inte i pannan de första minuterna! Låt kycklingen få färg.",
+          "pro_tip": "Använd en köttermometer — 74°C i centrum.",
+          "warning": "Undvik att lägga i för många bitar samtidigt — pannan tappar värme.",
+          "voice_cue": "Hetta upp pannan med lite olja. Lägg i kycklingen och rör den inte på 4 till 5 minuter."
+        }
       ],
-      "tips": "Tips och varianter här."
+      "tips": "Tips och varianter här.",
+      "drink_pairing": "Ett kylt glas Sauvignon Blanc eller citronvatten med mynta",
+      "leftover_tips": "Kycklingen håller 2 dagar i kylen. Skiva tunt och använd i sallad eller wraps.",
+      "scaling_notes": "Dubblera ingredienserna rakt av. Använd två pannor eller stek i omgångar."
     }
   ],
   "shopping_list": [
-    { "name": "Grädde", "amount": "2 dl", "est_price": "15 kr", "aisle": "Mejeri" }
+    { "name": "Grädde", "amount": "2 dl", "est_price": "15 kr", "aisle": "Mejeri", "tip": "Välj minst 15% fetthalt för krämig sås" }
   ]
 }`,
       },
@@ -237,37 +293,134 @@ Svara ENBART med giltig JSON (ingen markdown, inga backticks):
 }
 
 // ──────────────────────────────────────────
-// Cooking Assistant — real-time Q&A
+// Fas 2: Inköpsguiden — Shopping assistant
 // ──────────────────────────────────────────
 
-export async function askCookingAssistant(recipe, question, conversationHistory = []) {
+export async function askShoppingAssistant(recipe, question, conversationHistory = []) {
   const ingredientList = (recipe.ingredients || [])
-    .map((i) => `${i.amount} ${i.name}`)
-    .join(', ');
+    .map((i) => `${i.amount} ${i.name}${i.aisle ? ` (${i.aisle})` : ''}${i.have ? ' [har hemma]' : ''}`)
+    .join('\n');
 
-  const stepList = (recipe.steps || [])
-    .map((s, i) => `${i + 1}. ${typeof s === 'string' ? s : s.text || s.content || ''}`)
+  const shoppingItems = (recipe.ingredients || [])
+    .filter((i) => !i.have)
+    .map((i) => `- ${i.amount} ${i.name}${i.aisle ? ` → ${i.aisle}` : ''}${i.est_price ? ` (${i.est_price})` : ''}`)
     .join('\n');
 
   const messages = [
     {
       role: 'user',
-      content: `Du är en erfaren svensk kock som hjälper en hemmalagare i realtid. Du är som en varm, professionell kompis i köket.
+      content: `${MATKOMPASS_IDENTITY}
+
+Du agerar nu som INKÖPSGUIDEN — du hjälper användaren i butiken.
+
+RECEPT: ${recipe.title}
+ALLA INGREDIENSER:
+${ingredientList}
+
+INKÖPSLISTA (det som behöver handlas):
+${shoppingItems}
+
+BETEENDE:
+- Organisera efter butikens avdelningar (frukt & grönt → mejeri → kött → torrvaror → kryddor)
+- Ge smart substitutionsråd: "De har inte dragon? Köp basilika istället, funkar nästan lika bra"
+- Ge budgettips: "ICA Basic-versionen av krossade tomater funkar perfekt här"
+- Håll koll på vad användaren bockat av och påminn om glömda varor
+- Håll svar korta och tydliga — användaren är i rörelse i butiken
+- Säg "fyra till fem minuter" istället för "4-5 min"
+- Bekräfta alltid att du förstått: "Absolut! Jag hjälper dig med det."`,
+    },
+    ...conversationHistory.slice(-6).map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    })),
+    {
+      role: 'user',
+      content: question,
+    },
+  ];
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 400,
+    messages,
+  });
+
+  const answer = response.content
+    .filter((b) => b.type === 'text')
+    .map((b) => b.text)
+    .join('\n');
+
+  return { answer };
+}
+
+// ──────────────────────────────────────────
+// Fas 3: Kökscoachen — Cooking assistant
+// ──────────────────────────────────────────
+
+export async function askCookingAssistant(recipe, question, conversationHistory = [], context = {}) {
+  const ingredientList = (recipe.ingredients || [])
+    .map((i) => `${i.amount} ${i.name}`)
+    .join(', ');
+
+  const stepList = (recipe.steps || [])
+    .map((s, i) => {
+      const text = typeof s === 'string' ? s : s.text || s.content || '';
+      const duration = s.duration_seconds ? ` [${Math.ceil(s.duration_seconds / 60)} min]` : '';
+      return `${i + 1}. ${text}${duration}`;
+    })
+    .join('\n');
+
+  const currentStepInfo = context.currentStep !== undefined
+    ? `\nANVÄNDAREN ÄR PÅ STEG: ${context.currentStep + 1} av ${context.totalSteps || recipe.steps?.length || '?'}`
+    : '';
+
+  const timerInfo = context.activeTimers?.length
+    ? `\nAKTIVA TIMERS: ${context.activeTimers.map((t) => `${t.label}: ${Math.ceil(t.remaining_seconds / 60)} min kvar`).join(', ')}`
+    : '';
+
+  const inputMode = context.inputMode || 'text';
+
+  const voiceGuidelines = inputMode === 'voice'
+    ? `\nRÖSTLÄGE AKTIVT — Följ dessa regler:
+- Håll svar under 30 sekunder att lyssna på (max 2-3 meningar)
+- Använd naturligt talspråk, inte skriftspråk
+- Undvik parenteser, förkortningar, symboler
+- Säg "fyra till fem minuter" istället för "4-5 min"
+- Bekräfta alltid att du förstått: "Absolut!"
+- Avsluta med en tydlig signal: "Säg till när du är redo för nästa steg."`
+    : '';
+
+  const messages = [
+    {
+      role: 'user',
+      content: `${MATKOMPASS_IDENTITY}
+
+Du agerar nu som KÖKSCOACHEN — du guidar användaren steg-för-steg under matlagningen. Du är som en varm, professionell kompis i köket.
 
 RECEPT: ${recipe.title}
 INGREDIENSER: ${ingredientList}
 STEG:
 ${stepList}
 ${recipe.tips ? `TIPS: ${recipe.tips}` : ''}
+${currentStepInfo}
+${timerInfo}
+${voiceGuidelines}
 
-REGLER:
-- Svara alltid på svenska
-- Var kortfattad men tydlig (max 2-3 meningar)
+REGLER FÖR KÖKSCOACHEN:
+- Var kortfattad men tydlig
 - Ge exakta svar för timing/temperatur
 - Varna proaktivt om något kan gå fel
 - Ge alternativ om användaren saknar något
 - Var uppmuntrande och personlig (du/dig)
-- Om frågan inte handlar om matlagning, styr tillbaka vänligt`,
+- Om frågan inte handlar om matlagning, styr tillbaka vänligt
+- Fira framgångar: "Perfekt stekyta! Nu har du koll på det."
+
+SÄKERHET & HÄLSA:
+- Påminn om livsmedelssäkerhet vid riskmoment (kyckling, fläsk, ägg, fisk)
+- Ge exakta innertemperaturer för kött (kyckling 74°C, fläsk 68°C, nötkött 55-70°C)
+- Varna för allergener om relevant
+- Nämn korscontamination vid behov
+- Ge räddningstips om något gått fel: "Ingen fara! Skrapa bort den brända vitlöken, ta en ny klyfta och börja om. Det händer alla."`,
     },
     ...conversationHistory.slice(-6).map((msg) => ({
       role: msg.role,

@@ -6,9 +6,9 @@ import { Router } from 'express';
 import { prisma } from '../config/db.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
 import { recipeSearchRateLimit } from '../middleware/rateLimit.js';
-import { validate, recipeSearchSchema, cookingAskSchema, shareRecipeSchema } from '../middleware/validate.js';
+import { validate, recipeSearchSchema, cookingAskSchema, shoppingAskSchema, shareRecipeSchema } from '../middleware/validate.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
-import { searchRecipes, generateCacheKey, estimateApiCost, askCookingAssistant } from '../services/claude.js';
+import { searchRecipes, generateCacheKey, estimateApiCost, askCookingAssistant, askShoppingAssistant } from '../services/claude.js';
 import { parseIngredients } from '../services/lexicon.js';
 import { sendRecipeShareEmail } from '../config/email.js';
 
@@ -67,9 +67,27 @@ router.post(
   optionalAuth,
   validate(cookingAskSchema),
   asyncHandler(async (req, res) => {
+    const { recipe, question, conversationHistory, context } = req.validated;
+
+    const result = await askCookingAssistant(recipe, question, conversationHistory || [], context || {});
+
+    res.json({
+      answer: result.answer,
+    });
+  })
+);
+
+// ──────────────────────────────────────────
+// POST /recipes/shopping/ask — Shopping assistant Q&A
+// ──────────────────────────────────────────
+router.post(
+  '/shopping/ask',
+  optionalAuth,
+  validate(shoppingAskSchema),
+  asyncHandler(async (req, res) => {
     const { recipe, question, conversationHistory } = req.validated;
 
-    const result = await askCookingAssistant(recipe, question, conversationHistory || []);
+    const result = await askShoppingAssistant(recipe, question, conversationHistory || []);
 
     res.json({
       answer: result.answer,

@@ -178,8 +178,15 @@ export const recipes = {
     });
   },
 
-  async askCookingAssistant(recipe, question, conversationHistory) {
+  async askCookingAssistant(recipe, question, conversationHistory, context) {
     return apiFetch('/recipes/cooking/ask', {
+      method: 'POST',
+      body: JSON.stringify({ recipe, question, conversationHistory, context }),
+    });
+  },
+
+  async askShoppingAssistant(recipe, question, conversationHistory) {
+    return apiFetch('/recipes/shopping/ask', {
       method: 'POST',
       body: JSON.stringify({ recipe, question, conversationHistory }),
     });
