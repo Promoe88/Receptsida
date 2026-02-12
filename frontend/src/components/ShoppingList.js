@@ -1,10 +1,11 @@
 // ============================================
-// ShoppingList — Warm bright aggregated shopping list
+// ShoppingList — Soft UI aggregated shopping list
 // ============================================
 
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Check, ShoppingBag } from 'lucide-react';
 
 export function ShoppingList({ items }) {
@@ -29,10 +30,10 @@ export function ShoppingList({ items }) {
   const allChecked = checked.size === items.length;
 
   return (
-    <div className="card p-6">
+    <div className="card p-6 shadow-card">
       <div className="flex justify-between items-start flex-wrap gap-3">
         <div>
-          <h3 className="font-display text-xl text-warm-800 flex items-center gap-2">
+          <h3 className="font-display text-xl font-bold text-warm-800 tracking-tight flex items-center gap-2">
             <ShoppingBag size={22} className="text-sage-500" />
             Inköpslista
           </h3>
@@ -51,8 +52,11 @@ export function ShoppingList({ items }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
         {items.map((item, idx) => (
-          <button
+          <motion.button
             key={idx}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.03 }}
             onClick={() => toggle(idx)}
             className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm text-left
                       border transition-all duration-150 group
@@ -77,7 +81,7 @@ export function ShoppingList({ items }) {
             {item.est_price && (
               <span className="text-xs text-terra-400 font-semibold">{item.est_price}</span>
             )}
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>

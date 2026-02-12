@@ -12,14 +12,14 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { UserPlus, Eye, EyeOff, Sparkles, Loader2 } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home } from 'lucide-react';
 import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 const HOUSEHOLDS = [
-  { value: 1, emoji: '👤', label: 'Singel' },
-  { value: 2, emoji: '👫', label: 'Par' },
-  { value: 4, emoji: '👨‍👩‍👧', label: 'Familj' },
-  { value: 6, emoji: '👨‍👩‍👧‍👦', label: 'Stor familj' },
+  { value: 1, Icon: User, label: 'Singel' },
+  { value: 2, Icon: Users, label: 'Par' },
+  { value: 4, Icon: UsersRound, label: 'Familj' },
+  { value: 6, Icon: Home, label: 'Stor familj' },
 ];
 
 export default function RegisterPage() {
@@ -59,11 +59,11 @@ export default function RegisterPage() {
             transition={{ duration: 0.5 }}
             className="text-center mb-8"
           >
-            <div className="w-16 h-16 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-              <Sparkles size={30} className="text-sage-400" />
+            <div className="w-16 h-16 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
+              <ChefHat size={30} className="text-sage-400" strokeWidth={2} />
             </div>
-            <h1 className="font-display text-3xl text-warm-800">Kom igång med Nisse</h1>
-            <p className="text-warm-500 mt-2">Gratis — din personliga matassistent</p>
+            <h1 className="font-display text-3xl font-bold text-warm-800 tracking-tight">Kom igang med Nisse</h1>
+            <p className="text-warm-400 mt-2 font-medium">Gratis — din personliga matassistent</p>
           </motion.div>
 
           <motion.div
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                             : 'border-warm-200 bg-cream-200/50 hover:border-warm-300'
                           }`}
                       >
-                        <span className="text-xl block">{h.emoji}</span>
+                        <h.Icon size={20} className={householdSize === h.value ? 'text-sage-500' : 'text-warm-400'} strokeWidth={2} />
                         <span className="text-xs font-medium text-warm-500 mt-1 block">{h.label}</span>
                       </motion.button>
                     ))}

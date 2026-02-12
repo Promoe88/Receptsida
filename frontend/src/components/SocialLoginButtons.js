@@ -71,8 +71,8 @@ export function GoogleLoginButton({ onSuccess, redirectTo = '/' }) {
     <button
       onClick={handleGoogleLogin}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-2xl border-2 border-warm-200
-               bg-white hover:bg-warm-50 hover:border-warm-300 transition-all text-sm font-medium text-warm-700
+      className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-full
+               bg-white shadow-soft hover:shadow-medium transition-all text-sm font-semibold text-warm-700
                disabled:opacity-50"
     >
       <svg viewBox="0 0 24 24" width="20" height="20" className="flex-shrink-0">
@@ -137,8 +137,8 @@ export function AppleLoginButton({ onSuccess, redirectTo = '/' }) {
     <button
       onClick={handleAppleLogin}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-2xl border-2 border-warm-200
-               bg-warm-800 hover:bg-warm-900 transition-all text-sm font-medium text-white
+      className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-full
+               bg-warm-800 hover:bg-warm-900 shadow-medium transition-all text-sm font-bold text-white
                disabled:opacity-50"
     >
       <svg viewBox="0 0 24 24" width="20" height="20" fill="white" className="flex-shrink-0">
