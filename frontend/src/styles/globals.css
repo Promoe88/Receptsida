@@ -69,19 +69,23 @@
     @apply bg-cream-200 rounded-3xl;
   }
 
-  /* ── Inputs — Clean, minimal ── */
+  /* ── Inputs — Visible borders, clear focus ── */
   .input {
-    @apply w-full px-5 py-3.5 bg-cream-100 border border-transparent rounded-2xl
+    @apply w-full px-5 py-3.5 rounded-2xl
            font-body text-warm-800 placeholder:text-warm-400
            focus:outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100
            focus:bg-white transition-all duration-200;
+    background: #F9F9F9;
+    border: 1.5px solid #EAEAEA;
   }
 
   .input-lg {
-    @apply w-full px-6 py-4 bg-cream-100 border border-transparent rounded-3xl
+    @apply w-full px-6 py-4 rounded-3xl
            font-body text-lg text-warm-800 placeholder:text-warm-400
            focus:outline-none focus:border-sage-400 focus:ring-4 focus:ring-sage-50
            focus:bg-white transition-all duration-200;
+    background: #F9F9F9;
+    border: 1.5px solid #EAEAEA;
   }
 
   /* ── Labels & Badges ── */
