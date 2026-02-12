@@ -7,7 +7,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isApp } from '../lib/platform';
 import { useAuthStore } from '../lib/store';
@@ -35,7 +34,6 @@ const TICKER_ITEMS = [
 ];
 
 export default function HomePage() {
-  const router = useRouter();
   const { user } = useAuthStore();
   const { results, loading, error, search, reset } = useRecipeSearch();
   const { toggleFavorite } = useFavorites();
@@ -43,13 +41,7 @@ export default function HomePage() {
   const [lastQuery, setLastQuery] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
-  // Redirect first-time users to tutorial
-  useEffect(() => {
-    const tutorialSeen = localStorage.getItem('nisse_tutorial_seen');
-    if (!tutorialSeen) {
-      router.replace('/tutorial');
-    }
-  }, [router]);
+  // Note: Tutorial & login gate handled by OnboardingGate in AppShell
 
   // Load recent searches for app home
   useEffect(() => {

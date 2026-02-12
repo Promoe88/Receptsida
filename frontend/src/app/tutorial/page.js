@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../lib/store';
 import { gdpr } from '../../lib/api';
+import { isApp } from '../../lib/platform';
 import {
   ChefHat, MapPin, Shield, ArrowRight, ArrowLeft, Check, Sparkles,
 } from 'lucide-react';
@@ -93,7 +94,13 @@ export default function TutorialPage() {
       await completeOnboarding();
     }
     localStorage.setItem('nisse_tutorial_seen', 'true');
-    router.push('/');
+
+    // In app mode: send to login if not already logged in
+    if (isApp && !user) {
+      router.push('/login');
+    } else {
+      router.push('/');
+    }
   }
 
   function handleNext() {
