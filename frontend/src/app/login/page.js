@@ -57,7 +57,7 @@ function LoginForm() {
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">Losenord</label>
+          <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">Lösenord</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -117,8 +117,8 @@ export default function LoginPage() {
             <div className="w-16 h-16 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
               <ChefHat size={30} className="text-sage-400" strokeWidth={2} />
             </div>
-            <h1 className="font-display text-3xl font-bold text-warm-900 tracking-tight">Valkommen tillbaka</h1>
-            <p className="text-warm-500 mt-2 font-medium">Logga in pa Nisse</p>
+            <h1 className="font-display text-3xl font-bold text-warm-900 tracking-tight">Välkommen</h1>
+            <p className="text-warm-500 mt-2 font-medium">Logga in på Nisse</p>
           </motion.div>
 
           <motion.div
@@ -139,7 +139,7 @@ export default function LoginPage() {
           >
             Har du inget konto?{' '}
             <Link href="/register" className="text-terra-400 font-bold hover:underline">
-              Skapa konto gratis
+              Skapa konto
             </Link>
           </motion.p>
         </div>
