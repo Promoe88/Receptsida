@@ -13,7 +13,6 @@ import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
 import { Eye, EyeOff, ChefHat, Loader2, ArrowRight, Check, X } from 'lucide-react';
-import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 const PASSWORD_RULES = [
   { id: 'length', label: 'Minst 8 tecken', test: (pw) => pw.length >= 8 },
@@ -103,10 +102,6 @@ function RegisterForm() {
 
   return (
     <div className="card p-6 shadow-card-deep">
-      {/* Social login — full-width, same as login */}
-      <SocialLoginSection redirectTo="/tutorial" />
-
-      {/* Email/password form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">
