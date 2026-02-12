@@ -88,7 +88,7 @@ function LoginForm() {
           </motion.div>
         )}
 
-        <NisseButton type="submit" variant="black" disabled={submitting} fullWidth>
+        <NisseButton type="submit" variant="primary" disabled={submitting} fullWidth>
           {submitting ? <Loader2 size={18} className="animate-spin" /> : 'Logga in'}
           {!submitting && <ArrowRight size={18} />}
         </NisseButton>
