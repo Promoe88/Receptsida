@@ -61,6 +61,11 @@ function LoginForm() {
         <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">
           {submitting ? <span className="animate-spin">...</span> : <LogIn size={18} />} Logga in
         </button>
+        <div className="text-center pt-1">
+          <Link href="/forgot-password" className="text-sm text-warm-400 hover:text-sage-500 transition-colors">
+            Glömt lösenord?
+          </Link>
+        </div>
       </form>
     </div>
   );

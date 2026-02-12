@@ -6,10 +6,11 @@ import { Router } from 'express';
 import { prisma } from '../config/db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { recipeSearchRateLimit } from '../middleware/rateLimit.js';
-import { validate, recipeSearchSchema, cookingAskSchema } from '../middleware/validate.js';
+import { validate, recipeSearchSchema, cookingAskSchema, shareRecipeSchema } from '../middleware/validate.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
 import { searchRecipes, generateCacheKey, estimateApiCost, askCookingAssistant } from '../services/claude.js';
 import { parseIngredients } from '../services/lexicon.js';
+import { sendRecipeShareEmail } from '../config/email.js';
 
 const router = Router();
 
@@ -205,6 +206,38 @@ router.get(
         savedAt: f.createdAt,
       })),
     });
+  })
+);
+
+// ──────────────────────────────────────────
+// POST /recipes/share — Share recipe via email
+// ──────────────────────────────────────────
+router.post(
+  '/share',
+  requireAuth,
+  validate(shareRecipeSchema),
+  asyncHandler(async (req, res) => {
+    const { recipeId, toEmail } = req.validated;
+
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+      include: {
+        ingredients: { orderBy: { sortOrder: 'asc' } },
+      },
+    });
+
+    if (!recipe) {
+      throw new AppError(404, 'not_found', 'Receptet hittades inte.');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { name: true, email: true },
+    });
+
+    await sendRecipeShareEmail(user, toEmail, recipe);
+
+    res.json({ message: `Receptet har skickats till ${toEmail}!` });
   })
 );
 

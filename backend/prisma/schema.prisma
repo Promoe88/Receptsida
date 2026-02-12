@@ -16,14 +16,20 @@ datasource db {
 // ──────────────────────────────────────────
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String   @map("password_hash")
-  name          String?
-  householdSize Int      @default(1) @map("household_size")
-  plan          Plan     @default(FREE)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  name            String?
+  householdSize   Int       @default(1) @map("household_size")
+  plan            Plan      @default(FREE)
+  emailVerified   Boolean   @default(false) @map("email_verified")
+  verifyToken     String?   @unique @map("verify_token")
+  verifyExpires   DateTime? @map("verify_expires")
+  resetToken      String?   @unique @map("reset_token")
+  resetExpires    DateTime? @map("reset_expires")
+  welcomeMailSent Boolean   @default(false) @map("welcome_mail_sent")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   refreshTokens RefreshToken[]
   searches      RecipeSearch[]

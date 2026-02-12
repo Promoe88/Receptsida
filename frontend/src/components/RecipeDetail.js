@@ -10,16 +10,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Clock, Users, ExternalLink,
   ShoppingCart, ListOrdered, Play, ShoppingBag, Check,
-  Lightbulb, Wrench, Coins,
+  Lightbulb, Wrench, Coins, Share2, Send,
 } from 'lucide-react';
 import { CookingMode } from './CookingMode';
 import { GroceryMode } from './GroceryMode';
 import { getStepText } from '../data/recipes';
+import { recipes as recipesApi } from '../lib/api';
 
 export function RecipeDetail({ recipe, onClose }) {
   const [showCookingMode, setShowCookingMode] = useState(false);
   const [showGroceryMode, setShowGroceryMode] = useState(false);
   const [checkedSteps, setCheckedSteps] = useState(new Set());
+  const [showShareForm, setShowShareForm] = useState(false);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareStatus, setShareStatus] = useState(null); // null | 'sending' | 'sent' | 'error'
 
   if (!recipe) return null;
 
@@ -104,12 +108,12 @@ export function RecipeDetail({ recipe, onClose }) {
               )}
 
               {/* Action buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <button
                   onClick={() => setShowCookingMode(true)}
                   className="btn-primary flex items-center justify-center gap-2 py-3.5"
                 >
-                  <Play size={16} /> Börja laga
+                  <Play size={16} /> Laga
                 </button>
                 <button
                   onClick={() => setShowGroceryMode(true)}
@@ -117,7 +121,59 @@ export function RecipeDetail({ recipe, onClose }) {
                 >
                   <ShoppingBag size={16} /> Handla
                 </button>
+                <button
+                  onClick={() => setShowShareForm(!showShareForm)}
+                  className="btn-ghost flex items-center justify-center gap-2 py-3.5"
+                >
+                  <Share2 size={16} /> Dela
+                </button>
               </div>
+
+              {/* Share form */}
+              {showShareForm && (
+                <div className="p-4 bg-cream-200/50 rounded-2xl border border-warm-200 space-y-3">
+                  <p className="text-sm font-medium text-warm-700">Dela receptet via e-post</p>
+                  {shareStatus === 'sent' ? (
+                    <p className="text-sm text-sage-600 flex items-center gap-2">
+                      <Check size={16} /> Skickat!
+                    </p>
+                  ) : (
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        setShareStatus('sending');
+                        try {
+                          await recipesApi.share(recipe.id, shareEmail);
+                          setShareStatus('sent');
+                          setShareEmail('');
+                        } catch {
+                          setShareStatus('error');
+                        }
+                      }}
+                      className="flex gap-2"
+                    >
+                      <input
+                        type="email"
+                        value={shareEmail}
+                        onChange={(e) => { setShareEmail(e.target.value); setShareStatus(null); }}
+                        className="input flex-1"
+                        placeholder="mottagare@email.se"
+                        required
+                      />
+                      <button
+                        type="submit"
+                        disabled={shareStatus === 'sending'}
+                        className="btn-primary px-4 flex items-center gap-1.5"
+                      >
+                        <Send size={14} />
+                      </button>
+                    </form>
+                  )}
+                  {shareStatus === 'error' && (
+                    <p className="text-xs text-terra-500">Kunde inte skicka. Försök igen.</p>
+                  )}
+                </div>
+              )}
 
               {/* Ingredients */}
               <div>
