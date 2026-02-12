@@ -1,5 +1,5 @@
 // ============================================
-// Navbar — Warm Scandinavian header
+// Navbar — Nisse / Warm Scandinavian header
 // ============================================
 
 'use client';
@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '../lib/store';
-import { Menu, X, User, LogOut, Heart, Clock, ChefHat } from 'lucide-react';
+import { Menu, X, User, LogOut, Heart, Clock, MapPin, Settings, Sparkles } from 'lucide-react';
 
 export function Navbar() {
   const { user, loading, logout } = useAuthStore();
@@ -22,9 +22,9 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 bg-sage-400 rounded-2xl flex items-center justify-center
                           group-hover:scale-105 transition-transform shadow-sage-glow">
-              <ChefHat size={17} className="text-white" />
+              <Sparkles size={17} className="text-white" />
             </div>
-            <span className="font-display text-xl text-warm-800">MatKompass</span>
+            <span className="font-display text-xl text-warm-800">Nisse</span>
           </Link>
 
           {/* Desktop nav */}
@@ -32,6 +32,10 @@ export function Navbar() {
             <Link href="/" className="text-sm font-medium text-warm-500 hover:text-sage-600
                                     px-3 py-2 rounded-xl hover:bg-sage-50 transition-all">
               Recept
+            </Link>
+            <Link href="/butiker" className="text-sm font-medium text-warm-500 hover:text-sage-600
+                                    px-3 py-2 rounded-xl hover:bg-sage-50 transition-all">
+              Butiker
             </Link>
             {user && (
               <>
@@ -73,6 +77,7 @@ export function Navbar() {
                       <p className="text-sm font-medium text-warm-800 truncate">{user.email}</p>
                       <p className="text-xs text-warm-400 mt-0.5">
                         {user.plan === 'FREE' ? 'Gratisplan' : 'Premium'}
+                        {user.authProvider !== 'EMAIL' && ` · ${user.authProvider === 'GOOGLE' ? 'Google' : 'Apple'}`}
                       </p>
                     </div>
                     <Link
@@ -88,6 +93,20 @@ export function Navbar() {
                       onClick={() => setProfileOpen(false)}
                     >
                       <Clock size={15} /> Historik
+                    </Link>
+                    <Link
+                      href="/butiker"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-warm-600 hover:bg-sage-50 hover:text-sage-700 transition-colors"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      <MapPin size={15} /> Hitta butiker
+                    </Link>
+                    <Link
+                      href="/installningar"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-warm-600 hover:bg-sage-50 hover:text-sage-700 transition-colors border-t border-warm-100"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      <Settings size={15} /> Inställningar
                     </Link>
                     <button
                       onClick={() => { logout(); setProfileOpen(false); }}
@@ -129,6 +148,10 @@ export function Navbar() {
                     onClick={() => setMobileOpen(false)}>
                 Recept
               </Link>
+              <Link href="/butiker" className="px-4 py-3 text-sm font-medium text-warm-600 hover:bg-sage-50 rounded-xl"
+                    onClick={() => setMobileOpen(false)}>
+                <MapPin size={15} className="inline mr-2 text-blue-400" /> Butiker
+              </Link>
               {user ? (
                 <>
                   <Link href="/favoriter" className="px-4 py-3 text-sm font-medium text-warm-600 hover:bg-sage-50 rounded-xl"
@@ -138,6 +161,10 @@ export function Navbar() {
                   <Link href="/historik" className="px-4 py-3 text-sm font-medium text-warm-600 hover:bg-sage-50 rounded-xl"
                         onClick={() => setMobileOpen(false)}>
                     <Clock size={15} className="inline mr-2 text-sage-400" /> Historik
+                  </Link>
+                  <Link href="/installningar" className="px-4 py-3 text-sm font-medium text-warm-600 hover:bg-sage-50 rounded-xl"
+                        onClick={() => setMobileOpen(false)}>
+                    <Settings size={15} className="inline mr-2 text-warm-400" /> Inställningar
                   </Link>
                   <button
                     onClick={() => { logout(); setMobileOpen(false); }}

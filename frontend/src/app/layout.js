@@ -1,19 +1,20 @@
 // ============================================
-// Root Layout — Modern Scandinavian Kitchen
+// Root Layout — Nisse / MatKompass
 // ============================================
 
 import '../styles/globals.css';
 import { Navbar } from '../components/Navbar';
 import { AuthProvider } from '../components/AuthProvider';
+import { CookieConsent } from '../components/CookieConsent';
 
 export const metadata = {
-  title: 'MatKompass — Hitta recept, jämför priser, laga mat',
+  title: 'Nisse — Hitta recept, jämför priser, hitta butiker',
   description:
-    'Hitta recept baserat på vad du har hemma. Jämför priser hos ICA, Willys, Coop och Lidl. Röststyrd matlagning med AI-kock.',
-  keywords: 'recept, matlagning, ingredienser, prisjämförelse, ICA, Willys, Coop, Lidl, Sverige',
+    'Nisse är din personliga matassistent. Hitta recept, jämför priser hos ICA, Willys, Coop och Lidl. GPS-guidning till närmaste butik.',
+  keywords: 'recept, matlagning, ingredienser, prisjämförelse, ICA, Willys, Coop, Lidl, butiker, GPS, Sverige',
   openGraph: {
-    title: 'MatKompass — Hitta recept, jämför priser, laga mat',
-    description: 'Hitta recept baserat på vad du har hemma. Röststyrd matlagning med AI-kockassistent.',
+    title: 'Nisse — Din personliga matassistent',
+    description: 'Hitta recept, jämför priser och hitta närmaste butik med GPS.',
     type: 'website',
     locale: 'sv_SE',
   },
@@ -24,7 +25,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover', // Required for iOS safe area insets
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }) {
@@ -38,15 +39,21 @@ export default function RootLayout({ children }) {
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 bg-sage-400 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">M</span>
+                  <span className="text-white text-xs font-bold">N</span>
                 </div>
-                <p className="text-sm text-warm-600 font-medium">MatKompass</p>
+                <p className="text-sm text-warm-600 font-medium">Nisse</p>
               </div>
-              <p className="text-xs text-warm-400">
-                Priser uppdateras regelbundet. Faktiska priser kan variera.
-              </p>
+              <div className="flex items-center gap-4">
+                <a href="/integritetspolicy" className="text-xs text-warm-400 hover:text-warm-600 transition-colors">
+                  Integritetspolicy
+                </a>
+                <a href="/installningar" className="text-xs text-warm-400 hover:text-warm-600 transition-colors">
+                  Inställningar
+                </a>
+              </div>
             </div>
           </footer>
+          <CookieConsent />
         </AuthProvider>
       </body>
     </html>

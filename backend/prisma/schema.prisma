@@ -1,5 +1,5 @@
 // ============================================
-// MatKompass — Database Schema
+// Nisse / MatKompass — Database Schema
 // ============================================
 
 generator client {
@@ -16,27 +16,67 @@ datasource db {
 // ──────────────────────────────────────────
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  passwordHash    String    @map("password_hash")
+  id              String       @id @default(cuid())
+  email           String       @unique
+  passwordHash    String?      @map("password_hash") // Nullable for social auth users
   name            String?
-  householdSize   Int       @default(1) @map("household_size")
-  plan            Plan      @default(FREE)
-  emailVerified   Boolean   @default(false) @map("email_verified")
-  verifyToken     String?   @unique @map("verify_token")
-  verifyExpires   DateTime? @map("verify_expires")
-  resetToken      String?   @unique @map("reset_token")
-  resetExpires    DateTime? @map("reset_expires")
-  welcomeMailSent Boolean   @default(false) @map("welcome_mail_sent")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  householdSize   Int          @default(1) @map("household_size")
+  plan            Plan         @default(FREE)
+  authProvider    AuthProvider @default(EMAIL) @map("auth_provider")
+  providerId      String?      @map("provider_id") // Google/Apple user ID
+  emailVerified   Boolean      @default(false) @map("email_verified")
+  verifyToken     String?      @unique @map("verify_token")
+  verifyExpires   DateTime?    @map("verify_expires")
+  resetToken      String?      @unique @map("reset_token")
+  resetExpires    DateTime?    @map("reset_expires")
+  welcomeMailSent Boolean      @default(false) @map("welcome_mail_sent")
+  onboardingDone  Boolean      @default(false) @map("onboarding_done")
+  gdprConsentAt   DateTime?    @map("gdpr_consent_at")
+  locationConsent Boolean      @default(false) @map("location_consent")
+  deletionRequestedAt DateTime? @map("deletion_requested_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
 
-  refreshTokens RefreshToken[]
-  searches      RecipeSearch[]
-  favorites     Favorite[]
-  searchQuota   SearchQuota?
+  refreshTokens  RefreshToken[]
+  searches       RecipeSearch[]
+  favorites      Favorite[]
+  searchQuota    SearchQuota?
+  consentRecords ConsentRecord[]
 
+  @@index([authProvider, providerId])
   @@map("users")
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  APPLE
+}
+
+// ──────────────────────────────────────────
+// GDPR — Consent tracking
+// ──────────────────────────────────────────
+
+model ConsentRecord {
+  id        String      @id @default(cuid())
+  userId    String      @map("user_id")
+  type      ConsentType
+  granted   Boolean
+  ipAddress String?     @map("ip_address")
+  userAgent String?     @map("user_agent")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("consent_records")
+}
+
+enum ConsentType {
+  PRIVACY_POLICY
+  COOKIES
+  LOCATION
+  MARKETING
 }
 
 model RefreshToken {

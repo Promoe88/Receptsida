@@ -14,9 +14,12 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 // Routes
 import authRoutes from './routes/auth.js';
+import socialAuthRoutes from './routes/social-auth.js';
 import recipeRoutes from './routes/recipes.js';
 import lexiconRoutes from './routes/lexicon.js';
 import scraperRoutes from './routes/scraper.js';
+import gdprRoutes from './routes/gdpr.js';
+import locationRoutes from './routes/locations.js';
 
 const app = express();
 
@@ -54,9 +57,12 @@ app.use('/api/', generalRateLimit);
 // ──────────────────────────────────────────
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', socialAuthRoutes);
 app.use('/api/v1/recipes', recipeRoutes);
 app.use('/api/v1/lexicon', lexiconRoutes);
 app.use('/api/v1/scraper', scraperRoutes);
+app.use('/api/v1/gdpr', gdprRoutes);
+app.use('/api/v1/locations', locationRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {

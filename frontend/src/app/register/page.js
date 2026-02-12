@@ -8,7 +8,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../lib/store';
-import { UserPlus, Eye, EyeOff, ChefHat } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 const HOUSEHOLDS = [
   { value: 1, emoji: '👤', label: 'Singel' },
@@ -26,16 +27,18 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [householdSize, setHouseholdSize] = useState(1);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (!acceptedPrivacy) return;
     clearError();
     setSubmitting(true);
 
     try {
       await register(email, password, name || undefined, householdSize);
-      router.push('/');
+      router.push('/tutorial');
     } catch {
     } finally {
       setSubmitting(false);
@@ -47,13 +50,17 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <ChefHat size={28} className="text-sage-500" />
+            <Sparkles size={28} className="text-sage-500" />
           </div>
-          <h1 className="font-display text-3xl text-warm-800">Skapa konto</h1>
-          <p className="text-warm-500 mt-2">Gratis — hitta recept baserat på vad du har hemma</p>
+          <h1 className="font-display text-3xl text-warm-800">Kom igång med Nisse</h1>
+          <p className="text-warm-500 mt-2">Gratis — din personliga matassistent</p>
         </div>
 
         <div className="card p-6">
+          {/* Social login */}
+          <SocialLoginSection redirectTo="/tutorial" />
+
+          {/* Email/password form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">
@@ -124,6 +131,24 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Privacy consent */}
+            <label className="flex gap-3 cursor-pointer items-start pt-1">
+              <input
+                type="checkbox"
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded accent-sage-400"
+                required
+              />
+              <span className="text-xs text-warm-500 leading-relaxed">
+                Jag godkänner{' '}
+                <Link href="/integritetspolicy" target="_blank" className="text-sage-500 underline">
+                  integritetspolicyn
+                </Link>{' '}
+                och samtycker till att mina personuppgifter behandlas enligt GDPR.
+              </span>
+            </label>
+
             {error && (
               <div className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-2.5 rounded-2xl text-sm">
                 {error}
@@ -132,7 +157,7 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || !acceptedPrivacy}
               className="btn-primary w-full flex items-center justify-center gap-2"
             >
               {submitting ? (
