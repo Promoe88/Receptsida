@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { Eye, EyeOff, ChefHat, Loader2, ArrowRight, Check, X } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowRight, Check, X } from 'lucide-react';
 
 const PASSWORD_RULES = [
   { id: 'length', label: 'Minst 8 tecken', test: (pw) => pw.length >= 8 },
@@ -199,9 +199,6 @@ export default function RegisterPage() {
             transition={{ duration: 0.5 }}
             className="text-center mb-8"
           >
-            <div className="w-16 h-16 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
-              <ChefHat size={30} className="text-sage-400" strokeWidth={2} />
-            </div>
             <h1 className="font-display text-3xl font-bold text-warm-900 tracking-tight">Skapa konto</h1>
             <p className="text-warm-500 mt-2 font-medium">Kom igång med Nisse</p>
           </motion.div>
