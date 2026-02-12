@@ -38,10 +38,6 @@ export default function HomePage() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   function handleSearch(query, householdSize, preferences) {
-    if (!user) {
-      window.location.href = '/login?redirect=/';
-      return;
-    }
     setLastQuery(query);
     search(query, householdSize, preferences);
   }

@@ -19,6 +19,8 @@ const envSchema = z.object({
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
   RECIPE_SEARCH_LIMIT_PER_HOUR: z.coerce.number().default(10),
   RECIPE_SEARCH_LIMIT_PER_HOUR_PREMIUM: z.coerce.number().default(100),
+  RESEND_API_KEY: z.string().min(5),
+  EMAIL_FROM: z.string().default('MatKompass <noreply@matkompass.se>'),
 });
 
 function loadConfig() {

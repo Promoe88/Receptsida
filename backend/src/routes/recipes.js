@@ -4,12 +4,13 @@
 
 import { Router } from 'express';
 import { prisma } from '../config/db.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, optionalAuth } from '../middleware/auth.js';
 import { recipeSearchRateLimit } from '../middleware/rateLimit.js';
-import { validate, recipeSearchSchema, cookingAskSchema } from '../middleware/validate.js';
+import { validate, recipeSearchSchema, cookingAskSchema, shareRecipeSchema } from '../middleware/validate.js';
 import { asyncHandler, AppError } from '../middleware/errorHandler.js';
 import { searchRecipes, generateCacheKey, estimateApiCost, askCookingAssistant } from '../services/claude.js';
 import { parseIngredients } from '../services/lexicon.js';
+import { sendRecipeShareEmail } from '../config/email.js';
 
 const router = Router();
 
@@ -18,13 +19,13 @@ const router = Router();
 // ──────────────────────────────────────────
 router.post(
   '/search',
-  requireAuth,
+  optionalAuth,
   recipeSearchRateLimit,
   validate(recipeSearchSchema),
   asyncHandler(async (req, res) => {
     const { query, householdSize, preferences } = req.validated;
     const effectiveHouseholdSize =
-      householdSize || (await getUserHouseholdSize(req.user.id));
+      householdSize || (req.user ? await getUserHouseholdSize(req.user.id) : 2);
 
     const parsed = await parseIngredients(query);
 
@@ -32,13 +33,16 @@ router.post(
 
     const cacheKey = generateCacheKey(query, effectiveHouseholdSize);
 
-    saveSearchToDB(req.user.id, query, parsed, effectiveHouseholdSize, cacheKey, result).catch(
-      (err) => console.error('Failed to save search:', err.message)
-    );
+    // Only save to DB and track quota if user is logged in
+    if (req.user) {
+      saveSearchToDB(req.user.id, query, parsed, effectiveHouseholdSize, cacheKey, result).catch(
+        (err) => console.error('Failed to save search:', err.message)
+      );
 
-    updateSearchQuota(req.user.id).catch((err) =>
-      console.error('Failed to update quota:', err.message)
-    );
+      updateSearchQuota(req.user.id).catch((err) =>
+        console.error('Failed to update quota:', err.message)
+      );
+    }
 
     res.json({
       recipes: result.recipes,
@@ -60,7 +64,7 @@ router.post(
 // ──────────────────────────────────────────
 router.post(
   '/cooking/ask',
-  requireAuth,
+  optionalAuth,
   validate(cookingAskSchema),
   asyncHandler(async (req, res) => {
     const { recipe, question, conversationHistory } = req.validated;
@@ -122,19 +126,25 @@ router.get(
 // ──────────────────────────────────────────
 router.get(
   '/:id',
-  requireAuth,
+  optionalAuth,
   asyncHandler(async (req, res) => {
+    const include = {
+      ingredients: { orderBy: { sortOrder: 'asc' } },
+      steps: { orderBy: { sortOrder: 'asc' } },
+      tools: true,
+    };
+
+    // Only check favorites if user is logged in
+    if (req.user) {
+      include.favorites = {
+        where: { userId: req.user.id },
+        select: { id: true },
+      };
+    }
+
     const recipe = await prisma.recipe.findUnique({
       where: { id: req.params.id },
-      include: {
-        ingredients: { orderBy: { sortOrder: 'asc' } },
-        steps: { orderBy: { sortOrder: 'asc' } },
-        tools: true,
-        favorites: {
-          where: { userId: req.user.id },
-          select: { id: true },
-        },
-      },
+      include,
     });
 
     if (!recipe) {
@@ -143,7 +153,7 @@ router.get(
 
     res.json({
       ...recipe,
-      isFavorite: recipe.favorites.length > 0,
+      isFavorite: req.user ? (recipe.favorites?.length > 0) : false,
       favorites: undefined,
     });
   })
@@ -205,6 +215,38 @@ router.get(
         savedAt: f.createdAt,
       })),
     });
+  })
+);
+
+// ──────────────────────────────────────────
+// POST /recipes/share — Share recipe via email
+// ──────────────────────────────────────────
+router.post(
+  '/share',
+  requireAuth,
+  validate(shareRecipeSchema),
+  asyncHandler(async (req, res) => {
+    const { recipeId, toEmail } = req.validated;
+
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+      include: {
+        ingredients: { orderBy: { sortOrder: 'asc' } },
+      },
+    });
+
+    if (!recipe) {
+      throw new AppError(404, 'not_found', 'Receptet hittades inte.');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { name: true, email: true },
+    });
+
+    await sendRecipeShareEmail(user, toEmail, recipe);
+
+    res.json({ message: `Receptet har skickats till ${toEmail}!` });
   })
 );
 

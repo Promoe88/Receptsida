@@ -131,6 +131,31 @@ export const auth = {
     return apiFetch('/auth/me');
   },
 
+  async verify(token) {
+    return apiFetch('/auth/verify', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  async resendVerification() {
+    return apiFetch('/auth/resend-verification', { method: 'POST' });
+  },
+
+  async forgotPassword(email) {
+    return apiFetch('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  async resetPassword(token, password) {
+    return apiFetch('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    });
+  },
+
   async initFromStorage() {
     const stored = getStoredRefreshToken();
     if (!stored) return null;
@@ -174,6 +199,13 @@ export const recipes = {
 
   async favorites() {
     return apiFetch('/recipes/favorites/list');
+  },
+
+  async share(recipeId, toEmail) {
+    return apiFetch('/recipes/share', {
+      method: 'POST',
+      body: JSON.stringify({ recipeId, toEmail }),
+    });
   },
 };
 

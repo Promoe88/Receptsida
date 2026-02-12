@@ -120,6 +120,31 @@ export const generateRecipeSchema = z.object({
     .default('middag'),
 });
 
+// ──────────────────────────────────────────
+// Password reset schemas
+// ──────────────────────────────────────────
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Ogiltig e-postadress'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token krävs'),
+  password: z
+    .string()
+    .min(8, 'Lösenordet måste vara minst 8 tecken')
+    .max(128, 'Lösenordet får vara max 128 tecken'),
+});
+
+// ──────────────────────────────────────────
+// Recipe sharing schema
+// ──────────────────────────────────────────
+
+export const shareRecipeSchema = z.object({
+  recipeId: z.string().min(1, 'Recept-ID krävs'),
+  toEmail: z.string().email('Ogiltig mottagaradress'),
+});
+
 export const suggestRecipesSchema = z.object({
   ingredients: z
     .array(z.string().min(1).max(100))
