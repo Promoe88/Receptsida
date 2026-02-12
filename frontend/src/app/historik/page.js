@@ -5,8 +5,10 @@
 'use client';
 
 import { useEffect } from 'react';
+import { isApp } from '../../lib/platform';
 import { useAuthStore } from '../../lib/store';
 import { useSearchHistory } from '../../hooks/useRecipes';
+import { AppPageHeader } from '../../components/app/AppPageHeader';
 import { Clock, Search, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -40,9 +42,11 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="font-display text-3xl text-warm-800 mb-2">Sökhistorik</h1>
-      <p className="text-warm-500 mb-8">Dina tidigare receptsökningar.</p>
+    <>
+      <AppPageHeader title="Historik" />
+      <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${isApp ? 'py-4' : 'py-8'}`}>
+        {!isApp && <h1 className="font-display text-3xl text-warm-800 mb-2">Sökhistorik</h1>}
+        {!isApp && <p className="text-warm-500 mb-8">Dina tidigare receptsökningar.</p>}
 
       {loading ? (
         <div className="space-y-3">
@@ -122,6 +126,7 @@ export default function HistoryPage() {
           )}
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }

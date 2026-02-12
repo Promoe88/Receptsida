@@ -7,8 +7,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { isApp } from '../../lib/platform';
 import { useAuthStore } from '../../lib/store';
 import { gdpr } from '../../lib/api';
+import { AppPageHeader } from '../../components/app/AppPageHeader';
 import {
   Shield, Download, Trash2, MapPin, Cookie,
   AlertTriangle, Check, Loader2, User,
@@ -75,13 +77,17 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-      <div className="mb-8">
-        <h1 className="font-display text-3xl text-warm-800">Inställningar</h1>
-        <p className="text-warm-500 mt-1">Hantera ditt konto och din data</p>
-      </div>
+    <>
+      <AppPageHeader title="Inställningar" />
+      <div className={`max-w-2xl mx-auto px-4 ${isApp ? 'py-4' : 'py-8 sm:py-12'}`}>
+        {!isApp && (
+          <div className="mb-8">
+            <h1 className="font-display text-3xl text-warm-800">Inställningar</h1>
+            <p className="text-warm-500 mt-1">Hantera ditt konto och din data</p>
+          </div>
+        )}
 
-      <div className="space-y-6">
+        <div className="space-y-6">
         {/* Profile */}
         <div className="card p-5">
           <div className="flex items-center gap-3 mb-4">
@@ -207,6 +213,7 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
