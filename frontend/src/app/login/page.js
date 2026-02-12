@@ -106,7 +106,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <PageTransition>
-      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-5 safe-top">
+      <div className="flex-1 flex items-center justify-center px-5">
         <div className="w-full max-w-md">
           <motion.div
             initial={{ opacity: 0, y: 15 }}

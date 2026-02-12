@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4">
+    <div className="flex-1 flex items-center justify-center px-5">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-terra-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
