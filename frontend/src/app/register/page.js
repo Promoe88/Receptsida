@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home, ChevronLeft } from 'lucide-react';
 import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 const HOUSEHOLDS = [
@@ -51,8 +51,15 @@ export default function RegisterPage() {
 
   return (
     <PageTransition>
-      <div className="flex-1 flex items-center justify-center px-5 py-6 overflow-y-auto app-inner-scroll">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-6" style={{ background: '#F2F4F3' }}>
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1 text-sm font-medium text-warm-500 hover:text-warm-800 transition-colors mb-4 -ml-1 self-start"
+        >
+          <ChevronLeft size={20} />
+          Tillbaka
+        </button>
+        <div className="w-full max-w-md mx-auto my-auto">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -62,8 +69,8 @@ export default function RegisterPage() {
             <div className="w-16 h-16 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
               <ChefHat size={30} className="text-sage-400" strokeWidth={2} />
             </div>
-            <h1 className="font-display text-3xl font-bold text-warm-800 tracking-tight">Kom igang med Nisse</h1>
-            <p className="text-warm-400 mt-2 font-medium">Gratis — din personliga matassistent</p>
+            <h1 className="font-display text-3xl font-bold text-warm-900 tracking-tight">Kom igang med Nisse</h1>
+            <p className="text-warm-500 mt-2 font-medium">Gratis — din personliga matassistent</p>
           </motion.div>
 
           <motion.div
@@ -71,14 +78,14 @@ export default function RegisterPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div className="card p-6">
+            <div className="card p-6 shadow-card-deep">
               {/* Social login */}
               <SocialLoginSection redirectTo="/tutorial" />
 
               {/* Email/password form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">
+                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">
                     Namn <span className="text-warm-400 font-normal normal-case">(valfritt)</span>
                   </label>
                   <input
@@ -91,7 +98,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">E-post</label>
+                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">E-post</label>
                   <input
                     type="email"
                     value={email}
@@ -103,7 +110,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">Lösenord</label>
+                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">Lösenord</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -126,7 +133,7 @@ export default function RegisterPage() {
 
                 {/* Household selector */}
                 <div>
-                  <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-2.5 block">Ditt hushåll</label>
+                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-2.5 block">Ditt hushåll</label>
                   <div className="grid grid-cols-4 gap-2">
                     {HOUSEHOLDS.map((h) => (
                       <motion.button
@@ -175,7 +182,7 @@ export default function RegisterPage() {
                   </motion.div>
                 )}
 
-                <NisseButton type="submit" disabled={submitting || !acceptedPrivacy} fullWidth>
+                <NisseButton type="submit" variant="black" disabled={submitting || !acceptedPrivacy} fullWidth>
                   {submitting ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
                   Skapa konto
                 </NisseButton>
@@ -190,7 +197,7 @@ export default function RegisterPage() {
             className="text-center text-sm text-warm-500 mt-6"
           >
             Har du redan ett konto?{' '}
-            <Link href="/login" className="text-sage-400 font-semibold hover:underline">
+            <Link href="/login" className="text-terra-400 font-bold hover:underline">
               Logga in
             </Link>
           </motion.p>
