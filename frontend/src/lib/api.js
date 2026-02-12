@@ -2,7 +2,20 @@
 // API Client — Typed HTTP client for backend
 // ============================================
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+// Browser: use Next.js rewrite proxy (/api/v1/...) — avoids CORS entirely.
+// Capacitor (native): call Railway backend directly (set at build time).
+// Server (SSR): use full backend URL.
+function getApiUrl() {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+  }
+  if (window.Capacitor?.isNativePlatform?.()) {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://receptsida-production.up.railway.app/api/v1';
+  }
+  return '/api/v1';
+}
+
+const API_URL = getApiUrl();
 
 class ApiError extends Error {
   constructor(status, code, message) {
