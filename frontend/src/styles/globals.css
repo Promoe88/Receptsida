@@ -11,12 +11,12 @@
 
   body {
     @apply bg-cream text-warm-800 font-body antialiased;
-    background: linear-gradient(180deg, #F2F2F2 0%, #FFFFFF 100%);
+    background: #F5F5F7;
     background-attachment: fixed;
   }
 
   ::selection {
-    background: rgba(90, 125, 108, 0.15);
+    background: rgba(42, 191, 191, 0.18);
   }
 }
 
@@ -203,7 +203,7 @@ body.keyboard-open .app-main--scroll {
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   overflow: hidden;
-  background: linear-gradient(180deg, #F2F2F2 0%, #FFFFFF 100%);
+  background: #F5F5F7;
   transition: bottom 0.25s cubic-bezier(0.2, 0.8, 0.4, 1),
               padding-bottom 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);
 }
@@ -260,7 +260,7 @@ body.keyboard-open .app-main--scroll {
 /* ── Cooking HUD ── */
 .hud-mode {
   @apply fixed inset-0 z-[60];
-  background: linear-gradient(180deg, #F2F2F2 0%, #FFFFFF 100%);
+  background: #F5F5F7;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }

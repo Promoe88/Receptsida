@@ -106,7 +106,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <PageTransition>
-      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-6" style={{ background: '#F2F4F3' }}>
+      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-6 bg-cream">
         <div className="w-full max-w-md mx-auto my-auto">
           <motion.div
             initial={{ opacity: 0, y: 15 }}

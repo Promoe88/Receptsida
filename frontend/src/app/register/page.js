@@ -51,7 +51,7 @@ export default function RegisterPage() {
 
   return (
     <PageTransition>
-      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 pt-3 pb-6" style={{ background: '#F2F4F3' }}>
+      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 pt-3 pb-6 bg-cream">
         {/* Header row: back + title inline */}
         <div className="flex items-center gap-3 mb-4 flex-shrink-0">
           <button
