@@ -1,6 +1,6 @@
 // ============================================
-// Register Page — Clean, high-conversion form
-// Apple/Google/Email with household selector
+// Register Page — Compact, iPhone-optimized
+// Side-by-side social, tight spacing
 // ============================================
 
 'use client';
@@ -12,8 +12,8 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home, ArrowLeft, ArrowRight } from 'lucide-react';
-import { SocialLoginSection } from '../../components/SocialLoginButtons';
+import { Eye, EyeOff, Loader2, User, Users, UsersRound, Home, ArrowLeft, ArrowRight } from 'lucide-react';
+import { SocialLoginSectionCompact } from '../../components/SocialLoginButtons';
 
 const HOUSEHOLDS = [
   { value: 1, Icon: User, label: 'Singel' },
@@ -51,71 +51,66 @@ export default function RegisterPage() {
 
   return (
     <PageTransition>
-      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-4 pb-8" style={{ background: '#F2F4F3' }}>
-        <button
-          onClick={() => router.back()}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-soft text-warm-600 hover:text-warm-900 transition-colors mb-3 self-start flex-shrink-0"
-        >
-          <ArrowLeft size={20} strokeWidth={2} />
-        </button>
+      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 pt-3 pb-6 bg-cream">
+        {/* Header row: back + title inline */}
+        <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+          <button
+            onClick={() => router.back()}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-soft text-warm-600 hover:text-warm-900 transition-colors flex-shrink-0"
+          >
+            <ArrowLeft size={18} strokeWidth={2} />
+          </button>
+          <div>
+            <h1 className="font-display text-xl font-bold text-warm-900 tracking-tight leading-tight">Kom igång med Nisse</h1>
+            <p className="text-warm-500 text-xs font-medium">Din personliga matassistent</p>
+          </div>
+        </div>
+
         <div className="w-full max-w-md mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-5"
-          >
-            <div className="w-14 h-14 bg-sage-50 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-soft">
-              <ChefHat size={26} className="text-sage-400" strokeWidth={2} />
-            </div>
-            <h1 className="font-display text-2xl font-bold text-warm-900 tracking-tight">Kom igång med Nisse</h1>
-            <p className="text-warm-500 mt-1 text-sm font-medium">Din personliga matassistent</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.4 }}
           >
             <div className="card p-5 shadow-card-deep">
-              {/* Social login */}
-              <SocialLoginSection redirectTo="/tutorial" />
+              {/* Social login — compact side-by-side */}
+              <SocialLoginSectionCompact redirectTo="/tutorial" />
 
               {/* Email/password form */}
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-2.5">
                 <div>
-                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">
+                  <label className="text-[11px] font-bold text-warm-600 uppercase tracking-wider mb-1 block">
                     Namn <span className="text-warm-400 font-normal normal-case">(valfritt)</span>
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="input"
+                    className="input !py-3"
                     placeholder="Ditt namn"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">E-post</label>
+                  <label className="text-[11px] font-bold text-warm-600 uppercase tracking-wider mb-1 block">E-post</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="input"
+                    className="input !py-3"
                     placeholder="din@email.se"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">Lösenord</label>
+                  <label className="text-[11px] font-bold text-warm-600 uppercase tracking-wider mb-1 block">Lösenord</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="input pr-12"
+                      className="input !py-3 pr-12"
                       placeholder="Minst 8 tecken"
                       required
                       minLength={8}
@@ -132,42 +127,42 @@ export default function RegisterPage() {
 
                 {/* Household selector */}
                 <div>
-                  <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-2.5 block">Ditt hushåll</label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <label className="text-[11px] font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">Ditt hushåll</label>
+                  <div className="grid grid-cols-4 gap-1.5">
                     {HOUSEHOLDS.map((h) => (
                       <motion.button
                         key={h.value}
                         type="button"
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setHouseholdSize(h.value)}
-                        className={`py-3 rounded-2xl border-2 text-center transition-all duration-200
+                        className={`py-2 rounded-xl border-2 text-center transition-all duration-200
                           ${householdSize === h.value
                             ? 'border-sage-400 bg-sage-50 shadow-sage-glow'
                             : 'border-warm-200 bg-cream-200/50 hover:border-warm-300'
                           }`}
                       >
-                        <h.Icon size={20} className={householdSize === h.value ? 'text-sage-500' : 'text-warm-400'} strokeWidth={2} />
-                        <span className="text-xs font-medium text-warm-500 mt-1 block">{h.label}</span>
+                        <h.Icon size={18} className={householdSize === h.value ? 'text-sage-500' : 'text-warm-400'} strokeWidth={2} />
+                        <span className="text-[10px] font-medium text-warm-500 mt-0.5 block">{h.label}</span>
                       </motion.button>
                     ))}
                   </div>
                 </div>
 
                 {/* Privacy consent */}
-                <label className="flex gap-3 cursor-pointer items-start pt-1">
+                <label className="flex gap-2.5 cursor-pointer items-start">
                   <input
                     type="checkbox"
                     checked={acceptedPrivacy}
                     onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                    className="mt-1 w-4 h-4 rounded accent-sage-400"
+                    className="mt-0.5 w-4 h-4 rounded accent-sage-400 flex-shrink-0"
                     required
                   />
-                  <span className="text-xs text-warm-500 leading-relaxed">
+                  <span className="text-[11px] text-warm-500 leading-relaxed">
                     Jag godkänner{' '}
                     <Link href="/integritetspolicy" target="_blank" className="text-sage-400 underline font-medium">
                       integritetspolicyn
                     </Link>{' '}
-                    och samtycker till att mina personuppgifter behandlas enligt GDPR.
+                    och samtycker till GDPR.
                   </span>
                 </label>
 
@@ -175,7 +170,7 @@ export default function RegisterPage() {
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-2.5 rounded-2xl text-sm"
+                    className="bg-terra-50 border border-terra-200 text-terra-600 px-3 py-2 rounded-xl text-xs"
                   >
                     {error}
                   </motion.div>
@@ -193,7 +188,7 @@ export default function RegisterPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-center text-sm text-warm-500 mt-4 pb-2"
+            className="text-center text-sm text-warm-500 mt-4"
           >
             Har du redan ett konto?{' '}
             <Link href="/login" className="text-terra-400 font-bold hover:underline">

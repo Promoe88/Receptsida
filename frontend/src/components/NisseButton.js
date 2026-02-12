@@ -1,6 +1,6 @@
 // ============================================
 // NisseButton — Pill-shaped, high-contrast button
-// Bold text, sage green primary, soft shadow
+// Bold text, teal primary, black CTA
 // ============================================
 
 'use client';
@@ -49,7 +49,7 @@ export function NisseButton({
         ${fullWidth ? 'w-full' : ''}
         ${className}
       `}
-      style={variant === 'black' ? { backgroundColor: '#111111' } : undefined}
+      style={variant === 'black' ? { backgroundColor: '#1A1A2E' } : undefined}
       {...props}
     >
       {children}

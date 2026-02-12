@@ -4,9 +4,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Soft UI background system
+        // Background system
         cream: {
-          DEFAULT: '#F7F7F7',
+          DEFAULT: '#F5F5F7',
           50: '#FFFFFF',
           100: '#FAFAFA',
           200: '#F2F2F2',
@@ -14,46 +14,46 @@ module.exports = {
           400: '#E0E0E0',
           500: '#D4D4D4',
         },
-        // Sage green — primary (#5A7D6C)
+        // Teal — primary accent (#2ABFBF)
         sage: {
-          50: '#EFF5F2',
-          100: '#DFEAE4',
-          200: '#BFD5C9',
-          300: '#9FBFAE',
-          400: '#5A7D6C',
-          DEFAULT: '#5A7D6C',
-          500: '#4A6A5A',
-          600: '#3D5849',
-          700: '#304539',
-          800: '#23332A',
-          900: '#17211B',
+          50: '#E8F8F8',
+          100: '#D0F1F1',
+          200: '#A1E3E3',
+          300: '#6DD3D3',
+          400: '#2ABFBF',
+          DEFAULT: '#2ABFBF',
+          500: '#22A3A3',
+          600: '#1A8585',
+          700: '#146868',
+          800: '#0E4C4C',
+          900: '#083232',
         },
-        // Warm Clay — accent (#D97757)
+        // Warm Orange — secondary accent (#FF7A50)
         terra: {
-          50: '#FDF4F0',
-          100: '#F9E5DC',
-          200: '#F0C7B5',
-          300: '#E49A7E',
-          400: '#D97757',
-          DEFAULT: '#D97757',
-          500: '#C4623F',
-          600: '#A34F32',
-          700: '#7E3D27',
-          800: '#5A2C1C',
-          900: '#381C12',
+          50: '#FFF3EE',
+          100: '#FFE4D9',
+          200: '#FFC5AE',
+          300: '#FFA07D',
+          400: '#FF7A50',
+          DEFAULT: '#FF7A50',
+          500: '#E8633A',
+          600: '#C24D28',
+          700: '#9A3B1E',
+          800: '#722C16',
+          900: '#4A1D0E',
         },
-        // Neutral text scale
+        // Neutral text scale (navy-anchored)
         warm: {
           50: '#FAFAFA',
           100: '#F5F5F5',
           200: '#E8E8E8',
           300: '#D4D4D4',
-          400: '#A3A3A3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
+          400: '#8E8E93',
+          500: '#636366',
+          600: '#48484A',
+          700: '#2C2C2E',
+          800: '#1A1A2E',
+          900: '#0F0F1E',
         },
       },
       fontFamily: {
@@ -81,8 +81,8 @@ module.exports = {
         strong: '0 20px 60px rgba(0,0,0,0.10)',
         glass: '0 4px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)',
         'inner-soft': 'inset 0 1px 0 rgba(255,255,255,0.8)',
-        'sage-glow': '0 4px 24px rgba(90,125,108,0.20)',
-        'terra-glow': '0 4px 24px rgba(217,119,87,0.20)',
+        'sage-glow': '0 4px 24px rgba(42,191,191,0.25)',
+        'terra-glow': '0 4px 24px rgba(255,122,80,0.25)',
         'float': '0 8px 40px rgba(0,0,0,0.12)',
       },
       animation: {
