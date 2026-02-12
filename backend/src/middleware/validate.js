@@ -34,7 +34,11 @@ export const registerSchema = z.object({
   password: z
     .string()
     .min(8, 'Lösenordet måste vara minst 8 tecken')
-    .max(128, 'Lösenordet får vara max 128 tecken'),
+    .max(128, 'Lösenordet får vara max 128 tecken')
+    .regex(/[A-Z]/, 'Lösenordet måste innehålla minst en stor bokstav')
+    .regex(/[a-z]/, 'Lösenordet måste innehålla minst en liten bokstav')
+    .regex(/[0-9]/, 'Lösenordet måste innehålla minst en siffra')
+    .regex(/[^A-Za-z0-9]/, 'Lösenordet måste innehålla minst ett specialtecken'),
   name: z.string().min(1).max(100).optional(),
   householdSize: z.number().int().min(1).max(20).optional().default(1),
 });
