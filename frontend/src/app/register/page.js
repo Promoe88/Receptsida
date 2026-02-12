@@ -51,26 +51,26 @@ export default function RegisterPage() {
 
   return (
     <PageTransition>
-      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-6" style={{ background: '#F2F4F3' }}>
+      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-4 pb-8" style={{ background: '#F2F4F3' }}>
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1 text-sm font-medium text-warm-500 hover:text-warm-800 transition-colors mb-4 -ml-1 self-start"
+          className="flex items-center gap-1 text-sm font-medium text-warm-500 hover:text-warm-800 transition-colors mb-3 -ml-1 self-start flex-shrink-0"
         >
           <ChevronLeft size={20} />
           Tillbaka
         </button>
-        <div className="w-full max-w-md mx-auto my-auto">
+        <div className="w-full max-w-md mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-8"
+            className="text-center mb-5"
           >
-            <div className="w-16 h-16 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
-              <ChefHat size={30} className="text-sage-400" strokeWidth={2} />
+            <div className="w-14 h-14 bg-sage-50 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-soft">
+              <ChefHat size={26} className="text-sage-400" strokeWidth={2} />
             </div>
-            <h1 className="font-display text-3xl font-bold text-warm-900 tracking-tight">Kom igang med Nisse</h1>
-            <p className="text-warm-500 mt-2 font-medium">Gratis — din personliga matassistent</p>
+            <h1 className="font-display text-2xl font-bold text-warm-900 tracking-tight">Kom igång med Nisse</h1>
+            <p className="text-warm-500 mt-1 text-sm font-medium">Din personliga matassistent</p>
           </motion.div>
 
           <motion.div
@@ -78,12 +78,12 @@ export default function RegisterPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div className="card p-6 shadow-card-deep">
+            <div className="card p-5 shadow-card-deep">
               {/* Social login */}
               <SocialLoginSection redirectTo="/tutorial" />
 
               {/* Email/password form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                   <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">
                     Namn <span className="text-warm-400 font-normal normal-case">(valfritt)</span>
@@ -194,7 +194,7 @@ export default function RegisterPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-center text-sm text-warm-500 mt-6"
+            className="text-center text-sm text-warm-500 mt-4 pb-2"
           >
             Har du redan ett konto?{' '}
             <Link href="/login" className="text-terra-400 font-bold hover:underline">
