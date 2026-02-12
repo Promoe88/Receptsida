@@ -51,8 +51,8 @@ export default function RegisterPage() {
 
   return (
     <PageTransition>
-      <div className="flex-1 flex items-center justify-center px-5 py-6 overflow-y-auto app-inner-scroll">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-6">
+        <div className="w-full max-w-md mx-auto my-auto">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
