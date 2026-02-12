@@ -158,6 +158,19 @@ body.keyboard-open .app-tab-bar {
   display: none;
 }
 
+/* When keyboard is open, fixed views become scrollable so inputs stay visible */
+body.keyboard-open .app-main--fixed {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Content shifts from centered to top-aligned when keyboard takes space */
+body.keyboard-open .app-main--fixed > * {
+  justify-content: flex-start;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
 /* ── App Shell (native feel) ── */
 
 /* Full-screen fixed viewport — respects Dynamic Island + home indicator */
