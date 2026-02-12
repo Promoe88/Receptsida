@@ -30,10 +30,19 @@ const app = express();
 // Security headers
 app.use(helmet());
 
-// CORS
+// CORS — allow explicit origins + all Vercel preview deployments
+const allowedOrigins = config.CORS_ORIGIN.split(',').map((o) => o.trim());
+const vercelPreviewRegex = /^https:\/\/receptsida(-[a-z0-9]+-promoe88)?\.vercel\.app$/;
+
 app.use(
   cors({
-    origin: config.CORS_ORIGIN.split(',').map((o) => o.trim()),
+    origin(origin, cb) {
+      // Allow server-to-server (no origin) and allowed list
+      if (!origin || allowedOrigins.includes(origin) || vercelPreviewRegex.test(origin)) {
+        return cb(null, true);
+      }
+      cb(new Error('Blocked by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

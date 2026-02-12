@@ -53,14 +53,23 @@ async function apiFetch(path, options = {}) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
-  let response = await fetch(url, { ...options, headers });
+  let response;
+  try {
+    response = await fetch(url, { ...options, headers });
+  } catch {
+    throw new ApiError(0, 'network_error', 'Kunde inte nå servern. Kontrollera din internetanslutning och försök igen.');
+  }
 
   // Auto-refresh on 401
   if (response.status === 401 && refreshToken) {
     const refreshed = await tryRefresh();
     if (refreshed) {
       headers['Authorization'] = `Bearer ${accessToken}`;
-      response = await fetch(url, { ...options, headers });
+      try {
+        response = await fetch(url, { ...options, headers });
+      } catch {
+        throw new ApiError(0, 'network_error', 'Kunde inte nå servern. Kontrollera din internetanslutning och försök igen.');
+      }
     }
   }
 
