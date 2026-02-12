@@ -8,12 +8,13 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Search, Heart, MapPin, User } from 'lucide-react';
+import { Home, Search, PlusCircle, Heart, User } from 'lucide-react';
 
 const TABS = [
-  { href: '/', label: 'Sok', icon: Search },
+  { href: '/', label: 'Hem', icon: Home },
+  { href: '/butiker', label: 'Sök', icon: Search },
+  { href: '/favoriter', label: '', icon: PlusCircle, isCenter: true },
   { href: '/favoriter', label: 'Favoriter', icon: Heart },
-  { href: '/butiker', label: 'Butiker', icon: MapPin },
   { href: '/installningar', label: 'Profil', icon: User },
 ];
 
@@ -35,15 +36,34 @@ export function BottomTabBar() {
            WebkitBackdropFilter: 'blur(24px)',
          }}>
       <div className="flex items-center justify-around h-16 px-2">
-        {TABS.map((tab) => {
+        {TABS.map((tab, i) => {
           const Icon = tab.icon;
           const active = tab.href === '/'
             ? pathname === '/'
             : pathname.startsWith(tab.href);
 
+          if (tab.isCenter) {
+            return (
+              <Link
+                key={`tab-${i}`}
+                href={tab.href}
+                onClick={handleTap}
+                className="flex items-center justify-center flex-1 py-2"
+              >
+                <motion.div
+                  whileTap={{ scale: 0.85 }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center shadow-sage-glow -mt-5"
+                  style={{ backgroundColor: '#1A1A2E' }}
+                >
+                  <Icon size={24} strokeWidth={2} className="text-white" />
+                </motion.div>
+              </Link>
+            );
+          }
+
           return (
             <Link
-              key={tab.href}
+              key={`tab-${i}`}
               href={tab.href}
               onClick={handleTap}
               className="flex flex-col items-center justify-center gap-1 flex-1 py-2 relative"

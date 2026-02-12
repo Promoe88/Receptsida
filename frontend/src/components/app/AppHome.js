@@ -9,7 +9,7 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Mic, MicOff, Users, Loader2, Clock, ChevronRight,
-  Zap, Leaf, UsersRound, Package, Sparkles, Wine,
+  Zap, Leaf, UsersRound, Package, Sparkles, Wine, ArrowRight,
 } from 'lucide-react';
 import { useVoiceInput } from '../../hooks/useVoice';
 import { useAuthStore } from '../../lib/store';
@@ -122,6 +122,27 @@ export function AppHome({ onSearch, loading, recentSearches }) {
         </h1>
       </motion.div>
 
+      {/* Inspiration card */}
+      <motion.div variants={fadeUp} className="mb-5">
+        <div className="bg-white rounded-2xl p-4 shadow-soft flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+            <Sparkles size={22} className="text-amber-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-warm-800 leading-snug">Hitta recept baserat på vad du har hemma</p>
+          </div>
+          <button
+            onClick={() => {
+              const el = document.querySelector('input[type="text"]');
+              if (el) el.focus();
+            }}
+            className="text-sage-400 text-sm font-bold whitespace-nowrap flex items-center gap-1"
+          >
+            Testa! <ArrowRight size={14} />
+          </button>
+        </div>
+      </motion.div>
+
       {/* Search bar */}
       <motion.form onSubmit={handleSubmit} variants={fadeUp}>
         <div className="card p-1.5">
@@ -131,7 +152,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
               type="text"
               value={isListening ? transcript || query : query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ingredienser, matratt, budget..."
+              placeholder="Ingredienser, maträtt, budget..."
               className="flex-1 bg-transparent border-none outline-none text-warm-800
                        placeholder:text-warm-400 text-[15px] font-medium"
               disabled={loading}
@@ -222,7 +243,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
       {recentSearches?.length > 0 && (
         <motion.div className="mt-8" variants={fadeUp}>
           <h2 className="text-xs font-bold text-warm-400 uppercase tracking-wider mb-3">
-            Senaste sokningar
+            Senaste sökningar
           </h2>
           <div className="space-y-2">
             {recentSearches.slice(0, 5).map((item, idx) => (

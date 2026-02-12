@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Clock, Users, ExternalLink,
   ShoppingCart, ListOrdered, Play, ShoppingBag, Check,
-  Lightbulb, Wrench, Coins, Share2, Send,
+  Lightbulb, Wrench, Coins, Share2, Send, ArrowRight,
   Wine, Refrigerator, Scale, AlertTriangle, GraduationCap,
 } from 'lucide-react';
 import { CookingMode } from './CookingMode';
@@ -112,7 +112,8 @@ export function RecipeDetail({ recipe, onClose }) {
               <div className="grid grid-cols-3 gap-3">
                 <button
                   onClick={() => setShowCookingMode(true)}
-                  className="btn-primary flex items-center justify-center gap-2 py-3.5"
+                  className="flex items-center justify-center gap-2 py-3.5 rounded-full font-bold text-sm text-white transition-all active:scale-[0.97]"
+                  style={{ backgroundColor: '#1A1A2E' }}
                 >
                   <Play size={16} /> Laga
                 </button>
@@ -325,11 +326,12 @@ export function RecipeDetail({ recipe, onClose }) {
                style={{ background: 'rgba(255,255,255,0.90)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
             <button
               onClick={() => setShowCookingMode(true)}
-              className="w-full bg-sage-400 text-white py-4 rounded-full font-bold text-base
-                       shadow-sage-glow active:scale-[0.97] transition-all duration-200
+              className="w-full text-white py-4 rounded-full font-bold text-base
+                       shadow-medium active:scale-[0.97] transition-all duration-200
                        flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#1A1A2E' }}
             >
-              <Play size={18} strokeWidth={2.5} /> Borja laga
+              Börja laga <ArrowRight size={18} strokeWidth={2.5} />
             </button>
           </div>
         </motion.div>
