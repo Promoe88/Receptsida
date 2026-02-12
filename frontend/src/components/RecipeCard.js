@@ -1,11 +1,12 @@
 // ============================================
-// RecipeCard — Bright warm recipe card
-// Price per portion, difficulty level badge
+// RecipeCard — Glassmorphism recipe card
+// Soft shadows, bold headers, pill badges
 // ============================================
 
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   Clock, BarChart3, Users, Coins, ExternalLink,
   Heart, Check, ShoppingCart, Wrench, ListOrdered,
@@ -40,11 +41,11 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
   }
 
   return (
-    <div className="card p-6 sm:p-8">
+    <div className="card p-6 sm:p-8 shadow-card">
       {/* Header */}
       <div className="flex justify-between items-start gap-4 mb-5">
         <div className="flex-1">
-          <h3 className="font-display text-2xl sm:text-3xl text-warm-800">{recipe.title}</h3>
+          <h3 className="font-display text-2xl sm:text-3xl font-bold text-warm-800 tracking-tight">{recipe.title}</h3>
 
           {recipe.source_name && (
             <p className="text-sm text-warm-500 mt-1 flex items-center gap-1.5">
@@ -124,8 +125,11 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
       <Section icon={<ShoppingCart size={16} />} title="Ingredienser">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {(recipe.ingredients || []).map((ing, idx) => (
-            <button
+            <motion.button
               key={idx}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.03 }}
               onClick={() => toggleIngredient(idx)}
               className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm text-left
                         transition-all duration-150 group border
@@ -154,7 +158,7 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
                   {ing.est_price || 'Köp'}
                 </span>
               )}
-            </button>
+            </motion.button>
           ))}
         </div>
       </Section>
@@ -179,15 +183,21 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
       <Section icon={<ListOrdered size={16} />} title="Gör så här">
         <ol className="space-y-0 divide-y divide-warm-100">
           {(recipe.steps || []).map((step, idx) => (
-            <li key={idx} className="flex gap-4 py-4">
+            <motion.li
+              key={idx}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.04 }}
+              className="flex gap-4 py-4"
+            >
               <span className="w-8 h-8 bg-sage-400 text-white rounded-full flex items-center justify-center
-                             text-xs font-bold flex-shrink-0 mt-0.5">
+                             text-xs font-bold flex-shrink-0 mt-0.5 shadow-sage-glow">
                 {idx + 1}
               </span>
               <p className="text-sm text-warm-700 leading-relaxed flex-1">
                 {getStepText(step)}
               </p>
-            </li>
+            </motion.li>
           ))}
         </ol>
       </Section>

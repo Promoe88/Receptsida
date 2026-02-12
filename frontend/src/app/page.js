@@ -63,8 +63,8 @@ export default function HomePage() {
       <PageTransition>
         <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${isApp ? 'pt-4 pb-4 safe-top' : 'py-8'}`}>
           <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-            <h2 className={`font-display text-warm-800 ${isApp ? 'text-xl' : 'text-display-sm'}`}>
-              Recept för &ldquo;{lastQuery}&rdquo;
+            <h2 className={`font-display font-bold text-warm-800 tracking-tight ${isApp ? 'text-xl' : 'text-display-sm'}`}>
+              Recept for &ldquo;{lastQuery}&rdquo;
             </h2>
             <NisseButton variant="outline" size="sm" onClick={handleReset}>
               <ArrowLeft size={16} /> Ny sökning
@@ -154,7 +154,7 @@ export default function HomePage() {
       {/* How it works */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
         <div className="text-center mb-10">
-          <h2 className="font-display text-display-sm text-warm-800 mb-3">Från kylskåp till middagsbord</h2>
+          <h2 className="font-display text-display-sm font-bold text-warm-800 tracking-tight mb-3">Från kylskåp till middagsbord</h2>
           <p className="text-warm-500 max-w-md mx-auto">Tre steg. Noll beslutströtthet.</p>
         </div>
         <div className="grid sm:grid-cols-3 gap-6">
@@ -165,7 +165,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="bg-cream-200/40 py-16 border-y border-warm-200/30">
+      <section className="bg-cream-100/60 py-16 border-y border-warm-200/20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid sm:grid-cols-3 gap-6">
             <FeatureCard icon={<Leaf size={20} className="text-sage-400" />} title="Hållbar matlagning" text="Minimera matsvinn genom att laga mat med vad du redan har." />
@@ -179,11 +179,11 @@ export default function HomePage() {
       {!user && (
         <section className="py-16">
           <div className="max-w-lg mx-auto text-center px-4">
-            <div className="card p-8">
-              <div className="w-14 h-14 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <div className="card p-8 shadow-card">
+              <div className="w-14 h-14 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
                 <ChefHat size={28} className="text-sage-400" />
               </div>
-              <h3 className="font-display text-2xl text-warm-800 mb-2">Börja laga smartare</h3>
+              <h3 className="font-display text-2xl font-bold text-warm-800 tracking-tight mb-2">Börja laga smartare</h3>
               <p className="text-warm-500 text-sm mb-6">
                 Skapa ett gratis konto för att söka bland tusentals recept, spara favoriter och få röststyrd matlagningshjälp.
               </p>
@@ -201,12 +201,12 @@ export default function HomePage() {
 function FeatureCard({ icon, title, text }) {
   return (
     <motion.div
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -3 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="card-elevated p-6"
+      className="card p-6 shadow-card"
     >
-      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-cream-200">{icon}</div>
-      <h3 className="font-semibold text-warm-800 mb-1">{title}</h3>
+      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-cream-100">{icon}</div>
+      <h3 className="font-bold text-warm-800 mb-1">{title}</h3>
       <p className="text-sm text-warm-500 leading-relaxed">{text}</p>
     </motion.div>
   );
@@ -218,14 +218,14 @@ function StepCard({ number, icon, title, text }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
-      className="card p-6 text-center"
+      transition={{ duration: 0.5, delay: Number(number) * 0.1 }}
+      className="card p-6 text-center shadow-card"
     >
-      <div className="w-12 h-12 rounded-full bg-sage-400 text-white flex items-center justify-center mx-auto mb-4 shadow-sage-glow">
+      <div className="w-14 h-14 rounded-full bg-sage-400 text-white flex items-center justify-center mx-auto mb-4 shadow-sage-glow">
         {icon}
       </div>
-      <span className="text-xs font-semibold text-sage-400 uppercase tracking-widest">Steg {number}</span>
-      <h3 className="font-display text-xl text-warm-800 mt-1 mb-2">{title}</h3>
+      <span className="text-xs font-bold text-sage-400 uppercase tracking-widest">Steg {number}</span>
+      <h3 className="font-display text-xl font-bold text-warm-800 tracking-tight mt-1 mb-2">{title}</h3>
       <p className="text-sm text-warm-500 leading-relaxed">{text}</p>
     </motion.div>
   );

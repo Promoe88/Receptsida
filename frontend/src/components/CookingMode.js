@@ -1,6 +1,6 @@
 // ============================================
-// CookingMode — Warm voice-controlled cooking
-// AI Q&A chef assistant, bright aesthetic
+// CookingMode — Glassmorphism voice-controlled cooking
+// AI Q&A chef assistant, soft UI aesthetic
 // ============================================
 
 'use client';
@@ -155,13 +155,14 @@ export function CookingMode({ recipe, onClose }) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="hud-mode flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-warm-200">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-warm-200/30"
+           style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center">
-            <ChefHat size={17} className="text-sage-600" />
+          <div className="w-9 h-9 rounded-2xl bg-sage-50 flex items-center justify-center shadow-soft">
+            <ChefHat size={17} className="text-sage-500" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-warm-800">{recipe.title}</h2>
+            <h2 className="text-sm font-bold text-warm-800">{recipe.title}</h2>
             <p className="text-xs text-warm-400">Matlagningsläge</p>
           </div>
         </div>
@@ -186,8 +187,8 @@ export function CookingMode({ recipe, onClose }) {
       </div>
 
       {/* Progress */}
-      <div className="h-1 bg-cream-300">
-        <motion.div className="h-full bg-sage-400" animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
+      <div className="h-1 bg-cream-200">
+        <motion.div className="h-full bg-sage-400 rounded-full" animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
       </div>
 
       {/* Main content */}
@@ -205,13 +206,13 @@ export function CookingMode({ recipe, onClose }) {
             ))}
           </div>
 
-          <span className="label-sm text-sage-500 mb-4">Steg {currentStep + 1} av {totalSteps}</span>
+          <span className="label-sm text-sage-500 font-bold mb-4">Steg {currentStep + 1} av {totalSteps}</span>
 
           <AnimatePresence mode="wait">
             <motion.p key={currentStep}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}
-              className="font-display text-2xl sm:text-3xl lg:text-4xl text-warm-800 text-center leading-snug max-w-xl">
+              className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-warm-800 text-center leading-snug max-w-xl tracking-tight">
               {stepText}
             </motion.p>
           </AnimatePresence>
@@ -297,7 +298,8 @@ export function CookingMode({ recipe, onClose }) {
       </div>
 
       {/* Navigation */}
-      <div className="border-t border-warm-200 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-md">
+      <div className="border-t border-warm-200/30 px-6 py-4 flex items-center justify-between"
+           style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
         <button onClick={goPrev} disabled={currentStep === 0}
           className="flex items-center gap-2 text-sm font-medium text-warm-500 disabled:opacity-30 hover:text-warm-800 transition-colors px-4 py-2.5 rounded-xl">
           <ChevronLeft size={18} /> Föregående

@@ -1,6 +1,6 @@
 // ============================================
-// BottomTabBar — iOS-style 4-tab navigation
-// Search, Heart (Favorites), Map (Stores), User (Settings)
+// BottomTabBar — Glassmorphism tab navigation
+// Soft UI with frosted glass effect
 // ============================================
 
 'use client';
@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 import { Search, Heart, MapPin, User } from 'lucide-react';
 
 const TABS = [
-  { href: '/', label: 'Sök', icon: Search },
+  { href: '/', label: 'Sok', icon: Search },
   { href: '/favoriter', label: 'Favoriter', icon: Heart },
   { href: '/butiker', label: 'Butiker', icon: MapPin },
   { href: '/installningar', label: 'Profil', icon: User },
@@ -28,8 +28,12 @@ export function BottomTabBar() {
   };
 
   return (
-    <nav className="app-tab-bar z-50
-                    bg-white/95 backdrop-blur-xl border-t border-warm-200/60">
+    <nav className="app-tab-bar z-50 border-t border-warm-200/40"
+         style={{
+           background: 'rgba(255, 255, 255, 0.80)',
+           backdropFilter: 'blur(24px)',
+           WebkitBackdropFilter: 'blur(24px)',
+         }}>
       <div className="flex items-center justify-around h-16 px-2">
         {TABS.map((tab) => {
           const Icon = tab.icon;
@@ -62,7 +66,7 @@ export function BottomTabBar() {
                 />
               </motion.div>
               <span className={`text-[10px] leading-tight
-                ${active ? 'font-semibold text-sage-500' : 'font-medium text-warm-400'}`}>
+                ${active ? 'font-bold text-sage-500' : 'font-medium text-warm-400'}`}>
                 {tab.label}
               </span>
             </Link>

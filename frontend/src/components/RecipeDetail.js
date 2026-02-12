@@ -1,6 +1,6 @@
 // ============================================
-// RecipeDetail — Bright warm recipe modal
-// Soft UI, cooking + grocery launchers
+// RecipeDetail — Glassmorphism recipe modal
+// Floating cook button, soft shadows, clean UI
 // ============================================
 
 'use client';
@@ -54,7 +54,7 @@ export function RecipeDetail({ recipe, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-warm-800/30 backdrop-blur-sm"
+          className="absolute inset-0 bg-warm-900/20 backdrop-blur-md"
           onClick={onClose}
         />
 
@@ -63,14 +63,14 @@ export function RecipeDetail({ recipe, onClose }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="relative w-full max-w-2xl max-h-[92vh] bg-white rounded-t-3xl sm:rounded-3xl
+          className="relative w-full max-w-2xl max-h-[92vh] bg-white rounded-t-[32px] sm:rounded-[32px]
                     overflow-hidden z-10 flex flex-col shadow-strong"
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white/90 backdrop-blur-xl border-b border-warm-100
-                        px-6 py-5 flex items-start justify-between z-10">
+          <div className="sticky top-0 z-10 border-b border-warm-200/30 px-6 py-5 flex items-start justify-between"
+               style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
             <div className="flex-1 pr-4">
-              <h2 className="font-display text-2xl sm:text-3xl text-warm-800">{recipe.title}</h2>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-warm-800 tracking-tight">{recipe.title}</h2>
               {recipe.source_name && (
                 <p className="text-sm text-warm-500 mt-1 flex items-center gap-1.5">
                   Källa:{' '}
@@ -318,6 +318,19 @@ export function RecipeDetail({ recipe, onClose }) {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Floating "Start cooking" button */}
+          <div className="sticky bottom-0 px-5 py-4 border-t border-warm-200/30"
+               style={{ background: 'rgba(255,255,255,0.90)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+            <button
+              onClick={() => setShowCookingMode(true)}
+              className="w-full bg-sage-400 text-white py-4 rounded-full font-bold text-base
+                       shadow-sage-glow active:scale-[0.97] transition-all duration-200
+                       flex items-center justify-center gap-2"
+            >
+              <Play size={18} strokeWidth={2.5} /> Borja laga
+            </button>
           </div>
         </motion.div>
       </div>

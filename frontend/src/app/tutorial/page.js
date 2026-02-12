@@ -21,7 +21,7 @@ const STEPS = [
   {
     id: 'welcome',
     icon: Sparkles,
-    iconBg: 'bg-sage-100',
+    iconBg: 'bg-sage-50',
     iconColor: 'text-sage-400',
     title: 'Hej! Jag heter Nisse',
     subtitle: 'Din personliga matassistent',
@@ -51,9 +51,9 @@ const STEPS = [
   {
     id: 'location',
     icon: MapPin,
-    iconBg: 'bg-sage-50',
+    iconBg: 'bg-sage-50 shadow-soft',
     iconColor: 'text-sage-400',
-    title: 'Platsåtkomst',
+    title: 'Platsatkomst',
     subtitle: 'Hitta butiker nära dig',
     description:
       'För att visa närmaste mataffärer och ge dig vägbeskrivningar behöver vi tillgång till din plats. Du kan ändra detta när som helst i inställningarna.',
@@ -175,8 +175,8 @@ export default function TutorialPage() {
               >
                 <current.icon size={36} className={current.iconColor} />
               </motion.div>
-              <h1 className="font-display text-3xl text-warm-800">{current.title}</h1>
-              <p className="text-warm-500 mt-1.5 text-base">{current.subtitle}</p>
+              <h1 className="font-display text-3xl font-bold text-warm-800 tracking-tight">{current.title}</h1>
+              <p className="text-warm-400 mt-1.5 text-base font-medium">{current.subtitle}</p>
             </div>
 
             {/* Card content */}

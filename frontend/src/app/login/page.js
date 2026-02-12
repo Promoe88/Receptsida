@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { LogIn, Eye, EyeOff, Sparkles, Loader2 } from 'lucide-react';
+import { LogIn, Eye, EyeOff, ChefHat, Loader2 } from 'lucide-react';
 import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 function LoginForm() {
@@ -46,7 +46,7 @@ function LoginForm() {
       {/* Email/password form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">E-post</label>
+          <label className="text-xs font-bold text-warm-400 uppercase tracking-wider mb-1.5 block">E-post</label>
           <input
             type="email"
             value={email}
@@ -57,7 +57,7 @@ function LoginForm() {
           />
         </div>
         <div>
-          <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">Lösenord</label>
+          <label className="text-xs font-bold text-warm-400 uppercase tracking-wider mb-1.5 block">Losenord</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -114,11 +114,11 @@ export default function LoginPage() {
             transition={{ duration: 0.5 }}
             className="text-center mb-8"
           >
-            <div className="w-16 h-16 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-              <Sparkles size={30} className="text-sage-400" />
+            <div className="w-16 h-16 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
+              <ChefHat size={30} className="text-sage-400" strokeWidth={2} />
             </div>
-            <h1 className="font-display text-3xl text-warm-800">Välkommen tillbaka</h1>
-            <p className="text-warm-500 mt-2">Logga in på Nisse</p>
+            <h1 className="font-display text-3xl font-bold text-warm-800 tracking-tight">Valkommen tillbaka</h1>
+            <p className="text-warm-400 mt-2 font-medium">Logga in pa Nisse</p>
           </motion.div>
 
           <motion.div

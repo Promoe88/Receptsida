@@ -33,7 +33,7 @@ export function NisseLoader({ size = 48, className = '' }) {
 
 export function NisseFullPageLoader() {
   return (
-    <div className="fixed inset-0 z-[100] bg-cream/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+    <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-md flex flex-col items-center justify-center gap-4">
       <NisseLoader size={56} />
       <motion.p
         initial={{ opacity: 0 }}

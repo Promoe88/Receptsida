@@ -8,17 +8,20 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Mic, MicOff, Users, Loader2, Sparkles, ArrowRight } from 'lucide-react';
+import {
+  Search, Mic, MicOff, Users, Loader2, Sparkles, ArrowRight,
+  Zap, Leaf, UsersRound, Package, Wine,
+} from 'lucide-react';
 import { useVoiceInput } from '../hooks/useVoice';
 import { NisseButton } from './NisseButton';
 
 const CONTEXT_CHIPS = [
-  { id: 'barnfamilj', label: 'Barnfamilj', icon: '👨‍👩‍👧‍👦', color: 'sage' },
-  { id: 'snabbt', label: 'Snabbt & Billigt', icon: '⚡', color: 'terra' },
-  { id: 'matlador', label: 'Matlådor', icon: '📦', color: 'sage' },
-  { id: 'fest', label: 'Festmåltid', icon: '🥂', color: 'terra' },
-  { id: 'vegetariskt', label: 'Vegetariskt', icon: '🌿', color: 'sage' },
-  { id: 'helg', label: 'Helgmiddag', icon: '🍷', color: 'terra' },
+  { id: 'barnfamilj', label: 'Barnfamilj', Icon: UsersRound, color: 'sage' },
+  { id: 'snabbt', label: 'Snabbt & Billigt', Icon: Zap, color: 'terra' },
+  { id: 'matlador', label: 'Matlador', Icon: Package, color: 'sage' },
+  { id: 'fest', label: 'Festmaltid', Icon: Sparkles, color: 'terra' },
+  { id: 'vegetariskt', label: 'Vegetariskt', Icon: Leaf, color: 'sage' },
+  { id: 'helg', label: 'Helgmiddag', Icon: Wine, color: 'terra' },
 ];
 
 const CONTEXT_MAP = {
@@ -101,7 +104,7 @@ export function HeroSearch({ onSearch, loading }) {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-2xl text-center"
       >
-        <h1 className="font-display text-display-sm sm:text-display-md lg:text-display-lg text-warm-800 mb-4">
+        <h1 className="font-display text-display-sm sm:text-display-md lg:text-display-lg text-warm-800 mb-4 tracking-tight">
           Vad lagar vi idag?
         </h1>
         <p className="text-warm-500 text-base sm:text-lg mb-10 max-w-md mx-auto leading-relaxed">
@@ -206,6 +209,7 @@ export function HeroSearch({ onSearch, loading }) {
                   <div className="flex flex-wrap gap-2.5">
                     {CONTEXT_CHIPS.map((chip) => {
                       const active = selectedChips.includes(chip.id);
+                      const ChipIcon = chip.Icon;
                       return (
                         <motion.button
                           key={chip.id}
@@ -217,7 +221,7 @@ export function HeroSearch({ onSearch, loading }) {
                             : 'chip'
                           }
                         >
-                          <span className="text-base">{chip.icon}</span>
+                          <ChipIcon size={15} strokeWidth={2.5} />
                           {chip.label}
                         </motion.button>
                       );

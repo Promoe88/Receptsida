@@ -1,6 +1,6 @@
 // ============================================
-// GroceryMode — Warm voice-controlled shopping
-// Guides through store by aisle, bright aesthetic
+// GroceryMode — Glassmorphism voice-controlled shopping
+// Guides through store by aisle, soft UI aesthetic
 // ============================================
 
 'use client';
@@ -123,18 +123,19 @@ export function GroceryMode({ recipe, onClose }) {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="relative w-full max-w-lg max-h-[90vh] bg-white rounded-t-3xl sm:rounded-3xl
+        className="relative w-full max-w-lg max-h-[90vh] bg-white rounded-t-[32px] sm:rounded-[32px]
                   overflow-hidden z-10 flex flex-col shadow-strong"
       >
         {/* Header */}
-        <div className="bg-cream-200/60 px-6 py-5 border-b border-warm-200">
+        <div className="px-6 py-5 border-b border-warm-200/30"
+             style={{ background: 'rgba(247,247,247,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center">
-                <Route size={20} className="text-sage-600" />
+              <div className="w-10 h-10 rounded-2xl bg-sage-50 flex items-center justify-center shadow-soft">
+                <Route size={20} className="text-sage-500" />
               </div>
               <div>
-                <h2 className="font-display text-xl text-warm-800">Inköpslista</h2>
+                <h2 className="font-display text-xl font-bold text-warm-800 tracking-tight">Inköpslista</h2>
                 <p className="text-warm-400 text-xs mt-0.5">{recipe.title}</p>
               </div>
             </div>
@@ -328,7 +329,8 @@ export function GroceryMode({ recipe, onClose }) {
         </AnimatePresence>
 
         {/* Bottom: voice control + done */}
-        <div className="p-4 border-t border-warm-200 bg-cream-200/40 flex items-center gap-3">
+        <div className="p-4 border-t border-warm-200/30 flex items-center gap-3"
+             style={{ background: 'rgba(255,255,255,0.90)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
           {voiceSupported && (
             <button
               onClick={toggleVoiceListening}
