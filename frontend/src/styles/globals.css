@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
 @layer base {
   html {
@@ -14,27 +14,27 @@
   }
 
   ::selection {
-    background: rgba(124, 154, 130, 0.2);
+    background: rgba(90, 125, 108, 0.2);
   }
 }
 
 @layer components {
   /* ── Buttons ── */
   .btn-primary {
-    @apply bg-sage-400 text-white px-6 py-3 rounded-2xl font-semibold text-sm
+    @apply bg-sage-400 text-white px-6 py-3 rounded-full font-semibold text-sm
            hover:bg-sage-500 transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed
            active:scale-[0.97] shadow-soft hover:shadow-medium;
   }
 
   .btn-terra {
-    @apply bg-terra-400 text-white px-6 py-3 rounded-2xl font-semibold text-sm
+    @apply bg-terra-400 text-white px-6 py-3 rounded-full font-semibold text-sm
            hover:bg-terra-500 transition-all duration-200
            active:scale-[0.97] shadow-soft hover:shadow-medium;
   }
 
   .btn-outline {
-    @apply bg-white text-warm-700 px-6 py-3 rounded-2xl font-semibold text-sm
+    @apply bg-white text-warm-700 px-6 py-3 rounded-full font-semibold text-sm
            border border-warm-200 hover:border-sage-300 hover:bg-sage-50
            transition-all duration-200 active:scale-[0.97];
   }
@@ -47,17 +47,17 @@
 
   /* ── Cards ── */
   .card {
-    @apply bg-white rounded-3xl shadow-card;
+    @apply bg-white rounded-2xl shadow-card;
   }
 
   .card-elevated {
-    @apply bg-white rounded-3xl shadow-card
+    @apply bg-white rounded-2xl shadow-card
            hover:shadow-elevated hover:-translate-y-0.5
            transition-all duration-300;
   }
 
   .card-flat {
-    @apply bg-cream-200 rounded-3xl border border-warm-200/50;
+    @apply bg-cream-200 rounded-2xl border border-warm-200/50;
   }
 
   /* ── Inputs ── */
@@ -97,25 +97,25 @@
 
   /* ── Chips (for search context) ── */
   .chip {
-    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium
+    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
            bg-white border border-warm-200 text-warm-600
            hover:border-sage-300 hover:bg-sage-50 hover:text-sage-700
            transition-all duration-200 cursor-pointer select-none;
   }
 
   .chip-active {
-    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium
+    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
            bg-sage-50 border border-sage-300 text-sage-700 shadow-sage-glow;
   }
 
   .chip-terra {
-    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-medium
+    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
            bg-terra-50 border border-terra-200 text-terra-600;
   }
 
   /* ── Price tag ── */
   .price-tag {
-    @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl
+    @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full
            bg-sage-500 text-white text-sm font-bold shadow-sage-glow;
   }
 }

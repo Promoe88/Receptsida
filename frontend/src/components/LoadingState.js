@@ -5,7 +5,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
+import { NisseLoader } from './NisseLoader';
 
 const STEPS = [
   { label: 'Analyserar dina ingredienser...', duration: 1500 },
@@ -37,7 +38,7 @@ export function LoadingState() {
 
   return (
     <div className="text-center py-16 px-6 max-w-md mx-auto">
-      <Loader2 size={48} className="text-sage-400 animate-spin mx-auto mb-6" />
+      <NisseLoader size={56} className="mb-6" />
 
       <h3 className="font-display text-xl text-warm-800 mb-2">
         Söker efter perfekta recept...

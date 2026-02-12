@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Warm Scandinavian palette
+        // Cream background
         cream: {
           DEFAULT: '#FDFBF7',
           50: '#FFFFFF',
@@ -14,33 +14,33 @@ module.exports = {
           400: '#E8E2D8',
           500: '#DED6CA',
         },
-        // Sage green — primary
+        // Sage green — primary (#5A7D6C)
         sage: {
-          50: '#F0F5F1',
-          100: '#E0EBE2',
-          200: '#C2D7C5',
-          300: '#A3C3A9',
-          400: '#7C9A82',
-          DEFAULT: '#7C9A82',
-          500: '#5E8266',
-          600: '#4A6B51',
-          700: '#3A5440',
-          800: '#2B3D30',
-          900: '#1B2720',
+          50: '#EFF5F2',
+          100: '#DFEAE4',
+          200: '#BFD5C9',
+          300: '#9FBFAE',
+          400: '#5A7D6C',
+          DEFAULT: '#5A7D6C',
+          500: '#4A6A5A',
+          600: '#3D5849',
+          700: '#304539',
+          800: '#23332A',
+          900: '#17211B',
         },
-        // Terracotta — secondary accent
+        // Warm Clay — secondary (#D97757)
         terra: {
-          50: '#FDF5F0',
-          100: '#F5E6DD',
-          200: '#EAC9B5',
-          300: '#D4916F',
-          400: '#C4704B',
-          DEFAULT: '#C4704B',
-          500: '#A85A38',
-          600: '#8C4A2F',
-          700: '#6E3A25',
-          800: '#512B1C',
-          900: '#351C12',
+          50: '#FDF4F0',
+          100: '#F9E5DC',
+          200: '#F0C7B5',
+          300: '#E49A7E',
+          400: '#D97757',
+          DEFAULT: '#D97757',
+          500: '#C4623F',
+          600: '#A34F32',
+          700: '#7E3D27',
+          800: '#5A2C1C',
+          900: '#381C12',
         },
         // Warm neutrals for text
         warm: {
@@ -58,7 +58,7 @@ module.exports = {
       },
       fontFamily: {
         display: ['"DM Serif Display"', 'Georgia', 'serif'],
-        body: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['"DM Mono"', 'monospace'],
       },
       fontSize: {
@@ -79,8 +79,8 @@ module.exports = {
         elevated: '0 8px 40px rgba(45,42,38,0.10)',
         strong: '0 12px 48px rgba(45,42,38,0.14)',
         'inner-soft': 'inset 0 1px 0 rgba(255,255,255,0.6)',
-        'sage-glow': '0 0 20px rgba(124,154,130,0.15)',
-        'terra-glow': '0 0 20px rgba(196,112,75,0.15)',
+        'sage-glow': '0 0 20px rgba(90,125,108,0.15)',
+        'terra-glow': '0 0 20px rgba(217,119,87,0.15)',
       },
       animation: {
         'fade-up': 'fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) forwards',
@@ -89,6 +89,7 @@ module.exports = {
         'slide-up': 'slideUp 0.4s cubic-bezier(0.22,1,0.36,1) forwards',
         'ticker': 'ticker 20s linear infinite',
         'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+        'sparkle': 'sparkle 1.8s ease-in-out infinite',
       },
       keyframes: {
         fadeUp: {
@@ -114,6 +115,10 @@ module.exports = {
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.7' },
+        },
+        sparkle: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.7' },
+          '50%': { transform: 'scale(1.15)', opacity: '1' },
         },
       },
     },
