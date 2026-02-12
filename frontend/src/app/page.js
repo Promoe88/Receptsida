@@ -5,7 +5,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '../lib/store';
 import { useRecipeSearch, useFavorites } from '../hooks/useRecipes';
@@ -31,11 +32,20 @@ const TICKER_ITEMS = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { results, loading, error, search, reset } = useRecipeSearch();
   const { toggleFavorite } = useFavorites();
   const [lastQuery, setLastQuery] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+
+  // Redirect first-time users to tutorial
+  useEffect(() => {
+    const tutorialSeen = localStorage.getItem('nisse_tutorial_seen');
+    if (!tutorialSeen) {
+      router.replace('/tutorial');
+    }
+  }, [router]);
 
   function handleSearch(query, householdSize, preferences) {
     setLastQuery(query);

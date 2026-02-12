@@ -92,6 +92,7 @@ export default function TutorialPage() {
       gdpr.recordConsent('PRIVACY_POLICY', true).catch(() => {});
       await completeOnboarding();
     }
+    localStorage.setItem('nisse_tutorial_seen', 'true');
     router.push('/');
   }
 
