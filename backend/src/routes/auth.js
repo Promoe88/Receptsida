@@ -37,7 +37,12 @@ router.post(
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      throw new AppError(409, 'email_taken', 'E-postadressen är redan registrerad.');
+      // Allow re-registration if the previous account was never verified
+      if (!existing.emailVerified && existing.authProvider === 'EMAIL') {
+        await prisma.user.delete({ where: { id: existing.id } });
+      } else {
+        throw new AppError(409, 'email_taken', 'E-postadressen är redan registrerad.');
+      }
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
