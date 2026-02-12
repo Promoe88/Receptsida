@@ -15,7 +15,7 @@ export function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
 
   return (
-    <nav className="border-b border-warm-200/60 bg-cream/90 backdrop-blur-xl sticky top-0 z-50">
+    <nav className="border-b border-warm-200/60 bg-cream/90 backdrop-blur-xl sticky top-0 z-50 safe-top">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}

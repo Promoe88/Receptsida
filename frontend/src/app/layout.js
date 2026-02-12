@@ -19,14 +19,22 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover', // Required for iOS safe area insets
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="sv">
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-screen flex flex-col safe-left safe-right">
         <AuthProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-warm-200 py-10 px-6 bg-cream-200">
+          <footer className="border-t border-warm-200 py-10 px-6 bg-cream-200 safe-bottom">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 bg-sage-400 rounded-xl flex items-center justify-center">
