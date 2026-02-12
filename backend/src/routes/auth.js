@@ -75,9 +75,12 @@ router.post(
         householdSize: user.householdSize,
         plan: user.plan,
         emailVerified: user.emailVerified,
+        authProvider: user.authProvider,
+        onboardingDone: user.onboardingDone,
       },
       accessToken,
       refreshToken: refreshTokenValue,
+      isNewUser: true,
     });
   })
 );
@@ -245,6 +248,11 @@ router.post(
       throw new AppError(401, 'invalid_credentials', 'Fel e-post eller lösenord.');
     }
 
+    // Social auth users without password should use their provider to log in
+    if (!user.passwordHash) {
+      throw new AppError(401, 'social_auth_user', `Detta konto använder ${user.authProvider}-inloggning. Logga in med ${user.authProvider === 'GOOGLE' ? 'Google' : 'Apple'} istället.`);
+    }
+
     const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword) {
       throw new AppError(401, 'invalid_credentials', 'Fel e-post eller lösenord.');
@@ -261,6 +269,8 @@ router.post(
         householdSize: user.householdSize,
         plan: user.plan,
         emailVerified: user.emailVerified,
+        authProvider: user.authProvider,
+        onboardingDone: user.onboardingDone,
       },
       accessToken,
       refreshToken: refreshTokenValue,
@@ -354,6 +364,10 @@ router.get(
       householdSize: user.householdSize,
       plan: user.plan,
       emailVerified: user.emailVerified,
+      authProvider: user.authProvider,
+      onboardingDone: user.onboardingDone,
+      locationConsent: user.locationConsent,
+      gdprConsentAt: user.gdprConsentAt,
       stats: {
         totalSearches: user._count.searches,
         totalFavorites: user._count.favorites,
@@ -362,6 +376,22 @@ router.get(
       },
       createdAt: user.createdAt,
     });
+  })
+);
+
+// ──────────────────────────────────────────
+// POST /auth/complete-onboarding
+// ──────────────────────────────────────────
+router.post(
+  '/complete-onboarding',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { onboardingDone: true },
+    });
+
+    res.json({ message: 'Onboarding klar!' });
   })
 );
 

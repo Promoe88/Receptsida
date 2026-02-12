@@ -8,7 +8,8 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../lib/store';
-import { LogIn, Eye, EyeOff, ChefHat } from 'lucide-react';
+import { LogIn, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 function LoginForm() {
   const router = useRouter();
@@ -35,11 +36,15 @@ function LoginForm() {
 
   return (
     <div className="card p-6">
+      {/* Social login */}
+      <SocialLoginSection redirectTo={redirect} />
+
+      {/* Email/password form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">E-post</label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-            className="input" placeholder="din@email.se" required autoFocus />
+            className="input" placeholder="din@email.se" required />
         </div>
         <div>
           <label className="text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5 block">Lösenord</label>
@@ -77,10 +82,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <ChefHat size={28} className="text-sage-500" />
+            <Sparkles size={28} className="text-sage-500" />
           </div>
           <h1 className="font-display text-3xl text-warm-800">Välkommen tillbaka</h1>
-          <p className="text-warm-500 mt-2">Logga in för att hitta dina recept</p>
+          <p className="text-warm-500 mt-2">Logga in på Nisse</p>
         </div>
         <Suspense fallback={<div className="card animate-pulse h-64" />}>
           <LoginForm />

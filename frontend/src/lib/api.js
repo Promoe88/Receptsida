@@ -156,6 +156,28 @@ export const auth = {
     });
   },
 
+  async googleLogin(idToken) {
+    const data = await apiFetch('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ idToken }),
+    });
+    setTokens(data.accessToken, data.refreshToken);
+    return { user: data.user, isNewUser: data.isNewUser };
+  },
+
+  async appleLogin(identityToken, authorizationCode, fullName) {
+    const data = await apiFetch('/auth/apple', {
+      method: 'POST',
+      body: JSON.stringify({ identityToken, authorizationCode, fullName }),
+    });
+    setTokens(data.accessToken, data.refreshToken);
+    return { user: data.user, isNewUser: data.isNewUser };
+  },
+
+  async completeOnboarding() {
+    return apiFetch('/auth/complete-onboarding', { method: 'POST' });
+  },
+
   async initFromStorage() {
     const stored = getStoredRefreshToken();
     if (!stored) return null;
@@ -165,6 +187,53 @@ export const auth = {
     if (!refreshed) return null;
 
     return auth.me();
+  },
+};
+
+// ── GDPR API ──
+
+export const gdpr = {
+  async recordConsent(type, granted) {
+    return apiFetch('/gdpr/consent', {
+      method: 'POST',
+      body: JSON.stringify({ type, granted }),
+    });
+  },
+
+  async getConsent() {
+    return apiFetch('/gdpr/consent');
+  },
+
+  async exportData() {
+    return apiFetch('/gdpr/export');
+  },
+
+  async deleteAccount(confirmEmail) {
+    return apiFetch('/gdpr/delete-account', {
+      method: 'POST',
+      body: JSON.stringify({ confirmEmail }),
+    });
+  },
+};
+
+// ── Locations API ──
+
+export const locations = {
+  async nearby(lat, lng, radius) {
+    const params = new URLSearchParams({ lat: String(lat), lng: String(lng) });
+    if (radius) params.set('radius', String(radius));
+    return apiFetch(`/locations/nearby?${params.toString()}`);
+  },
+
+  async directions(fromLat, fromLng, toLat, toLng, mode = 'driving') {
+    const params = new URLSearchParams({
+      fromLat: String(fromLat),
+      fromLng: String(fromLng),
+      toLat: String(toLat),
+      toLng: String(toLng),
+      mode,
+    });
+    return apiFetch(`/locations/directions?${params.toString()}`);
   },
 };
 
@@ -224,4 +293,4 @@ export const lexicon = {
   },
 };
 
-export default { auth, recipes, lexicon };
+export default { auth, recipes, lexicon, gdpr, locations };

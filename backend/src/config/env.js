@@ -21,6 +21,15 @@ const envSchema = z.object({
   RECIPE_SEARCH_LIMIT_PER_HOUR_PREMIUM: z.coerce.number().default(100),
   RESEND_API_KEY: z.string().min(5),
   EMAIL_FROM: z.string().default('MatKompass <noreply@matkompass.se>'),
+  // Social auth (optional — set to enable)
+  GOOGLE_CLIENT_ID: z.string().optional().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
+  APPLE_CLIENT_ID: z.string().optional().default(''),
+  APPLE_TEAM_ID: z.string().optional().default(''),
+  APPLE_KEY_ID: z.string().optional().default(''),
+  APPLE_PRIVATE_KEY: z.string().optional().default(''),
+  // Google Maps
+  GOOGLE_MAPS_API_KEY: z.string().optional().default(''),
 });
 
 function loadConfig() {
