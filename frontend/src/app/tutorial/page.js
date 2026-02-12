@@ -138,7 +138,7 @@ export default function TutorialPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-5 py-10 safe-top safe-bottom">
+    <div className="flex-1 flex flex-col items-center justify-center px-5 py-6">
       <div className="w-full max-w-md flex-1 flex flex-col justify-center">
         {/* Progress dots */}
         <div className="flex justify-center gap-2.5 mb-10">

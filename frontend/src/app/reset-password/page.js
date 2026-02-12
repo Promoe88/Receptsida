@@ -24,7 +24,7 @@ function ResetContent() {
 
   if (!token) {
     return (
-      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4">
+      <div className="flex-1 flex items-center justify-center px-4">
         <div className="card p-8 text-center max-w-md">
           <Lock size={48} className="text-terra-400 mx-auto mb-4" />
           <h1 className="font-display text-2xl text-warm-800 mb-2">Ogiltig länk</h1>
@@ -59,7 +59,7 @@ function ResetContent() {
 
   if (success) {
     return (
-      <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4">
+      <div className="flex-1 flex items-center justify-center px-4">
         <div className="card p-8 text-center max-w-md">
           <CheckCircle size={48} className="text-sage-400 mx-auto mb-4" />
           <h1 className="font-display text-2xl text-warm-800 mb-2">Lösenord uppdaterat!</h1>
@@ -73,7 +73,7 @@ function ResetContent() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4">
+    <div className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
@@ -147,7 +147,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <Loader2 size={32} className="text-sage-400 animate-spin" />
         </div>
       }

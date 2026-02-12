@@ -36,7 +36,7 @@ function VerifyContent() {
   }, [token]);
 
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4">
+    <div className="flex-1 flex items-center justify-center px-4">
       <div className="w-full max-w-md text-center">
         <div className="card p-8">
           {status === 'loading' && (
@@ -78,7 +78,7 @@ export default function VerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <Loader2 size={32} className="text-sage-400 animate-spin" />
         </div>
       }

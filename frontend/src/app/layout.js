@@ -31,7 +31,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="sv">
-      <body className="min-h-screen flex flex-col safe-left safe-right">
+      <body className="min-h-screen flex flex-col">
         <AuthProvider>
           <LayoutShell>{children}</LayoutShell>
         </AuthProvider>

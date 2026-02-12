@@ -28,8 +28,8 @@ export function BottomTabBar() {
   };
 
   return (
-    <nav className="app-tab-bar fixed bottom-0 left-0 right-0 z-50
-                    bg-white/95 backdrop-blur-xl border-t border-warm-200/60 safe-bottom">
+    <nav className="app-tab-bar z-50
+                    bg-white/95 backdrop-blur-xl border-t border-warm-200/60">
       <div className="flex items-center justify-around h-16 px-2">
         {TABS.map((tab) => {
           const Icon = tab.icon;
