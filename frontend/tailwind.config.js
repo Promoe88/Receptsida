@@ -75,7 +75,7 @@ module.exports = {
       boxShadow: {
         soft: '0 2px 16px rgba(0,0,0,0.04)',
         card: '0 4px 40px rgba(0,0,0,0.05)',
-        'card-deep': '0 20px 50px rgba(0,0,0,0.10)',
+        'card-deep': '0 8px 24px rgba(0,0,0,0.06), 0 24px 60px rgba(0,0,0,0.12)',
         medium: '0 8px 32px rgba(0,0,0,0.06)',
         elevated: '0 12px 48px rgba(0,0,0,0.08)',
         strong: '0 20px 60px rgba(0,0,0,0.10)',
