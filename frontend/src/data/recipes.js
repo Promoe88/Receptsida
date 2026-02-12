@@ -42,3 +42,9 @@ export function getStepDuration(step) {
   if (typeof step !== 'object') return null;
   return step?.duration_seconds || step?.duration || null;
 }
+
+// Get voice-optimized cue for TTS, falls back to regular text
+export function getStepVoiceCue(step) {
+  if (typeof step === 'string') return step;
+  return step?.voice_cue || step?.text || step?.content || '';
+}

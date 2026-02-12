@@ -11,6 +11,7 @@ import {
   X, Clock, Users, ExternalLink,
   ShoppingCart, ListOrdered, Play, ShoppingBag, Check,
   Lightbulb, Wrench, Coins, Share2, Send,
+  Wine, Refrigerator, Scale, AlertTriangle, GraduationCap,
 } from 'lucide-react';
 import { CookingMode } from './CookingMode';
 import { GroceryMode } from './GroceryMode';
@@ -186,17 +187,27 @@ export function RecipeDetail({ recipe, onClose }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(recipe.ingredients || []).map((ing, idx) => (
                     <div key={idx}
-                      className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm border
+                      className={`rounded-2xl px-4 py-3 text-sm border
                         ${ing.have ? 'bg-cream-200 border-warm-200/60' : 'bg-sage-50/50 border-sage-200/40'}`}
                     >
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0
-                        ${ing.have ? 'bg-sage-400' : 'bg-terra-400'}`} />
-                      <span className="flex-1">
-                        <strong className="font-medium text-warm-800">{ing.amount}</strong>{' '}
-                        <span className="text-warm-600">{ing.name}</span>
-                      </span>
-                      {!ing.have && ing.est_price && (
-                        <span className="text-xs text-terra-400 font-semibold">{ing.est_price}</span>
+                      <div className="flex items-center gap-2.5">
+                        <span className={`w-2 h-2 rounded-full flex-shrink-0
+                          ${ing.have ? 'bg-sage-400' : 'bg-terra-400'}`} />
+                        <span className="flex-1">
+                          <strong className="font-medium text-warm-800">{ing.amount}</strong>{' '}
+                          <span className="text-warm-600">{ing.name}</span>
+                        </span>
+                        {!ing.have && ing.est_price && (
+                          <span className="text-xs text-terra-400 font-semibold">{ing.est_price}</span>
+                        )}
+                      </div>
+                      {ing.substitutes?.length > 0 && (
+                        <p className="text-[11px] text-warm-400 mt-1 ml-4.5 pl-0.5">
+                          Alt: {ing.substitutes.join(', ')}
+                        </p>
+                      )}
+                      {ing.tip && (
+                        <p className="text-[11px] text-sage-500 mt-0.5 ml-4.5 pl-0.5">{ing.tip}</p>
                       )}
                     </div>
                   ))}
@@ -232,22 +243,36 @@ export function RecipeDetail({ recipe, onClose }) {
                 </h3>
                 <ol className="space-y-0 divide-y divide-warm-100">
                   {(recipe.steps || []).map((step, idx) => (
-                    <li key={idx} className="flex gap-4 py-4">
-                      <button
-                        onClick={() => toggleStep(idx)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center
-                                  text-xs font-bold flex-shrink-0 mt-0.5 transition-all duration-200
-                                  ${checkedSteps.has(idx)
-                                    ? 'bg-sage-400 text-white'
-                                    : 'bg-sage-100 text-sage-700 hover:bg-sage-200'
-                                  }`}
-                      >
-                        {checkedSteps.has(idx) ? <Check size={12} strokeWidth={3} /> : idx + 1}
-                      </button>
-                      <p className={`text-sm leading-relaxed flex-1 transition-all duration-200
-                        ${checkedSteps.has(idx) ? 'text-warm-400 line-through' : 'text-warm-700'}`}>
-                        {getStepText(step)}
-                      </p>
+                    <li key={idx} className="py-4">
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => toggleStep(idx)}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center
+                                    text-xs font-bold flex-shrink-0 mt-0.5 transition-all duration-200
+                                    ${checkedSteps.has(idx)
+                                      ? 'bg-sage-400 text-white'
+                                      : 'bg-sage-100 text-sage-700 hover:bg-sage-200'
+                                    }`}
+                        >
+                          {checkedSteps.has(idx) ? <Check size={12} strokeWidth={3} /> : idx + 1}
+                        </button>
+                        <div className="flex-1">
+                          <p className={`text-sm leading-relaxed transition-all duration-200
+                            ${checkedSteps.has(idx) ? 'text-warm-400 line-through' : 'text-warm-700'}`}>
+                            {getStepText(step)}
+                          </p>
+                          {step.warning && !checkedSteps.has(idx) && (
+                            <p className="text-[11px] text-terra-500 mt-1.5 flex items-center gap-1">
+                              <AlertTriangle size={10} /> {step.warning}
+                            </p>
+                          )}
+                          {step.beginner_tip && !checkedSteps.has(idx) && (
+                            <p className="text-[11px] text-sage-500 mt-1">
+                              <GraduationCap size={10} className="inline mr-1" />{step.beginner_tip}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ol>
@@ -260,6 +285,36 @@ export function RecipeDetail({ recipe, onClose }) {
                   <p className="text-sm text-warm-700">
                     <strong className="font-semibold text-sage-600">Tips:</strong> {recipe.tips}
                   </p>
+                </div>
+              )}
+
+              {/* Drink pairing, leftovers, scaling */}
+              {(recipe.drink_pairing || recipe.leftover_tips || recipe.scaling_notes) && (
+                <div className="grid grid-cols-1 gap-2">
+                  {recipe.drink_pairing && (
+                    <div className="p-3.5 bg-cream-200/50 rounded-2xl border border-warm-200/50 flex gap-3">
+                      <Wine size={15} className="text-terra-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-warm-600">
+                        <strong className="font-medium text-warm-700">Dryck:</strong> {recipe.drink_pairing}
+                      </p>
+                    </div>
+                  )}
+                  {recipe.leftover_tips && (
+                    <div className="p-3.5 bg-cream-200/50 rounded-2xl border border-warm-200/50 flex gap-3">
+                      <Refrigerator size={15} className="text-sage-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-warm-600">
+                        <strong className="font-medium text-warm-700">Rester:</strong> {recipe.leftover_tips}
+                      </p>
+                    </div>
+                  )}
+                  {recipe.scaling_notes && (
+                    <div className="p-3.5 bg-cream-200/50 rounded-2xl border border-warm-200/50 flex gap-3">
+                      <Scale size={15} className="text-warm-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-warm-600">
+                        <strong className="font-medium text-warm-700">Skala:</strong> {recipe.scaling_notes}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

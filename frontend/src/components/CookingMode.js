@@ -12,7 +12,7 @@ import {
   RotateCcw, Check, Mic, MicOff, Volume2, VolumeX,
   MessageCircle, Send, Loader2, ChefHat,
 } from 'lucide-react';
-import { getStepText, getStepDuration } from '../data/recipes';
+import { getStepText, getStepDuration, getStepVoiceCue } from '../data/recipes';
 import { useSpeech, useVoiceInput } from '../hooks/useVoice';
 import { useCookingAssistant } from '../hooks/useRecipes';
 
@@ -97,8 +97,12 @@ export function CookingMode({ recipe, onClose }) {
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
+  const voiceCue = getStepVoiceCue(step);
+
   useEffect(() => {
-    if (voiceEnabled && stepText) speak(`Steg ${currentStep + 1}. ${stepText}`);
+    if (voiceEnabled && voiceCue) {
+      speak(`Steg ${currentStep + 1}. ${voiceCue}`);
+    }
   }, [currentStep, voiceEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goNext = useCallback(() => {
@@ -126,10 +130,11 @@ export function CookingMode({ recipe, onClose }) {
     if (lower.includes('nästa') || lower.includes('next')) goNext();
     else if (lower.includes('tillbaka') || lower.includes('föregående')) goPrev();
     else {
-      ask(transcript).then((answer) => { if (answer && voiceEnabled) speak(answer); });
+      const ctx = { currentStep, totalSteps, inputMode: 'voice' };
+      ask(transcript, ctx).then((answer) => { if (answer && voiceEnabled) speak(answer); });
       setShowChat(true);
     }
-  }, [goNext, goPrev, ask, voiceEnabled, speak]);
+  }, [goNext, goPrev, ask, voiceEnabled, speak, currentStep, totalSteps]);
 
   function toggleVoiceListening() {
     if (isListening) stopListening();
@@ -141,7 +146,8 @@ export function CookingMode({ recipe, onClose }) {
     if (!chatInput.trim() || chatLoading) return;
     const question = chatInput;
     setChatInput('');
-    const answer = await ask(question);
+    const ctx = { currentStep, totalSteps, inputMode: voiceEnabled ? 'voice' : 'text' };
+    const answer = await ask(question, ctx);
     if (answer && voiceEnabled) speak(answer);
   }
 

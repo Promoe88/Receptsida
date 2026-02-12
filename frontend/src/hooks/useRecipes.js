@@ -144,7 +144,7 @@ export function useCookingAssistant(recipe) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const ask = useCallback(async (question) => {
+  const ask = useCallback(async (question, context = {}) => {
     if (!recipe || !question.trim()) return null;
 
     const userMsg = { role: 'user', content: question };
@@ -153,6 +153,42 @@ export function useCookingAssistant(recipe) {
 
     try {
       const data = await recipes.askCookingAssistant(
+        { title: recipe.title, ingredients: recipe.ingredients, steps: recipe.steps, tips: recipe.tips },
+        question,
+        messages.slice(-6),
+        context
+      );
+      const assistantMsg = { role: 'assistant', content: data.answer };
+      setMessages((prev) => [...prev, assistantMsg]);
+      return data.answer;
+    } catch (err) {
+      const errorMsg = { role: 'assistant', content: 'Kunde inte svara just nu. Försök igen.' };
+      setMessages((prev) => [...prev, errorMsg]);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [recipe, messages]);
+
+  const clearMessages = useCallback(() => setMessages([]), []);
+
+  return { messages, loading, ask, clearMessages };
+}
+
+// ── useShoppingAssistant ──
+export function useShoppingAssistant(recipe) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const ask = useCallback(async (question) => {
+    if (!recipe || !question.trim()) return null;
+
+    const userMsg = { role: 'user', content: question };
+    setMessages((prev) => [...prev, userMsg]);
+    setLoading(true);
+
+    try {
+      const data = await recipes.askShoppingAssistant(
         { title: recipe.title, ingredients: recipe.ingredients, steps: recipe.steps, tips: recipe.tips },
         question,
         messages.slice(-6)
