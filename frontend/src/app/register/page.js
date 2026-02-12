@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home, ChevronLeft } from 'lucide-react';
 import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 const HOUSEHOLDS = [
@@ -52,6 +52,13 @@ export default function RegisterPage() {
   return (
     <PageTransition>
       <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1 text-sm font-medium text-warm-500 hover:text-warm-800 transition-colors mb-4 -ml-1 self-start"
+        >
+          <ChevronLeft size={20} />
+          Tillbaka
+        </button>
         <div className="w-full max-w-md mx-auto my-auto">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
