@@ -1,6 +1,7 @@
 // ============================================
-// Home Page — Modern Scandinavian Kitchen
-// Search hero (70vh) + Market Insight + Results
+// Home Page — Platform-aware
+// Web: Hero search + marketing sections
+// App: Compact search + quick actions
 // ============================================
 
 'use client';
@@ -8,9 +9,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
+import { isApp } from '../lib/platform';
 import { useAuthStore } from '../lib/store';
-import { useRecipeSearch, useFavorites } from '../hooks/useRecipes';
+import { useRecipeSearch, useFavorites, useSearchHistory } from '../hooks/useRecipes';
 import { HeroSearch } from '../components/HeroSearch';
+import { AppHome } from '../components/app/AppHome';
 import { RecipeCard } from '../components/RecipeCard';
 import { RecipeDetail } from '../components/RecipeDetail';
 import { ShoppingList } from '../components/ShoppingList';
@@ -18,11 +21,11 @@ import { LoadingState } from '../components/LoadingState';
 import { SourceBanner } from '../components/SourceBanner';
 import {
   ArrowLeft, Leaf, TrendingDown, Headphones, ChefHat,
-  ShoppingBag, Mic, Tag,
+  ShoppingBag, Mic,
 } from 'lucide-react';
 import Link from 'next/link';
 
-// Market insight ticker items
+// Market insight ticker items (web only)
 const TICKER_ITEMS = [
   { text: 'Kycklingfilé 20% billigare på Willys just nu', tag: 'Erbjudande' },
   { text: 'Laxfilé till bästa pris på Coop denna vecka', tag: 'Veckans fynd' },
@@ -36,6 +39,7 @@ export default function HomePage() {
   const { user } = useAuthStore();
   const { results, loading, error, search, reset } = useRecipeSearch();
   const { toggleFavorite } = useFavorites();
+  const { history, loadHistory } = useSearchHistory();
   const [lastQuery, setLastQuery] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
@@ -47,6 +51,13 @@ export default function HomePage() {
     }
   }, [router]);
 
+  // Load recent searches for app home
+  useEffect(() => {
+    if (isApp && user) {
+      loadHistory();
+    }
+  }, [user, loadHistory]);
+
   function handleSearch(query, householdSize, preferences) {
     setLastQuery(query);
     search(query, householdSize, preferences);
@@ -57,15 +68,15 @@ export default function HomePage() {
     reset();
   }
 
-  // Results view
+  // ── Results view (shared, slightly adapted per platform) ──
   if (results) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${isApp ? 'pt-4 pb-4 safe-top' : 'py-8'}`}>
         <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-          <h2 className="font-display text-display-sm text-warm-800">
+          <h2 className={`font-display text-warm-800 ${isApp ? 'text-xl' : 'text-display-sm'}`}>
             Recept för &ldquo;{lastQuery}&rdquo;
           </h2>
-          <button onClick={handleReset} className="btn-outline text-sm !py-2">
+          <button onClick={handleReset} className={`btn-outline text-sm !py-2 ${isApp ? '!rounded-xl' : ''}`}>
             <ArrowLeft size={16} className="mr-1.5 inline" />
             Ny sökning
           </button>
@@ -83,7 +94,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className={isApp ? 'space-y-4' : 'space-y-6'}>
           {results.recipes.map((recipe, idx) => (
             <RecipeCard
               key={idx}
@@ -114,7 +125,16 @@ export default function HomePage() {
 
   if (loading) return <LoadingState />;
 
-  // Main search-first interface
+  // ── App: compact native search ──
+  if (isApp) {
+    const recentSearches = history?.map((h) => ({
+      query: h.query,
+    })) || [];
+
+    return <AppHome onSearch={handleSearch} loading={loading} recentSearches={recentSearches} />;
+  }
+
+  // ── Web: full marketing page ──
   return (
     <div className="min-h-screen">
       {/* Hero search — 70% viewport */}

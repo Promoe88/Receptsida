@@ -3,6 +3,7 @@
 // ============================================
 
 import { StoreMap } from '../../components/StoreMap';
+import { AppPageHeader } from '../../components/app/AppPageHeader';
 
 export const metadata = {
   title: 'Hitta butiker — Nisse / MatKompass',
@@ -11,8 +12,11 @@ export const metadata = {
 
 export default function StoresPage() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-      <StoreMap />
-    </div>
+    <>
+      <AppPageHeader title="Butiker" />
+      <div className="max-w-2xl mx-auto px-4 py-4 sm:py-12">
+        <StoreMap />
+      </div>
+    </>
   );
 }

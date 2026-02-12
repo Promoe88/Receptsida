@@ -5,9 +5,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { isApp } from '../../lib/platform';
 import { useAuthStore } from '../../lib/store';
 import { useFavorites } from '../../hooks/useRecipes';
 import { RecipeCard } from '../../components/RecipeCard';
+import { AppPageHeader } from '../../components/app/AppPageHeader';
 import { Heart } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,9 +44,11 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="font-display text-3xl text-warm-800 mb-2">Mina favoriter</h1>
-      <p className="text-warm-500 mb-8">Dina sparade recept samlade på ett ställe.</p>
+    <>
+      <AppPageHeader title="Favoriter" />
+      <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${isApp ? 'py-4' : 'py-8'}`}>
+        {!isApp && <h1 className="font-display text-3xl text-warm-800 mb-2">Mina favoriter</h1>}
+        {!isApp && <p className="text-warm-500 mb-8">Dina sparade recept samlade på ett ställe.</p>}
 
       {loading ? (
         <div className="space-y-4">
@@ -78,6 +82,7 @@ export default function FavoritesPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
