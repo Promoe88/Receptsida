@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { LogIn, Eye, EyeOff, ChefHat, Loader2 } from 'lucide-react';
+import { LogIn, Eye, EyeOff, ChefHat, Loader2, ArrowRight } from 'lucide-react';
 import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 function LoginForm() {
@@ -89,8 +89,8 @@ function LoginForm() {
         )}
 
         <NisseButton type="submit" variant="black" disabled={submitting} fullWidth>
-          {submitting ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
-          Logga in
+          {submitting ? <Loader2 size={18} className="animate-spin" /> : 'Logga in'}
+          {!submitting && <ArrowRight size={18} />}
         </NisseButton>
 
         <div className="text-center pt-1">

@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home, ChevronLeft } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, ChefHat, Loader2, User, Users, UsersRound, Home, ArrowLeft, ArrowRight } from 'lucide-react';
 import { SocialLoginSection } from '../../components/SocialLoginButtons';
 
 const HOUSEHOLDS = [
@@ -54,10 +54,9 @@ export default function RegisterPage() {
       <div className="flex-1 flex flex-col overflow-y-auto app-inner-scroll px-5 py-4 pb-8" style={{ background: '#F2F4F3' }}>
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1 text-sm font-medium text-warm-500 hover:text-warm-800 transition-colors mb-3 -ml-1 self-start flex-shrink-0"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-soft text-warm-600 hover:text-warm-900 transition-colors mb-3 self-start flex-shrink-0"
         >
-          <ChevronLeft size={20} />
-          Tillbaka
+          <ArrowLeft size={20} strokeWidth={2} />
         </button>
         <div className="w-full max-w-md mx-auto">
           <motion.div
@@ -183,8 +182,8 @@ export default function RegisterPage() {
                 )}
 
                 <NisseButton type="submit" variant="black" disabled={submitting || !acceptedPrivacy} fullWidth>
-                  {submitting ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
-                  Skapa konto
+                  {submitting ? <Loader2 size={18} className="animate-spin" /> : 'Skapa konto'}
+                  {!submitting && <ArrowRight size={18} />}
                 </NisseButton>
               </form>
             </div>
