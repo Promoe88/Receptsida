@@ -1,7 +1,6 @@
 // ============================================
 // AppHome — Native app home screen
 // Compact search, quick chips, recent searches
-// No hero/marketing — straight to the action
 // ============================================
 
 'use client';
@@ -59,7 +58,6 @@ export function AppHome({ onSearch, loading, recentSearches }) {
     const searchQuery = query.trim() || transcript.trim();
     if (!searchQuery || loading) return;
 
-    // Haptic feedback on search
     import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
       Haptics.impact({ style: ImpactStyle.Medium });
     }).catch(() => {});
@@ -130,23 +128,24 @@ export function AppHome({ onSearch, loading, recentSearches }) {
               disabled={loading}
             />
             {voiceSupported && (
-              <button
+              <motion.button
                 type="button"
+                whileTap={{ scale: 0.9 }}
                 onClick={handleVoice}
-                className={`p-2 rounded-xl transition-all flex-shrink-0
+                className={`p-2 rounded-full transition-all flex-shrink-0
                   ${isListening
                     ? 'bg-terra-100 text-terra-500 animate-pulse-soft'
                     : 'text-warm-400 active:bg-warm-100'
                   }`}
               >
                 {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-              </button>
+              </motion.button>
             )}
-            <button
+            <motion.button
               type="submit"
+              whileTap={{ scale: 0.9 }}
               disabled={loading || (!query.trim() && !transcript.trim())}
-              className="bg-sage-400 text-white rounded-xl p-2.5
-                       active:bg-sage-500 active:scale-[0.96]
+              className="bg-sage-400 text-white rounded-full p-2.5
                        disabled:opacity-30 transition-all duration-150"
             >
               {loading ? (
@@ -154,7 +153,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
               ) : (
                 <Search size={18} />
               )}
-            </button>
+            </motion.button>
           </div>
 
           {/* Household size */}
@@ -162,18 +161,19 @@ export function AppHome({ onSearch, loading, recentSearches }) {
             <Users size={14} className="text-warm-400" />
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <button
+                <motion.button
                   key={n}
                   type="button"
+                  whileTap={{ scale: 0.85 }}
                   onClick={() => setHouseholdSize(n)}
-                  className={`w-7 h-7 rounded-lg text-xs font-semibold transition-all duration-150
+                  className={`w-7 h-7 rounded-full text-xs font-semibold transition-all duration-150
                     ${householdSize === n
                       ? 'bg-sage-400 text-white'
                       : 'bg-cream-200 text-warm-500 active:bg-sage-100'
                     }`}
                 >
                   {n}
-                </button>
+                </motion.button>
               ))}
             </div>
             <span className="text-[11px] text-warm-400">
@@ -194,11 +194,12 @@ export function AppHome({ onSearch, loading, recentSearches }) {
           {QUICK_CHIPS.map((chip) => {
             const active = selectedChips.includes(chip.id);
             return (
-              <button
+              <motion.button
                 key={chip.id}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => toggleChip(chip.id)}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium
-                  transition-all duration-150 active:scale-[0.96]
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[13px] font-medium
+                  transition-all duration-150
                   ${active
                     ? 'bg-sage-100 border border-sage-300 text-sage-700'
                     : 'bg-white border border-warm-200 text-warm-600'
@@ -206,7 +207,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
               >
                 <span className="text-sm">{chip.icon}</span>
                 {chip.label}
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -225,18 +226,19 @@ export function AppHome({ onSearch, loading, recentSearches }) {
           </h2>
           <div className="space-y-1.5">
             {recentSearches.slice(0, 5).map((item, idx) => (
-              <button
+              <motion.button
                 key={idx}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleQuickSearch(item.query)}
-                className="flex items-center gap-3 w-full px-3.5 py-2.5 bg-white rounded-xl
-                         border border-warm-100 active:bg-cream-200 transition-colors duration-150"
+                className="flex items-center gap-3 w-full px-3.5 py-2.5 bg-white rounded-2xl
+                         border border-warm-100 transition-colors duration-150"
               >
                 <Clock size={14} className="text-warm-300 flex-shrink-0" />
                 <span className="text-sm text-warm-600 flex-1 text-left truncate">
                   {item.query}
                 </span>
                 <ChevronRight size={14} className="text-warm-300 flex-shrink-0" />
-              </button>
+              </motion.button>
             ))}
           </div>
         </motion.div>
@@ -250,7 +252,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="mt-4 flex items-center justify-center gap-2 bg-terra-50 border border-terra-200
-                     rounded-2xl px-4 py-2.5"
+                     rounded-full px-4 py-2.5"
           >
             <span className="w-2 h-2 rounded-full bg-terra-400 animate-pulse" />
             <span className="text-sm text-terra-600 font-medium">Lyssnar...</span>

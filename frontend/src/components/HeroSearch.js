@@ -1,6 +1,6 @@
 // ============================================
 // HeroSearch — Guided multi-step search hero
-// 70% viewport, warm Scandinavian aesthetic
+// 70% viewport, native-feel with spring transitions
 // Multi-step: Input -> Context Chips -> Search
 // ============================================
 
@@ -10,6 +10,7 @@ import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Mic, MicOff, Users, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import { useVoiceInput } from '../hooks/useVoice';
+import { NisseButton } from './NisseButton';
 
 const CONTEXT_CHIPS = [
   { id: 'barnfamilj', label: 'Barnfamilj', icon: '👨‍👩‍👧‍👦', color: 'sage' },
@@ -33,7 +34,7 @@ export function HeroSearch({ onSearch, loading }) {
   const [query, setQuery] = useState('');
   const [householdSize, setHouseholdSize] = useState(2);
   const [selectedChips, setSelectedChips] = useState([]);
-  const [step, setStep] = useState(1); // 1 = input, 2 = context chips
+  const [step, setStep] = useState(1);
   const inputRef = useRef(null);
   const { isListening, transcript, supported: voiceSupported, startListening, stopListening } = useVoiceInput();
 
@@ -100,7 +101,6 @@ export function HeroSearch({ onSearch, loading }) {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-2xl text-center"
       >
-        {/* Title */}
         <h1 className="font-display text-display-sm sm:text-display-md lg:text-display-lg text-warm-800 mb-4">
           Vad lagar vi idag?
         </h1>
@@ -109,12 +109,8 @@ export function HeroSearch({ onSearch, loading }) {
         </p>
 
         {/* Search card */}
-        <motion.div
-          layout
-          className="card p-2 sm:p-3 relative"
-        >
+        <motion.div layout className="card p-2 sm:p-3 relative">
           <form onSubmit={handleSubmit}>
-            {/* Main input */}
             <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4">
               <Search size={22} className="text-warm-400 flex-shrink-0" />
               <input
@@ -129,26 +125,25 @@ export function HeroSearch({ onSearch, loading }) {
                 autoFocus
               />
 
-              {/* Voice button */}
               {voiceSupported && (
-                <button
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.9 }}
                   onClick={handleVoice}
-                  className={`p-2.5 rounded-2xl transition-all duration-200 flex-shrink-0
+                  className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0
                     ${isListening
                       ? 'bg-terra-100 text-terra-500 animate-pulse-soft'
-                      : 'text-warm-400 hover:text-sage-500 hover:bg-sage-50'
+                      : 'text-warm-400 hover:text-sage-400 hover:bg-sage-50'
                     }`}
                 >
                   {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-                </button>
+                </motion.button>
               )}
 
-              {/* Search/Next button */}
-              <button
+              <NisseButton
                 type="submit"
                 disabled={loading || (!query.trim() && !transcript.trim())}
-                className="btn-primary !rounded-2xl !py-3 !px-5 flex items-center gap-2 disabled:opacity-30"
+                size="md"
               >
                 {loading ? (
                   <Loader2 size={18} className="animate-spin" />
@@ -158,7 +153,7 @@ export function HeroSearch({ onSearch, loading }) {
                   <Search size={18} />
                 )}
                 <span className="hidden sm:inline">{loading ? 'Söker...' : step === 1 ? 'Nästa' : 'Sök recept'}</span>
-              </button>
+              </NisseButton>
             </div>
 
             {/* Household size bar */}
@@ -166,18 +161,19 @@ export function HeroSearch({ onSearch, loading }) {
               <Users size={15} className="text-warm-400" />
               <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <button
+                  <motion.button
                     key={n}
                     type="button"
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setHouseholdSize(n)}
-                    className={`w-8 h-8 rounded-xl text-xs font-semibold transition-all
+                    className={`w-8 h-8 rounded-full text-xs font-semibold transition-all
                       ${householdSize === n
                         ? 'bg-sage-400 text-white shadow-sage-glow'
                         : 'bg-cream-200 text-warm-500 hover:bg-sage-50 hover:text-sage-600'
                       }`}
                   >
                     {n}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
               <span className="text-xs text-warm-400 ml-1">
@@ -193,7 +189,7 @@ export function HeroSearch({ onSearch, loading }) {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 className="overflow-hidden border-t border-warm-100"
               >
                 <div className="px-5 py-5">
@@ -202,7 +198,7 @@ export function HeroSearch({ onSearch, loading }) {
                     Välj kontext för bättre resultat
                     <button
                       onClick={handleDirectSearch}
-                      className="ml-auto text-xs text-sage-500 hover:text-sage-700 font-medium underline underline-offset-2"
+                      className="ml-auto text-xs text-sage-400 hover:text-sage-600 font-medium underline underline-offset-2"
                     >
                       Hoppa över
                     </button>
@@ -211,9 +207,10 @@ export function HeroSearch({ onSearch, loading }) {
                     {CONTEXT_CHIPS.map((chip) => {
                       const active = selectedChips.includes(chip.id);
                       return (
-                        <button
+                        <motion.button
                           key={chip.id}
                           type="button"
+                          whileTap={{ scale: 0.95 }}
                           onClick={() => toggleChip(chip.id)}
                           className={active
                             ? (chip.color === 'terra' ? 'chip-terra' : 'chip-active')
@@ -222,23 +219,23 @@ export function HeroSearch({ onSearch, loading }) {
                         >
                           <span className="text-base">{chip.icon}</span>
                           {chip.label}
-                        </button>
+                        </motion.button>
                       );
                     })}
                   </div>
 
-                  {/* Final search button */}
-                  <button
+                  <NisseButton
                     onClick={handleDirectSearch}
                     disabled={loading}
-                    className="btn-primary w-full mt-5 flex items-center justify-center gap-2"
+                    fullWidth
+                    className="mt-5"
                   >
                     {loading ? (
                       <><Loader2 size={16} className="animate-spin" /> Söker recept...</>
                     ) : (
                       <><Search size={16} /> Hitta recept för &ldquo;{query.trim()}&rdquo;</>
                     )}
-                  </button>
+                  </NisseButton>
                 </div>
               </motion.div>
             )}
