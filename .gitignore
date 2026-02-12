@@ -35,3 +35,8 @@ npm-debug.log*
 postgres_data/
 redis_data/
 .DS_Store
+
+# Capacitor — track ios/ project but ignore build artifacts
+frontend/ios/App/Pods/
+frontend/ios/App/App/public/
+frontend/ios/DerivedData/
