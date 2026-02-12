@@ -9,15 +9,18 @@ export const platform = Capacitor.getPlatform(); // 'ios' | 'android' | 'web'
 
 /**
  * Scroll the currently focused input into view above the keyboard.
- * Uses a short delay so the WebView has resized first.
+ * Double-rAF ensures the CSS transition (bottom: --keyboard-height)
+ * has triggered a layout reflow before we measure positions.
  */
 function scrollFocusedInputIntoView() {
+  // Double requestAnimationFrame: first rAF queues after CSS applies,
+  // second rAF queues after the layout reflow from the CSS change.
   requestAnimationFrame(() => {
-    const el = document.activeElement;
-    if (!el || !el.matches('input, textarea, select, [contenteditable]')) return;
-
-    // Smooth scroll so the input sits comfortably in view
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    requestAnimationFrame(() => {
+      const el = document.activeElement;
+      if (!el || !el.matches('input, textarea, select, [contenteditable]')) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   });
 }
 
@@ -37,28 +40,32 @@ export async function initNativePlugins() {
       await StatusBar.setStyle({ style: Style.Light });
     }
 
-    // Keyboard: make focused input visible above keyboard
+    // Keyboard: shrink viewport and scroll focused input into view
     Keyboard.addListener('keyboardWillShow', (info) => {
-      document.body.classList.add('keyboard-open');
+      // Set keyboard height CSS var BEFORE adding class so CSS transition works
       document.documentElement.style.setProperty(
         '--keyboard-height', `${info.keyboardHeight}px`
       );
-      // Wait for viewport resize then scroll input into view
-      setTimeout(scrollFocusedInputIntoView, 50);
+      document.body.classList.add('keyboard-open');
+      // Wait for CSS transition + layout reflow, then scroll
+      scrollFocusedInputIntoView();
     });
 
     Keyboard.addListener('keyboardWillHide', () => {
       document.body.classList.remove('keyboard-open');
-      document.documentElement.style.setProperty('--keyboard-height', '0px');
+      // Small delay before resetting height so closing transition is smooth
+      setTimeout(() => {
+        document.documentElement.style.setProperty('--keyboard-height', '0px');
+      }, 50);
     });
 
-    // Also handle focus events — user may tap another input while keyboard is open
+    // Handle tapping a different input while keyboard is already open
     document.addEventListener('focusin', (e) => {
       if (!document.body.classList.contains('keyboard-open')) return;
       if (!e.target.matches('input, textarea, select, [contenteditable]')) return;
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 50);
+      });
     });
   } catch (err) {
     console.warn('Native plugin init failed:', err.message);
