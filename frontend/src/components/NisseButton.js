@@ -1,6 +1,8 @@
 // ============================================
-// NisseButton — Pill-shaped, high-contrast button
-// Bold text, teal primary, black CTA
+// NisseButton — Design system §6.1
+// Primary: black pill, disabled 0.4, hover opacity 0.9
+// Ghost: text #2ABFBF, hover bg #E8F8F8
+// All: 44px min touch target
 // ============================================
 
 'use client';
@@ -8,17 +10,32 @@
 import { motion } from 'framer-motion';
 
 const VARIANTS = {
-  primary: 'bg-warm-800 text-white hover:bg-warm-900 shadow-btn hover:shadow-btn-hover',
-  teal: 'bg-sage-400 text-white hover:bg-sage-500 shadow-teal-glow',
-  secondary: 'bg-terra-400 text-white hover:bg-terra-500 shadow-terra-glow',
-  outline: 'bg-white text-warm-700 border border-warm-200 hover:border-sage-300 hover:bg-sage-50 shadow-soft',
-  ghost: 'text-sage-500 hover:bg-sage-50 hover:text-sage-600',
+  primary: {
+    className: 'bg-warm-800 text-white',
+    style: { boxShadow: '0 4px 12px rgba(26,26,46,0.15)' },
+  },
+  teal: {
+    className: 'bg-sage-400 text-white hover:bg-sage-500 shadow-teal-glow',
+    style: {},
+  },
+  secondary: {
+    className: 'bg-terra-400 text-white hover:bg-terra-500 shadow-terra-glow',
+    style: {},
+  },
+  outline: {
+    className: 'bg-white text-warm-800',
+    style: { border: '1px solid #E5E5EA' },
+  },
+  ghost: {
+    className: '',
+    style: { color: '#2ABFBF' },
+  },
 };
 
 const SIZES = {
-  sm: 'px-5 py-2.5 text-xs gap-1.5',
-  md: 'px-7 py-3.5 text-sm gap-2',
-  lg: 'px-9 py-4 text-base gap-2.5',
+  sm: 'px-5 py-2.5 text-caption gap-1.5',
+  md: 'px-7 py-3.5 text-label gap-2',
+  lg: 'px-9 py-4 text-body gap-2.5',
 };
 
 export function NisseButton({
@@ -32,23 +49,26 @@ export function NisseButton({
   className = '',
   ...props
 }) {
+  const v = VARIANTS[variant] || VARIANTS.primary;
+
   return (
     <motion.button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.97 }}
+      whileHover={variant === 'primary' ? { opacity: 0.9 } : undefined}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
       className={`
-        inline-flex items-center justify-center rounded-full font-bold
-        transition-colors duration-200
-        disabled:opacity-50 disabled:cursor-not-allowed
-        ${VARIANTS[variant]}
+        inline-flex items-center justify-center rounded-full font-medium
+        transition-all duration-200
+        disabled:opacity-40 disabled:cursor-not-allowed
+        ${v.className}
         ${SIZES[size]}
         ${fullWidth ? 'w-full' : ''}
         ${className}
       `}
-      style={undefined}
+      style={{ minHeight: '44px', ...v.style }}
       {...props}
     >
       {children}

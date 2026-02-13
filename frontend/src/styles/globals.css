@@ -18,83 +18,117 @@
   ::selection {
     background: rgba(42, 191, 191, 0.18);
   }
+
+  /* Reduced motion: respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {
   /* ── Buttons — Pill-shaped per design system ── */
   .btn-primary {
-    @apply bg-warm-800 text-white px-7 py-3.5 rounded-full font-bold text-sm
-           hover:bg-warm-900 transition-all duration-200
-           disabled:opacity-50 disabled:cursor-not-allowed
+    @apply bg-warm-800 text-white px-7 py-3.5 rounded-full font-medium text-label
+           transition-all duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed
            active:scale-[0.97];
     box-shadow: 0 4px 12px rgba(26, 26, 46, 0.15);
   }
 
   .btn-primary:hover {
-    box-shadow: 0 6px 20px rgba(26, 26, 46, 0.20);
+    opacity: 0.9;
   }
 
   .btn-teal {
-    @apply bg-sage-400 text-white px-7 py-3.5 rounded-full font-bold text-sm
+    @apply bg-sage-400 text-white px-7 py-3.5 rounded-full font-medium text-label
            hover:bg-sage-500 transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed
            active:scale-[0.97] shadow-teal-glow;
   }
 
   .btn-terra {
-    @apply bg-terra-400 text-white px-7 py-3.5 rounded-full font-bold text-sm
+    @apply bg-terra-400 text-white px-7 py-3.5 rounded-full font-medium text-label
            hover:bg-terra-500 transition-all duration-200
            active:scale-[0.97] shadow-terra-glow;
   }
 
   .btn-outline {
-    @apply bg-white text-warm-700 px-7 py-3.5 rounded-full font-semibold text-sm
-           border border-warm-200 hover:border-sage-300 hover:bg-sage-50
-           transition-all duration-200 active:scale-[0.97] shadow-soft;
+    @apply bg-white text-warm-800 px-6 py-3 rounded-full font-medium text-label
+           transition-all duration-200 active:scale-[0.97];
+    border: 1px solid #E5E5EA;
+  }
+
+  .btn-outline:hover {
+    border-color: #2ABFBF;
+    color: #2ABFBF;
   }
 
   .btn-ghost {
-    @apply text-sage-500 px-5 py-2.5 rounded-full font-medium text-sm
-           hover:bg-sage-50 hover:text-sage-600
+    @apply px-4 py-2 rounded-full font-medium text-label
            transition-all duration-200;
+    color: #2ABFBF;
+  }
+
+  .btn-ghost:hover {
+    background: #E8F8F8;
   }
 
   .btn-icon {
     @apply w-10 h-10 rounded-full flex items-center justify-center
-           bg-white border border-warm-200 text-warm-600
+           bg-white text-warm-600
            hover:bg-warm-100 hover:text-warm-800
-           transition-all duration-200 active:scale-[0.95] shadow-soft;
+           transition-all duration-200 active:scale-[0.95];
+    border: 1px solid #E5E5EA;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .btn-icon-danger {
+    @apply w-10 h-10 rounded-full flex items-center justify-center
+           bg-terra text-white
+           hover:bg-terra-500
+           transition-all duration-200 active:scale-[0.95];
   }
 
   /* ── Cards — No borders, shadow only, per design system ── */
   .card {
-    @apply bg-white rounded-xl shadow-card;
+    @apply bg-white rounded-md shadow-card;
   }
 
   .card-elevated {
-    @apply bg-white rounded-xl shadow-card
+    @apply bg-white rounded-md shadow-card
            hover:shadow-card-hover hover:-translate-y-0.5
-           transition-all duration-300;
+           transition-all duration-200;
   }
 
   .card-glass {
-    @apply rounded-xl shadow-glass;
+    @apply rounded-md shadow-glass;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
 
   .card-flat {
-    @apply bg-cream-200 rounded-xl;
+    @apply bg-cream-200 rounded-md;
   }
 
-  /* ── Inputs — Teal focus glow ── */
+  /* ── Inputs — Teal focus glow, per design system ── */
   .input {
-    @apply w-full px-5 py-3.5 rounded-[12px]
-           font-body text-warm-800 placeholder:text-warm-400
+    @apply w-full rounded-sm
+           font-body text-body text-warm-800
            focus:outline-none transition-all duration-200;
+    padding: 14px 16px;
     background: #FFFFFF;
     border: 1px solid #E5E5EA;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .input::placeholder {
+    color: #C7C7CC;
   }
 
   .input:focus {
@@ -104,11 +138,18 @@
   }
 
   .input-lg {
-    @apply w-full px-6 py-4 rounded-[12px]
-           font-body text-lg text-warm-800 placeholder:text-warm-400
+    @apply w-full rounded-sm
+           font-body text-lg text-warm-800
            focus:outline-none transition-all duration-200;
+    padding: 16px 20px;
     background: #FFFFFF;
     border: 1px solid #E5E5EA;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .input-lg::placeholder {
+    color: #C7C7CC;
   }
 
   .input-lg:focus {
@@ -119,62 +160,78 @@
 
   .input-error {
     border-color: #FF3B30 !important;
-    @apply ring-2 ring-danger-50 animate-shake;
+    box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.1) !important;
+    @apply animate-shake;
   }
 
-  /* ── Labels & Badges ── */
+  /* ── Labels & Badges — border-radius 8px per design system ── */
   .label-sm {
-    @apply text-[11px] font-bold uppercase tracking-[0.08em] text-warm-400;
+    @apply text-tiny font-semibold uppercase text-warm-400;
+    letter-spacing: 1px;
   }
 
   .badge-sage {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs
-           font-semibold bg-sage-50 text-sage-600;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-caption
+           font-semibold;
+    background: #E8F8F8;
+    color: #2ABFBF;
+    border-radius: 8px;
   }
 
   .badge-terra {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs
-           font-semibold bg-terra-50 text-terra-500;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-caption
+           font-semibold;
+    background: #FFF0EB;
+    color: #FF7A50;
+    border-radius: 8px;
   }
 
   .badge-warm {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px]
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 text-caption
            font-medium bg-cream-300 text-warm-600;
+    border-radius: 8px;
+  }
+
+  .badge-dark {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-caption
+           font-semibold bg-warm-800 text-white;
+    border-radius: 8px;
   }
 
   .badge-success {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-caption
            font-semibold bg-success-50 text-success-600;
+    border-radius: 8px;
   }
 
   /* ── Chips — Soft UI pill selectors ── */
   .chip {
-    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
+    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-label font-medium
            bg-white border border-warm-200 text-warm-600 shadow-soft
            hover:border-sage-300 hover:bg-sage-50 hover:text-sage-700
            transition-all duration-200 cursor-pointer select-none;
   }
 
   .chip-active {
-    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold
+    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-label font-semibold
            bg-sage-400 border border-sage-400 text-white shadow-teal-glow;
   }
 
   .chip-terra {
-    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold
+    @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-label font-semibold
            bg-terra-400 border border-terra-400 text-white shadow-terra-glow;
   }
 
   /* ── Price tag ── */
   .price-tag {
     @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full
-           bg-sage-400 text-white text-sm font-bold shadow-teal-glow;
+           bg-sage-400 text-white text-label font-bold shadow-teal-glow;
   }
 
-  /* ── Skeleton shimmer ── */
+  /* ── Skeleton shimmer — design system gradient ── */
   .skeleton {
-    @apply rounded-xl;
-    background: linear-gradient(90deg, #F2F2F2 25%, #E8E8E8 50%, #F2F2F2 75%);
+    border-radius: 16px;
+    background: linear-gradient(90deg, #F0F0F0 25%, #E0E0E0 50%, #F0F0F0 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
   }
@@ -304,10 +361,11 @@ body.keyboard-open .app-main--scroll {
   scrollbar-width: none;
 }
 
-/* ── Cooking HUD ── */
+/* ── Cooking HUD — Dark background per design system ── */
 .hud-mode {
   @apply fixed inset-0 z-[60];
-  background: #F5F5F7;
+  background: #1A1A2E;
+  color: #FFFFFF;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }

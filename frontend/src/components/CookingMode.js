@@ -1,6 +1,10 @@
 // ============================================
-// CookingMode — Glassmorphism voice-controlled cooking
-// AI Q&A chef assistant, soft UI aesthetic
+// CookingMode — Design system §10
+// Dark background #1A1A2E, white text
+// Cards: rgba(255,255,255,0.1), 16px radius
+// Buttons: teal, large text (1.5x)
+// Timer: 120px, teal ring, 48px bold center
+// Mic: 64px, idle white outline, listening teal pulse
 // ============================================
 
 'use client';
@@ -10,11 +14,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, ChevronLeft, ChevronRight, Play, Pause,
   RotateCcw, Check, Mic, MicOff, Volume2, VolumeX,
-  MessageCircle, Send, Loader2, ChefHat,
+  MessageCircle, Send, ChefHat,
 } from 'lucide-react';
 import { getStepText, getStepDuration, getStepVoiceCue } from '../data/recipes';
 import { useSpeech, useVoiceInput } from '../hooks/useVoice';
 import { useCookingAssistant } from '../hooks/useRecipes';
+import { Spinner } from './Spinner';
 
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
@@ -42,33 +47,50 @@ function CountdownTimer({ duration, onComplete }) {
   }, [isRunning, remaining, onComplete]);
 
   const progress = duration > 0 ? ((duration - remaining) / duration) * 100 : 0;
-  const circumference = 2 * Math.PI * 36;
+  const circumference = 2 * Math.PI * 52;
+  const isPulsing = remaining > 0 && remaining <= 30 && isRunning;
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative w-28 h-28">
-        <svg className="w-28 h-28 -rotate-90" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="#E8E8E8" strokeWidth="4" />
-          <circle cx="40" cy="40" r="36" fill="none"
-            stroke={remaining === 0 ? '#2ABFBF' : '#FF7A50'}
+      {/* 120px timer per design system */}
+      <div className="relative" style={{ width: '120px', height: '120px' }}>
+        <svg className="-rotate-90" style={{ width: '120px', height: '120px' }} viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
+          <circle cx="60" cy="60" r="52" fill="none"
+            stroke="#2ABFBF"
             strokeWidth="4" strokeLinecap="round" className="timer-ring"
-            style={{ strokeDasharray: circumference, strokeDashoffset: circumference - (progress / 100) * circumference }}
+            style={{
+              strokeDasharray: circumference,
+              strokeDashoffset: circumference - (progress / 100) * circumference,
+              opacity: isPulsing ? undefined : 1,
+            }}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold text-warm-800 tabular-nums font-mono">
-            {remaining === 0 ? <Check size={28} className="text-sage-500" /> : formatTime(remaining)}
-          </span>
+        <div className={`absolute inset-0 flex items-center justify-center ${isPulsing ? 'animate-pulse-soft' : ''}`}>
+          {remaining === 0 ? (
+            <Check size={36} style={{ color: '#2ABFBF' }} />
+          ) : (
+            <span style={{ fontSize: '48px', fontWeight: '700', color: '#FFFFFF', fontFamily: 'monospace' }}>
+              {formatTime(remaining)}
+            </span>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <button onClick={() => { setRemaining(duration); setIsRunning(false); }}
-          className="p-2.5 rounded-xl bg-cream-200 text-warm-500 hover:bg-cream-300 transition-colors">
+        <button
+          onClick={() => { setRemaining(duration); setIsRunning(false); }}
+          aria-label="Återställ timer"
+          className="p-2.5 rounded-full transition-colors"
+          style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
+        >
           <RotateCcw size={16} />
         </button>
-        <button onClick={() => setIsRunning(!isRunning)}
-          className={`p-3.5 rounded-xl text-white transition-all shadow-soft
-            ${isRunning ? 'bg-warm-400 hover:bg-warm-500' : 'bg-sage-400 hover:bg-sage-500'}`}>
+        <button
+          onClick={() => setIsRunning(!isRunning)}
+          aria-label={isRunning ? 'Pausa' : 'Starta'}
+          className="p-3.5 rounded-full text-white transition-all"
+          style={{ background: '#2ABFBF', boxShadow: '0 4px 24px rgba(42,191,191,0.25)' }}
+        >
           {isRunning ? <Pause size={20} /> : <Play size={20} />}
         </button>
       </div>
@@ -154,65 +176,105 @@ export function CookingMode({ recipe, onClose }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="hud-mode flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-warm-200/30"
-           style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+
+      {/* Progress bar at top — design system: horizontal progress */}
+      <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)' }}>
+        <motion.div
+          style={{ height: '100%', background: '#2ABFBF', borderRadius: '2px' }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
+
+      {/* Top bar — dark theme */}
+      <div className="flex items-center justify-between px-6 py-4"
+           style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-sage-50 flex items-center justify-center shadow-soft">
-            <ChefHat size={17} className="text-sage-500" />
+          <div className="flex items-center justify-center"
+               style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)' }}>
+            <ChefHat size={17} style={{ color: '#2ABFBF' }} />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-warm-800">{recipe.title}</h2>
-            <p className="text-xs text-warm-400">Matlagningsläge</p>
+            <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#FFFFFF' }}>{recipe.title}</h2>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Matlagningsläge</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => { setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeech(); }}
-            className={`p-2 rounded-xl transition-all ${voiceEnabled ? 'bg-sage-100 text-sage-600' : 'text-warm-400 hover:text-warm-700'}`}>
+          <button
+            onClick={() => { setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeech(); }}
+            aria-label={voiceEnabled ? 'Stäng av röst' : 'Aktivera röst'}
+            className="p-2 rounded-xl transition-all"
+            style={{
+              background: voiceEnabled ? 'rgba(42,191,191,0.15)' : 'transparent',
+              color: voiceEnabled ? '#2ABFBF' : 'rgba(255,255,255,0.5)',
+            }}
+          >
             {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
-          <button onClick={() => setShowChat(!showChat)}
-            className={`p-2 rounded-xl transition-all relative ${showChat ? 'bg-sage-100 text-sage-600' : 'text-warm-400 hover:text-warm-700'}`}>
+          <button
+            onClick={() => setShowChat(!showChat)}
+            aria-label="Chatt med AI-kock"
+            className="p-2 rounded-xl transition-all relative"
+            style={{
+              background: showChat ? 'rgba(42,191,191,0.15)' : 'transparent',
+              color: showChat ? '#2ABFBF' : 'rgba(255,255,255,0.5)',
+            }}
+          >
             <MessageCircle size={18} />
             {messages.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-terra-400 rounded-full text-white text-[9px] font-bold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 flex items-center justify-center"
+                    style={{ width: '16px', height: '16px', borderRadius: '9999px', background: '#FF7A50', color: '#FFF', fontSize: '9px', fontWeight: '700' }}>
                 {messages.filter((m) => m.role === 'assistant').length}
               </span>
             )}
           </button>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-cream-200 text-warm-400 transition-colors">
+          <button
+            onClick={onClose}
+            aria-label="Stäng matlagningsläge"
+            className="p-2 rounded-xl transition-colors"
+            style={{ color: 'rgba(255,255,255,0.5)' }}
+          >
             <X size={20} />
           </button>
         </div>
-      </div>
-
-      {/* Progress */}
-      <div className="h-1 bg-cream-200">
-        <motion.div className="h-full bg-sage-400 rounded-full" animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
       </div>
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         <div className={`flex-1 flex flex-col items-center justify-center px-8 py-12 max-w-2xl mx-auto w-full
                         transition-all duration-300 ${showChat ? 'lg:max-w-xl' : ''}`}>
-          {/* Step dots */}
+          {/* Step indicator dots — design system colors */}
           <div className="flex items-center gap-2 mb-8">
             {steps.map((_, idx) => (
               <button key={idx} onClick={() => setCurrentStep(idx)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-150
-                  ${idx === currentStep ? 'bg-sage-400 scale-125 shadow-teal-glow'
-                    : completedSteps.has(idx) ? 'bg-sage-300' : 'bg-cream-400'}`}
+                aria-label={`Steg ${idx + 1}`}
+                className="rounded-full transition-all duration-300 hover:scale-150"
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  background: idx === currentStep
+                    ? '#2ABFBF'
+                    : completedSteps.has(idx)
+                      ? '#2ABFBF'
+                      : 'rgba(255,255,255,0.2)',
+                  boxShadow: idx === currentStep ? '0 0 12px rgba(42,191,191,0.4)' : 'none',
+                  opacity: idx === currentStep ? 1 : completedSteps.has(idx) ? 0.6 : 1,
+                }}
               />
             ))}
           </div>
 
-          <span className="label-sm text-sage-500 font-bold mb-4">Steg {currentStep + 1} av {totalSteps}</span>
+          <span style={{ fontSize: '10px', fontWeight: '600', letterSpacing: '1px', textTransform: 'uppercase', color: '#2ABFBF', marginBottom: '16px' }}>
+            Steg {currentStep + 1} av {totalSteps}
+          </span>
 
+          {/* Step text — 1.5x normal font = 24px body -> 36px */}
           <AnimatePresence mode="wait">
             <motion.p key={currentStep}
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}
-              className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-warm-800 text-center leading-snug max-w-xl tracking-tight">
+              className="text-center leading-snug max-w-xl"
+              style={{ fontSize: '24px', fontWeight: '700', color: '#FFFFFF', lineHeight: '1.4' }}>
               {stepText}
             </motion.p>
           </AnimatePresence>
@@ -224,70 +286,106 @@ export function CookingMode({ recipe, onClose }) {
             </motion.div>
           )}
 
+          {/* Microphone — 64px, design system §10 */}
           {voiceSupported && (
             <div className="mt-8">
-              <button onClick={toggleVoiceListening}
-                className={`p-4 rounded-3xl transition-all duration-200 shadow-soft
-                  ${isListening
-                    ? 'bg-terra-100 text-terra-500 animate-pulse-soft border-2 border-terra-300'
-                    : 'bg-white text-warm-400 hover:text-sage-500 border-2 border-warm-200 hover:border-sage-300'}`}>
+              <button
+                onClick={toggleVoiceListening}
+                aria-label={isListening ? 'Sluta lyssna' : 'Fråga kocken'}
+                className="rounded-full transition-all duration-200"
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: isListening ? '#2ABFBF' : 'transparent',
+                  border: isListening ? '2px solid #2ABFBF' : '2px solid rgba(255,255,255,0.4)',
+                  boxShadow: isListening ? '0 0 24px rgba(42,191,191,0.4)' : 'none',
+                  color: isListening ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
+                }}
+              >
                 {isListening ? <MicOff size={24} /> : <Mic size={24} />}
               </button>
-              <p className="text-[11px] text-warm-400 text-center mt-2">
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: '8px' }}>
                 {isListening ? 'Lyssnar...' : 'Fråga kocken'}
               </p>
             </div>
           )}
         </div>
 
-        {/* Chat panel */}
+        {/* Chat panel — dark cards */}
         <AnimatePresence>
           {showChat && (
             <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 360, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="border-l border-warm-200 flex flex-col bg-cream-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-warm-200 flex items-center gap-2">
-                <ChefHat size={16} className="text-sage-500" />
-                <span className="text-sm font-semibold text-warm-800">AI-kockassistent</span>
+              className="flex flex-col overflow-hidden"
+              style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)' }}>
+              <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <ChefHat size={16} style={{ color: '#2ABFBF' }} />
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#FFFFFF' }}>AI-kockassistent</span>
               </div>
 
               <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
                 {messages.length === 0 && (
                   <div className="text-center py-8">
-                    <ChefHat size={32} className="text-warm-300 mx-auto mb-3" />
-                    <p className="text-xs text-warm-400 max-w-[200px] mx-auto">
+                    <ChefHat size={32} style={{ color: 'rgba(255,255,255,0.2)' }} className="mx-auto mb-3" />
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', maxWidth: '200px', margin: '0 auto' }}>
                       Fråga mig vad som helst om receptet!
                     </p>
                   </div>
                 )}
                 {messages.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed
-                      ${msg.role === 'user'
-                        ? 'bg-sage-100 text-sage-800 rounded-br-sm'
-                        : 'bg-white text-warm-700 rounded-bl-sm shadow-soft'}`}>
+                    <div style={{
+                      maxWidth: '85%',
+                      padding: '10px 14px',
+                      borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                      fontSize: '14px',
+                      lineHeight: '1.5',
+                      background: msg.role === 'user' ? 'rgba(42,191,191,0.2)' : 'rgba(255,255,255,0.1)',
+                      color: '#FFFFFF',
+                    }}>
                       {msg.content}
                     </div>
                   </div>
                 ))}
                 {chatLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-white text-warm-400 px-3.5 py-2.5 rounded-2xl rounded-bl-sm shadow-soft flex items-center gap-2">
-                      <Loader2 size={14} className="animate-spin" />
-                      <span className="text-sm">Tänker...</span>
+                    <div className="flex items-center gap-2" style={{
+                      padding: '10px 14px',
+                      borderRadius: '16px 16px 16px 4px',
+                      background: 'rgba(255,255,255,0.1)',
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: '14px',
+                    }}>
+                      <Spinner size="sm" />
+                      <span>Tänker...</span>
                     </div>
                   </div>
                 )}
                 <div ref={chatEndRef} />
               </div>
 
-              <form onSubmit={handleSendChat} className="px-3 py-3 border-t border-warm-200">
+              <form onSubmit={handleSendChat} className="px-3 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <div className="flex gap-2">
                   <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)}
                     placeholder="Fråga kocken..." disabled={chatLoading}
-                    className="input flex-1 !rounded-2xl !py-2.5 text-sm" />
+                    className="flex-1 focus:outline-none transition-all duration-200"
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '12px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      color: '#FFFFFF',
+                      fontSize: '14px',
+                    }}
+                  />
                   <button type="submit" disabled={chatLoading || !chatInput.trim()}
-                    className="p-2.5 rounded-xl bg-sage-400 text-white hover:bg-sage-500 transition-colors disabled:opacity-40">
+                    className="rounded-xl transition-colors disabled:opacity-40"
+                    style={{ padding: '10px', background: '#2ABFBF', color: '#FFFFFF' }}
+                    aria-label="Skicka meddelande"
+                  >
                     <Send size={16} />
                   </button>
                 </div>
@@ -297,20 +395,28 @@ export function CookingMode({ recipe, onClose }) {
         </AnimatePresence>
       </div>
 
-      {/* Navigation */}
-      <div className="border-t border-warm-200/30 px-6 py-4 flex items-center justify-between"
-           style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+      {/* Bottom navigation — dark theme */}
+      <div className="px-6 py-4 flex items-center justify-between"
+           style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
         <button onClick={goPrev} disabled={currentStep === 0}
-          className="flex items-center gap-2 text-sm font-medium text-warm-500 disabled:opacity-30 hover:text-warm-800 transition-colors px-4 py-2.5 rounded-xl">
+          aria-label="Föregående steg"
+          className="flex items-center gap-2 font-medium disabled:opacity-30 transition-colors px-4 py-2.5 rounded-xl"
+          style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>
           <ChevronLeft size={18} /> Föregående
         </button>
-        <div className="text-[11px] text-warm-400 hidden sm:block">
+        <div className="hidden sm:block" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)' }}>
           {voiceSupported ? 'Röst: "nästa" / "tillbaka" / ställ frågor' : 'Piltangenter / mellanslag'}
         </div>
         {currentStep === totalSteps - 1 ? (
-          <button onClick={onClose} className="btn-primary px-8">Klar!</button>
+          <button onClick={onClose}
+            className="rounded-full font-medium transition-all active:scale-[0.97]"
+            style={{ padding: '12px 32px', background: '#2ABFBF', color: '#FFFFFF', fontSize: '14px', boxShadow: '0 4px 24px rgba(42,191,191,0.25)' }}>
+            Klar!
+          </button>
         ) : (
-          <button onClick={goNext} className="btn-primary flex items-center gap-2 px-6">
+          <button onClick={goNext}
+            className="flex items-center gap-2 rounded-full font-medium transition-all active:scale-[0.97]"
+            style={{ padding: '12px 24px', background: '#2ABFBF', color: '#FFFFFF', fontSize: '14px', boxShadow: '0 4px 24px rgba(42,191,191,0.25)' }}>
             Nästa steg <ChevronRight size={18} />
           </button>
         )}

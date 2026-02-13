@@ -1,6 +1,7 @@
 // ============================================
-// BottomTabBar — Glassmorphism tab navigation
-// Soft UI with frosted glass effect
+// BottomTabBar — Design system §6.5
+// 80px height, shadow (no border), teal center
+// Active: black icon + teal dot, Inactive: #C7C7CC
 // ============================================
 
 'use client';
@@ -29,13 +30,16 @@ export function BottomTabBar() {
   };
 
   return (
-    <nav className="app-tab-bar z-50 border-t border-warm-200/40"
-         style={{
-           background: 'rgba(255, 255, 255, 0.80)',
-           backdropFilter: 'blur(24px)',
-           WebkitBackdropFilter: 'blur(24px)',
-         }}>
-      <div className="flex items-center justify-around h-16 px-2">
+    <nav
+      className="app-tab-bar z-50"
+      aria-label="Huvudnavigering"
+      style={{
+        background: '#FFFFFF',
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.04)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
+      <div className="flex items-center justify-around px-2" style={{ height: '80px' }}>
         {TABS.map((tab, i) => {
           const Icon = tab.icon;
           const active = tab.href === '/'
@@ -48,13 +52,21 @@ export function BottomTabBar() {
                 key={`tab-${i}`}
                 href={tab.href}
                 onClick={handleTap}
+                aria-label="Lägg till nytt"
                 className="flex items-center justify-center flex-1 py-2"
               >
                 <motion.div
                   whileTap={{ scale: 0.85 }}
-                  className="w-12 h-12 rounded-full flex items-center justify-center shadow-btn bg-warm-800 -mt-5"
+                  className="flex items-center justify-center -mt-5"
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '9999px',
+                    background: '#2ABFBF',
+                    boxShadow: '0 4px 24px rgba(42,191,191,0.25)',
+                  }}
                 >
-                  <Icon size={24} strokeWidth={2} className="text-white" />
+                  <Icon size={24} strokeWidth={1.5} className="text-white" />
                 </motion.div>
               </Link>
             );
@@ -65,29 +77,41 @@ export function BottomTabBar() {
               key={`tab-${i}`}
               href={tab.href}
               onClick={handleTap}
+              aria-label={tab.label}
               className="flex flex-col items-center justify-center gap-1 flex-1 py-2 relative"
             >
-              {active && (
-                <motion.div
-                  layoutId="tab-indicator"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 bg-sage-400 rounded-full"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
               <motion.div
                 whileTap={{ scale: 0.85 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
                 <Icon
-                  size={22}
-                  strokeWidth={active ? 2.5 : 1.8}
-                  className={active ? 'text-sage-400' : 'text-warm-400'}
+                  size={24}
+                  strokeWidth={1.5}
+                  style={{ color: active ? '#1A1A2E' : '#C7C7CC' }}
                 />
               </motion.div>
-              <span className={`text-[10px] leading-tight
-                ${active ? 'font-bold text-sage-500' : 'font-medium text-warm-400'}`}>
+              <span
+                className="text-tiny leading-tight"
+                style={{
+                  color: active ? '#1A1A2E' : '#C7C7CC',
+                  fontWeight: active ? '600' : '500',
+                }}
+              >
                 {tab.label}
               </span>
+              {active && (
+                <motion.div
+                  layoutId="tab-dot"
+                  className="absolute rounded-full"
+                  style={{
+                    bottom: '4px',
+                    width: '4px',
+                    height: '4px',
+                    background: '#2ABFBF',
+                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
             </Link>
           );
         })}

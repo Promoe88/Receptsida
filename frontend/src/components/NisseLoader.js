@@ -1,45 +1,32 @@
 // ============================================
-// NisseLoader — Pulsing sparkle SVG loader
-// Used for route changes and loading states
+// NisseLoader — Design system §8.1
+// Uses the Spinner component (single loader pattern)
+// Full-page: centered 40px spinner + text
 // ============================================
 
 'use client';
 
 import { motion } from 'framer-motion';
+import { Spinner } from './Spinner';
 
-export function NisseLoader({ size = 48, className = '' }) {
+export function NisseLoader({ size = 'lg', className = '' }) {
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      <motion.svg
-        width={size}
-        height={size}
-        viewBox="0 0 48 48"
-        fill="none"
-        animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        {/* Main sparkle */}
-        <path
-          d="M24 4L27.5 18.5L42 16L30 24L42 32L27.5 29.5L24 44L20.5 29.5L6 32L18 24L6 16L20.5 18.5L24 4Z"
-          fill="#2ABFBF"
-          fillOpacity="0.9"
-        />
-        {/* Inner glow */}
-        <circle cx="24" cy="24" r="5" fill="#D97757" fillOpacity="0.6" />
-      </motion.svg>
+      <Spinner size={size} />
     </div>
   );
 }
 
 export function NisseFullPageLoader() {
   return (
-    <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-md flex flex-col items-center justify-center gap-4">
-      <NisseLoader size={56} />
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4"
+         style={{ background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(12px)' }}>
+      <Spinner size="lg" />
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="text-sm text-warm-500 font-medium"
+        className="text-label text-warm-500 font-medium"
       >
         Laddar...
       </motion.p>
