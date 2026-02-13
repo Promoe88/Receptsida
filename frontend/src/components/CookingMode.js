@@ -200,7 +200,7 @@ export function CookingMode({ recipe, onClose }) {
             {steps.map((_, idx) => (
               <button key={idx} onClick={() => setCurrentStep(idx)}
                 className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-150
-                  ${idx === currentStep ? 'bg-sage-400 scale-125 shadow-sage-glow'
+                  ${idx === currentStep ? 'bg-sage-400 scale-125 shadow-teal-glow'
                     : completedSteps.has(idx) ? 'bg-sage-300' : 'bg-cream-400'}`}
               />
             ))}

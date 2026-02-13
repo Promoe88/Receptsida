@@ -52,7 +52,7 @@ export function BottomTabBar() {
               >
                 <motion.div
                   whileTap={{ scale: 0.85 }}
-                  className="w-12 h-12 rounded-full flex items-center justify-center shadow-sage-glow -mt-5"
+                  className="w-12 h-12 rounded-full flex items-center justify-center shadow-teal-glow -mt-5"
                   style={{ backgroundColor: '#1A1A2E' }}
                 >
                   <Icon size={24} strokeWidth={2} className="text-white" />

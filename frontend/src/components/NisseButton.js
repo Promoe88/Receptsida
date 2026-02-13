@@ -8,12 +8,11 @@
 import { motion } from 'framer-motion';
 
 const VARIANTS = {
-  primary: 'bg-sage-400 text-white hover:bg-sage-500 shadow-sage-glow',
+  primary: 'bg-warm-800 text-white hover:bg-warm-900 shadow-btn hover:shadow-btn-hover',
+  teal: 'bg-sage-400 text-white hover:bg-sage-500 shadow-teal-glow',
   secondary: 'bg-terra-400 text-white hover:bg-terra-500 shadow-terra-glow',
-  dark: 'bg-warm-900 text-white hover:bg-black shadow-medium',
-  black: 'text-white shadow-medium hover:opacity-90',
   outline: 'bg-white text-warm-700 border border-warm-200 hover:border-sage-300 hover:bg-sage-50 shadow-soft',
-  ghost: 'text-warm-600 hover:bg-warm-100 hover:text-warm-800',
+  ghost: 'text-sage-500 hover:bg-sage-50 hover:text-sage-600',
 };
 
 const SIZES = {
@@ -49,7 +48,7 @@ export function NisseButton({
         ${fullWidth ? 'w-full' : ''}
         ${className}
       `}
-      style={variant === 'black' ? { backgroundColor: '#1A1A2E' } : undefined}
+      style={undefined}
       {...props}
     >
       {children}

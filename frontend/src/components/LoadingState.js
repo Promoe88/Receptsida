@@ -67,7 +67,7 @@ export function LoadingState() {
               <span
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
                           transition-all duration-300
-                  ${isDone ? 'bg-sage-400 text-white shadow-sage-glow' : ''}
+                  ${isDone ? 'bg-sage-400 text-white shadow-teal-glow' : ''}
                   ${isActive ? 'bg-terra-400 text-white shadow-terra-glow' : ''}
                   ${!isDone && !isActive ? 'bg-cream-300 text-warm-400' : ''}`}
               >

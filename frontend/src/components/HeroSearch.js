@@ -171,7 +171,7 @@ export function HeroSearch({ onSearch, loading }) {
                     onClick={() => setHouseholdSize(n)}
                     className={`w-8 h-8 rounded-full text-xs font-semibold transition-all
                       ${householdSize === n
-                        ? 'bg-sage-400 text-white shadow-sage-glow'
+                        ? 'bg-sage-400 text-white shadow-teal-glow'
                         : 'bg-cream-200 text-warm-500 hover:bg-sage-50 hover:text-sage-600'
                       }`}
                   >

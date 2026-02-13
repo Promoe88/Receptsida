@@ -221,7 +221,7 @@ function StepCard({ number, icon, title, text }) {
       transition={{ duration: 0.5, delay: Number(number) * 0.1 }}
       className="card p-6 text-center shadow-card"
     >
-      <div className="w-14 h-14 rounded-full bg-sage-400 text-white flex items-center justify-center mx-auto mb-4 shadow-sage-glow">
+      <div className="w-14 h-14 rounded-full bg-sage-400 text-white flex items-center justify-center mx-auto mb-4 shadow-teal-glow">
         {icon}
       </div>
       <span className="text-xs font-bold text-sage-400 uppercase tracking-widest">Steg {number}</span>

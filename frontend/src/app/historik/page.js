@@ -115,7 +115,7 @@ export default function HistoryPage() {
                   onClick={() => loadHistory(i + 1)}
                   className={`w-10 h-10 rounded-xl text-sm font-medium transition-all
                     ${pagination.page === i + 1
-                      ? 'bg-sage-400 text-white shadow-sage-glow'
+                      ? 'bg-sage-400 text-white shadow-teal-glow'
                       : 'bg-white border border-warm-200 text-warm-500 hover:border-sage-300'
                     }`}
                 >

@@ -192,7 +192,7 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
               className="flex gap-4 py-4"
             >
               <span className="w-8 h-8 bg-sage-400 text-white rounded-full flex items-center justify-center
-                             text-xs font-bold flex-shrink-0 mt-0.5 shadow-sage-glow">
+                             text-xs font-bold flex-shrink-0 mt-0.5 shadow-teal-glow">
                 {idx + 1}
               </span>
               <p className="text-sm text-warm-700 leading-relaxed flex-1">

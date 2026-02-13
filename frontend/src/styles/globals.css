@@ -21,12 +21,19 @@
 }
 
 @layer components {
-  /* ── Buttons — Pill-shaped, high-contrast ── */
+  /* ── Buttons — Pill-shaped per design system ── */
   .btn-primary {
+    @apply bg-warm-800 text-white px-7 py-3.5 rounded-full font-bold text-sm
+           hover:bg-warm-900 transition-all duration-200
+           disabled:opacity-40 disabled:cursor-not-allowed
+           active:scale-[0.97] shadow-btn hover:shadow-btn-hover;
+  }
+
+  .btn-teal {
     @apply bg-sage-400 text-white px-7 py-3.5 rounded-full font-bold text-sm
            hover:bg-sage-500 transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed
-           active:scale-[0.97] shadow-sage-glow;
+           active:scale-[0.97] shadow-teal-glow;
   }
 
   .btn-terra {
@@ -42,36 +49,43 @@
   }
 
   .btn-ghost {
-    @apply text-warm-600 px-5 py-2.5 rounded-2xl font-medium text-sm
-           hover:bg-warm-100 hover:text-warm-800
+    @apply text-sage-500 px-5 py-2.5 rounded-full font-medium text-sm
+           hover:bg-sage-50 hover:text-sage-600
            transition-all duration-200;
   }
 
-  /* ── Cards — Glassmorphism with extreme rounding ── */
+  .btn-icon {
+    @apply w-10 h-10 rounded-full flex items-center justify-center
+           bg-white border border-warm-200 text-warm-600
+           hover:bg-warm-100 hover:text-warm-800
+           transition-all duration-200 active:scale-[0.95] shadow-soft;
+  }
+
+  /* ── Cards — No borders, shadow only, per design system ── */
   .card {
-    @apply bg-white rounded-3xl shadow-card;
+    @apply bg-white rounded-xl shadow-card;
   }
 
   .card-elevated {
-    @apply bg-white rounded-3xl shadow-card
-           hover:shadow-elevated hover:-translate-y-0.5
+    @apply bg-white rounded-xl shadow-card
+           hover:shadow-card-hover hover:-translate-y-0.5
            transition-all duration-300;
   }
 
   .card-glass {
-    @apply rounded-3xl shadow-glass;
+    @apply rounded-xl shadow-glass;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
 
   .card-flat {
-    @apply bg-cream-200 rounded-3xl;
+    @apply bg-cream-200 rounded-xl;
   }
 
-  /* ── Inputs — Visible borders, clear focus ── */
+  /* ── Inputs — Teal focus glow ── */
   .input {
-    @apply w-full px-5 py-3.5 rounded-2xl
+    @apply w-full px-5 py-3.5 rounded-xl
            font-body text-warm-800 placeholder:text-warm-400
            focus:outline-none focus:border-sage-400 focus:ring-2 focus:ring-sage-100
            focus:bg-white transition-all duration-200;
@@ -80,12 +94,17 @@
   }
 
   .input-lg {
-    @apply w-full px-6 py-4 rounded-3xl
+    @apply w-full px-6 py-4 rounded-2xl
            font-body text-lg text-warm-800 placeholder:text-warm-400
            focus:outline-none focus:border-sage-400 focus:ring-4 focus:ring-sage-50
            focus:bg-white transition-all duration-200;
     background: #F9F9F9;
     border: 1.5px solid #EAEAEA;
+  }
+
+  .input-error {
+    border-color: #FF3B30 !important;
+    @apply ring-2 ring-danger-50 animate-shake;
   }
 
   /* ── Labels & Badges ── */
@@ -108,6 +127,11 @@
            font-medium bg-cream-300 text-warm-600;
   }
 
+  .badge-success {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs
+           font-semibold bg-success-50 text-success-600;
+  }
+
   /* ── Chips — Soft UI pill selectors ── */
   .chip {
     @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium
@@ -118,7 +142,7 @@
 
   .chip-active {
     @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold
-           bg-sage-400 border border-sage-400 text-white shadow-sage-glow;
+           bg-sage-400 border border-sage-400 text-white shadow-teal-glow;
   }
 
   .chip-terra {
@@ -129,7 +153,15 @@
   /* ── Price tag ── */
   .price-tag {
     @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full
-           bg-sage-400 text-white text-sm font-bold shadow-sage-glow;
+           bg-sage-400 text-white text-sm font-bold shadow-teal-glow;
+  }
+
+  /* ── Skeleton shimmer ── */
+  .skeleton {
+    @apply rounded-xl;
+    background: linear-gradient(90deg, #F2F2F2 25%, #E8E8E8 50%, #F2F2F2 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
   }
 }
 

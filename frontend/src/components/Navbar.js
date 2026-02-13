@@ -21,7 +21,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="w-9 h-9 bg-sage-400 rounded-2xl flex items-center justify-center
-                          group-hover:scale-105 transition-transform shadow-sage-glow">
+                          group-hover:scale-105 transition-transform shadow-teal-glow">
               <Sparkles size={17} className="text-white" />
             </div>
             <span className="font-display text-xl text-warm-800">Nisse</span>
