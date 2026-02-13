@@ -8,6 +8,7 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "seed": "node src/utils/seed-lexicon.js",
+    "seed:user": "node src/utils/seed-user.js",
     "migrate": "npx prisma migrate dev",
     "studio": "npx prisma studio",
     "scrape": "node src/utils/run-scraper.js",

@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const isCapacitor = process.env.CAPACITOR_BUILD === 'true';
 
+// Backend base URL (without /api/v1 suffix)
+const BACKEND_HOST = process.env.BACKEND_URL || 'http://localhost:4000';
+
 const nextConfig = {
   reactStrictMode: true,
 
@@ -15,8 +18,8 @@ const nextConfig = {
     async rewrites() {
       return [
         {
-          source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/:path*`,
+          source: '/api/v1/:path*',
+          destination: `${BACKEND_HOST}/api/v1/:path*`,
         },
       ];
     },

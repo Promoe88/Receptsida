@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { Eye, EyeOff, Loader2, ArrowRight, Check, X } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowRight, Check, X, ChevronLeft } from 'lucide-react';
 
 const PASSWORD_RULES = [
   { id: 'length', label: 'Minst 8 tecken', test: (pw) => pw.length >= 8 },
@@ -197,10 +197,17 @@ export default function RegisterPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-8"
+            className="mb-8"
           >
-            <h1 className="font-display text-3xl font-bold text-warm-900 tracking-tight">Skapa konto</h1>
-            <p className="text-warm-500 mt-2 font-medium">Kom igång med Nisse</p>
+            <Link
+              href="/login"
+              className="flex items-center gap-1 text-sm font-medium text-warm-500 hover:text-warm-800 transition-colors mb-4 -ml-1"
+            >
+              <ChevronLeft size={20} />
+              Tillbaka
+            </Link>
+            <h1 className="font-display text-3xl font-bold text-warm-900 tracking-tight text-center">Skapa konto</h1>
+            <p className="text-warm-500 mt-2 font-medium text-center">Kom igång med Nisse</p>
           </motion.div>
 
           <motion.div
