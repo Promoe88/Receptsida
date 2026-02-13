@@ -1,17 +1,18 @@
 // ============================================
-// Home Page — Native-feel hero search with context chips
-// Platform-aware: Web (Hero + marketing) vs App (Compact)
+// Home Page — Native-feel with ingredient search flow
+// Platform-aware: Web (Hero + marketing) vs App (New design)
 // ============================================
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isApp } from '../lib/platform';
 import { useAuthStore } from '../lib/store';
-import { useRecipeSearch, useFavorites, useSearchHistory } from '../hooks/useRecipes';
+import { useRecipeSearch, useFavorites } from '../hooks/useRecipes';
 import { HeroSearch } from '../components/HeroSearch';
 import { AppHome } from '../components/app/AppHome';
+import { IngredientSearch } from '../components/app/IngredientSearch';
 import { RecipeCard } from '../components/RecipeCard';
 import { RecipeDetail } from '../components/RecipeDetail';
 import { ShoppingList } from '../components/ShoppingList';
@@ -37,31 +38,32 @@ export default function HomePage() {
   const { user } = useAuthStore();
   const { results, loading, error, search, reset } = useRecipeSearch();
   const { toggleFavorite } = useFavorites();
-  const { history, loadHistory } = useSearchHistory();
   const [lastQuery, setLastQuery] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-
-  useEffect(() => {
-    if (isApp && user) {
-      loadHistory();
-    }
-  }, [user, loadHistory]);
+  // App navigation state
+  const [appView, setAppView] = useState('home'); // 'home' | 'search' | 'results'
 
   function handleSearch(query, householdSize, preferences) {
     setLastQuery(query);
     search(query, householdSize, preferences);
+    if (isApp) setAppView('results');
   }
 
   function handleReset() {
     setSelectedRecipe(null);
     reset();
+    if (isApp) setAppView('home');
   }
 
-  // ── Results view ──
+  function handleBackFromSearch() {
+    setAppView('home');
+  }
+
+  // ── Results view (both platforms) ──
   if (results) {
     return (
       <PageTransition>
-        <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${isApp ? 'pt-4 pb-4 safe-top' : 'py-8'}`}>
+        <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${isApp ? 'pt-4 pb-4' : 'py-8'}`}>
           <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
             <h2 className={`font-display font-bold text-warm-800 tracking-tight ${isApp ? 'text-xl' : 'text-display-sm'}`}>
               Recept for &ldquo;{lastQuery}&rdquo;
@@ -90,6 +92,7 @@ export default function HomePage() {
               >
                 <RecipeCard
                   recipe={recipe}
+                  rank={idx + 1}
                   onToggleFavorite={user ? toggleFavorite : null}
                   onSelect={setSelectedRecipe}
                 />
@@ -105,7 +108,11 @@ export default function HomePage() {
 
           <AnimatePresence>
             {selectedRecipe && (
-              <RecipeDetail recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
+              <RecipeDetail
+                recipe={selectedRecipe}
+                rank={results.recipes.indexOf(selectedRecipe) + 1 || undefined}
+                onClose={() => setSelectedRecipe(null)}
+              />
             )}
           </AnimatePresence>
         </div>
@@ -115,10 +122,52 @@ export default function HomePage() {
 
   if (loading) return <LoadingState />;
 
-  // ── App: compact native search ──
+  // ── App: new design with home + ingredient search flow ──
   if (isApp) {
-    const recentSearches = history?.map((h) => ({ query: h.query })) || [];
-    return <AppHome onSearch={handleSearch} loading={loading} recentSearches={recentSearches} />;
+    return (
+      <AnimatePresence mode="wait">
+        {appView === 'home' && (
+          <motion.div
+            key="home"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.25 }}
+            className="h-full overflow-y-auto"
+          >
+            <AppHome
+              onStartSearch={() => setAppView('search')}
+              onSelectPopularRecipe={(recipe) => setSelectedRecipe(recipe)}
+            />
+            <AnimatePresence>
+              {selectedRecipe && (
+                <RecipeDetail
+                  recipe={selectedRecipe}
+                  onClose={() => setSelectedRecipe(null)}
+                />
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {appView === 'search' && (
+          <motion.div
+            key="search"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.25 }}
+            className="h-full"
+          >
+            <IngredientSearch
+              onBack={handleBackFromSearch}
+              onSearch={handleSearch}
+              loading={loading}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
   }
 
   // ── Web: full marketing page ──

@@ -1,285 +1,150 @@
 // ============================================
-// AppHome — Native app home screen
-// Soft UI, vector icons, staggered animations
+// AppHome — Pixel-perfect home screen
+// Header with grid icon + MatKompass + avatar
+// CTA banner card + Popular recipes section
 // ============================================
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Search, Mic, MicOff, Users, Loader2, Clock, ChevronRight,
-  Zap, Leaf, UsersRound, Package, Sparkles, Wine, ArrowRight,
-} from 'lucide-react';
-import { useVoiceInput } from '../../hooks/useVoice';
+import { motion } from 'framer-motion';
+import { LayoutGrid, Star, Clock, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '../../lib/store';
 
-const QUICK_CHIPS = [
-  { id: 'snabbt', label: 'Snabbt', icon: Zap },
-  { id: 'vegetariskt', label: 'Veg', icon: Leaf },
-  { id: 'barnfamilj', label: 'Familj', icon: UsersRound },
-  { id: 'matlador', label: 'Matlador', icon: Package },
-  { id: 'fest', label: 'Fest', icon: Sparkles },
-  { id: 'helg', label: 'Helg', icon: Wine },
+const POPULAR_RECIPES = [
+  {
+    id: 1,
+    title: 'Krämig Kycklingpasta 🍝',
+    image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=600&q=80',
+    rating: 4.5,
+    time: 25,
+  },
+  {
+    id: 2,
+    title: 'Laxbowl med avokado 🥑',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
+    rating: 4.8,
+    time: 20,
+  },
+  {
+    id: 3,
+    title: 'Tacos med guacamole 🌮',
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80',
+    rating: 4.6,
+    time: 30,
+  },
 ];
-
-const CONTEXT_MAP = {
-  barnfamilj: { occasion: 'vardag', maxBudget: 80, dietary: [] },
-  snabbt: { maxTimeMinutes: 20, maxBudget: 60 },
-  matlador: { occasion: 'meal-prep' },
-  fest: { occasion: 'fest' },
-  vegetariskt: { dietary: ['vegetarisk'] },
-  helg: { maxTimeMinutes: 60, occasion: 'fest' },
-};
 
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.06 } },
+  show: { transition: { staggerChildren: 0.08 } },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
 };
 
-export function AppHome({ onSearch, loading, recentSearches }) {
+export function AppHome({ onStartSearch, onSelectPopularRecipe }) {
   const { user } = useAuthStore();
-  const [query, setQuery] = useState('');
-  const [householdSize, setHouseholdSize] = useState(2);
-  const [selectedChips, setSelectedChips] = useState([]);
-  const { isListening, transcript, supported: voiceSupported, startListening, stopListening } = useVoiceInput();
 
-  const buildPreferences = useCallback(() => {
-    const prefs = {};
-    for (const chipId of selectedChips) {
-      const mapping = CONTEXT_MAP[chipId];
-      if (mapping) {
-        Object.entries(mapping).forEach(([key, value]) => {
-          if (key === 'dietary') {
-            prefs.dietary = [...(prefs.dietary || []), ...value];
-          } else {
-            prefs[key] = value;
-          }
-        });
-      }
-    }
-    return Object.keys(prefs).length > 0 ? prefs : undefined;
-  }, [selectedChips]);
-
-  const handleSubmit = useCallback((e) => {
-    e?.preventDefault();
-    const searchQuery = query.trim() || transcript.trim();
-    if (!searchQuery || loading) return;
-
-    import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
-      Haptics.impact({ style: ImpactStyle.Medium });
-    }).catch(() => {});
-
-    onSearch(searchQuery, householdSize, buildPreferences());
-  }, [query, transcript, householdSize, loading, onSearch, buildPreferences]);
-
-  const handleQuickSearch = useCallback((text) => {
-    setQuery(text);
-    onSearch(text, householdSize, buildPreferences());
-  }, [householdSize, onSearch, buildPreferences]);
-
-  const toggleChip = useCallback((chipId) => {
-    import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
-      Haptics.impact({ style: ImpactStyle.Light });
-    }).catch(() => {});
-
-    setSelectedChips((prev) =>
-      prev.includes(chipId)
-        ? prev.filter((c) => c !== chipId)
-        : [...prev, chipId]
-    );
-  }, []);
-
-  const handleVoice = useCallback(() => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening((result) => setQuery(result));
-    }
-  }, [isListening, stopListening, startListening]);
-
-  const greeting = user?.name ? user.name.split(' ')[0] : null;
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
 
   return (
     <motion.div
-      className="px-5 pt-6 pb-4"
+      className="px-5 pt-5 pb-6"
       variants={stagger}
       initial="hidden"
       animate="show"
     >
-      {/* Greeting */}
-      <motion.div variants={fadeUp}>
-        {greeting && (
-          <p className="text-warm-400 text-sm font-medium mb-0.5">Hej, {greeting}</p>
-        )}
-        <h1 className="font-display text-2xl font-bold text-warm-800 mb-5 tracking-tight">
-          Vad lagar vi idag?
+      {/* ── Header bar ── */}
+      <motion.div variants={fadeUp} className="flex items-center justify-between mb-7">
+        <button className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
+          <LayoutGrid size={20} className="text-warm-700" strokeWidth={1.8} />
+        </button>
+
+        <h1 className="font-display text-heading font-bold text-warm-800 tracking-tight">
+          MatKompass
         </h1>
-      </motion.div>
 
-      {/* Inspiration card */}
-      <motion.div variants={fadeUp} className="mb-5">
-        <div className="bg-white rounded-2xl p-4 shadow-soft flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
-            <Sparkles size={22} className="text-amber-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-warm-800 leading-snug">Hitta recept baserat på vad du har hemma</p>
-          </div>
-          <button
-            onClick={() => {
-              const el = document.querySelector('input[type="text"]');
-              if (el) el.focus();
-            }}
-            className="text-sage-400 text-sm font-bold whitespace-nowrap flex items-center gap-1"
-          >
-            Testa! <ArrowRight size={14} />
-          </button>
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center text-caption font-bold text-white"
+          style={{ background: 'linear-gradient(135deg, #2ABFBF, #22A8A8)' }}
+        >
+          {initials}
         </div>
       </motion.div>
 
-      {/* Search bar */}
-      <motion.form onSubmit={handleSubmit} variants={fadeUp}>
-        <div className="card p-1.5">
-          <div className="flex items-center gap-2.5 px-3.5 py-2.5">
-            <Search size={20} className="text-warm-400 flex-shrink-0" strokeWidth={2.5} />
-            <input
-              type="text"
-              value={isListening ? transcript || query : query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ingredienser, maträtt, budget..."
-              className="flex-1 bg-transparent border-none outline-none text-warm-800
-                       placeholder:text-warm-400 text-[15px] font-medium"
-              disabled={loading}
-            />
-            {voiceSupported && (
-              <motion.button
-                type="button"
-                whileTap={{ scale: 0.9 }}
-                onClick={handleVoice}
-                className={`p-2 rounded-full transition-all flex-shrink-0
-                  ${isListening
-                    ? 'bg-terra-100 text-terra-500 animate-pulse-soft'
-                    : 'text-warm-400 active:bg-warm-100'
-                  }`}
-              >
-                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-              </motion.button>
-            )}
-            <motion.button
-              type="submit"
-              whileTap={{ scale: 0.9 }}
-              disabled={loading || (!query.trim() && !transcript.trim())}
-              className="bg-sage-400 text-white rounded-full p-2.5 shadow-teal-glow
-                       disabled:opacity-30 transition-all duration-150"
-            >
-              {loading ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <Search size={18} strokeWidth={2.5} />
-              )}
-            </motion.button>
-          </div>
-
-          {/* Household size */}
-          <div className="flex items-center gap-2.5 px-3.5 py-2 border-t border-warm-200/50">
-            <Users size={14} className="text-warm-400" />
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <motion.button
-                  key={n}
-                  type="button"
-                  whileTap={{ scale: 0.85 }}
-                  onClick={() => setHouseholdSize(n)}
-                  className={`w-7 h-7 rounded-full text-xs font-bold transition-all duration-150
-                    ${householdSize === n
-                      ? 'bg-sage-400 text-white shadow-teal-glow'
-                      : 'bg-cream-200 text-warm-500 active:bg-sage-100'
-                    }`}
-                >
-                  {n}
-                </motion.button>
-              ))}
-            </div>
-            <span className="text-[11px] text-warm-400 font-medium">
-              {householdSize === 1 ? 'person' : 'pers'}
-            </span>
-          </div>
-        </div>
-      </motion.form>
-
-      {/* Quick context chips — vector icons */}
-      <motion.div className="mt-4" variants={fadeUp}>
-        <div className="flex flex-wrap gap-2">
-          {QUICK_CHIPS.map((chip) => {
-            const Icon = chip.icon;
-            const active = selectedChips.includes(chip.id);
-            return (
-              <motion.button
-                key={chip.id}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => toggleChip(chip.id)}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-[13px] font-semibold
-                  transition-all duration-150
-                  ${active
-                    ? 'bg-sage-400 text-white shadow-teal-glow'
-                    : 'bg-white text-warm-600 shadow-soft'
-                  }`}
-              >
-                <Icon size={14} strokeWidth={2.5} />
-                {chip.label}
-              </motion.button>
-            );
-          })}
-        </div>
-      </motion.div>
-
-      {/* Recent searches */}
-      {recentSearches?.length > 0 && (
-        <motion.div className="mt-8" variants={fadeUp}>
-          <h2 className="text-xs font-bold text-warm-400 uppercase tracking-wider mb-3">
-            Senaste sökningar
+      {/* ── CTA Banner ── */}
+      <motion.div variants={fadeUp} className="mb-7">
+        <div className="bg-white rounded-2xl p-5 shadow-card">
+          <h2 className="font-display text-[17px] font-bold text-warm-800 leading-snug mb-1">
+            Hitta recept baserat på vad du har hemma
           </h2>
-          <div className="space-y-2">
-            {recentSearches.slice(0, 5).map((item, idx) => (
-              <motion.button
-                key={idx}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleQuickSearch(item.query)}
-                className="flex items-center gap-3 w-full px-4 py-3 bg-white rounded-2xl
-                         shadow-soft transition-all duration-150"
-              >
-                <Clock size={14} className="text-warm-300 flex-shrink-0" />
-                <span className="text-sm text-warm-600 font-medium flex-1 text-left truncate">
-                  {item.query}
-                </span>
-                <ChevronRight size={14} className="text-warm-300 flex-shrink-0" />
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Voice listening indicator */}
-      <AnimatePresence>
-        {isListening && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="mt-4 flex items-center justify-center gap-2 bg-terra-50
-                     rounded-full px-4 py-2.5 shadow-soft"
+          <p className="text-label text-warm-400 mb-4">
+            Lägg till ingredienser och låt Nisse hitta det perfekta receptet
+          </p>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={onStartSearch}
+            className="inline-flex items-center gap-2 bg-warm-800 text-white px-6 py-3 rounded-full
+                     font-medium text-label shadow-btn"
           >
-            <span className="w-2 h-2 rounded-full bg-terra-400 animate-pulse" />
-            <span className="text-sm text-terra-600 font-semibold">Lyssnar...</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Börja nu <ArrowRight size={16} strokeWidth={2.5} />
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* ── Popular recipes ── */}
+      <motion.div variants={fadeUp}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-display text-[17px] font-bold text-warm-800">Populära recept</h2>
+          <button className="text-label font-semibold text-sage-400">Visa alla</button>
+        </div>
+
+        <div className="space-y-4">
+          {POPULAR_RECIPES.map((recipe) => (
+            <motion.button
+              key={recipe.id}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onSelectPopularRecipe?.(recipe)}
+              className="w-full relative rounded-2xl overflow-hidden shadow-card"
+              style={{ height: '200px' }}
+            >
+              <img
+                src={recipe.image}
+                alt={recipe.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {/* Bottom gradient overlay */}
+              <div
+                className="absolute inset-x-0 bottom-0 p-4 flex items-end"
+                style={{
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.0) 100%)',
+                  height: '60%',
+                }}
+              >
+                <div className="w-full">
+                  <h3 className="text-white font-bold text-[16px] text-left mb-2 leading-tight">
+                    {recipe.title}
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-white/90 text-caption font-semibold">
+                      <Star size={13} fill="#FFD60A" className="text-gold" />
+                      {recipe.rating}
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white text-caption font-medium px-2.5 py-1 rounded-full">
+                      <Clock size={12} />
+                      {recipe.time} min
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
