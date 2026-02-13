@@ -39,7 +39,7 @@ export function LoadingState() {
 
   return (
     <div className="text-center py-16 px-6 max-w-md mx-auto">
-      <NisseLoader size={56} className="mb-6" />
+      <NisseLoader size="lg" className="mb-6" />
 
       <h3 className="font-display text-xl font-bold text-warm-800 tracking-tight mb-2">
         Söker efter perfekta recept...

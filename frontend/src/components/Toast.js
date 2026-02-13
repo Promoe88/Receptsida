@@ -1,66 +1,76 @@
 // ============================================
-// Toast — Notification system (design system)
-// 4 variants: success, error, warning, info
-// Slide-down animation, auto-dismiss
+// Toast — Design system §9
+// Centered, 90% width, max 1 visible
+// Per-variant auto-dismiss: success 3s, error 5s, warning/info 4s
+// 3px left border, 12px radius
 // ============================================
 
 'use client';
 
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 
 const ToastContext = createContext(null);
 
-const VARIANT_STYLES = {
+const VARIANT_CONFIG = {
   success: {
-    bg: 'bg-white',
-    border: 'border-l-4 border-success',
+    borderColor: '#2ABFBF',
     icon: CheckCircle,
-    iconColor: 'text-success',
+    iconColor: '#2ABFBF',
+    duration: 3000,
   },
   error: {
-    bg: 'bg-white',
-    border: 'border-l-4 border-danger',
-    icon: XCircle,
-    iconColor: 'text-danger',
+    borderColor: '#FF3B30',
+    icon: AlertCircle,
+    iconColor: '#FF3B30',
+    duration: 5000,
   },
   warning: {
-    bg: 'bg-white',
-    border: 'border-l-4 border-warning',
+    borderColor: '#FF9500',
     icon: AlertTriangle,
-    iconColor: 'text-warning',
+    iconColor: '#FF9500',
+    duration: 4000,
   },
   info: {
-    bg: 'bg-white',
-    border: 'border-l-4 border-info',
+    borderColor: '#007AFF',
     icon: Info,
-    iconColor: 'text-info',
+    iconColor: '#007AFF',
+    duration: 4000,
   },
 };
 
 function ToastItem({ toast, onDismiss }) {
-  const style = VARIANT_STYLES[toast.variant] || VARIANT_STYLES.info;
-  const Icon = style.icon;
+  const config = VARIANT_CONFIG[toast.variant] || VARIANT_CONFIG.info;
+  const Icon = config.icon;
 
   return (
     <div
-      className={`
-        ${style.bg} ${style.border} rounded-xl shadow-elevated
-        px-4 py-3 flex items-start gap-3 min-w-[280px] max-w-[400px]
-        ${toast.exiting ? 'animate-toast-out' : 'animate-toast-in'}
-      `}
+      className={toast.exiting ? 'animate-toast-out' : 'animate-toast-in'}
       role="alert"
+      style={{
+        background: '#FFFFFF',
+        borderRadius: '12px',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+        borderLeft: `3px solid ${config.borderColor}`,
+        padding: '14px 16px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '12px',
+        width: '100%',
+      }}
     >
-      <Icon size={20} className={`${style.iconColor} flex-shrink-0 mt-0.5`} />
-      <div className="flex-1 min-w-0">
+      <Icon size={20} style={{ color: config.iconColor, flexShrink: 0, marginTop: '2px' }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
         {toast.title && (
-          <p className="text-sm font-semibold text-warm-800">{toast.title}</p>
+          <p className="text-label font-semibold text-warm-800">{toast.title}</p>
         )}
-        <p className="text-sm text-warm-600">{toast.message}</p>
+        <p className="text-label text-warm-600">{toast.message}</p>
       </div>
       <button
         onClick={() => onDismiss(toast.id)}
-        className="text-warm-400 hover:text-warm-600 transition-colors flex-shrink-0"
+        className="transition-colors flex-shrink-0"
+        style={{ color: '#C7C7CC' }}
+        aria-label="Stäng notifikation"
       >
         <X size={16} />
       </button>
@@ -69,27 +79,37 @@ function ToastItem({ toast, onDismiss }) {
 }
 
 export function ToastProvider({ children }) {
-  const [toasts, setToasts] = useState([]);
-  const timersRef = useRef({});
+  const [currentToast, setCurrentToast] = useState(null);
+  const timerRef = useRef(null);
 
   const dismiss = useCallback((id) => {
-    setToasts((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, exiting: true } : t))
-    );
+    setCurrentToast((prev) => {
+      if (!prev || prev.id !== id) return prev;
+      return { ...prev, exiting: true };
+    });
     setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 250);
-    clearTimeout(timersRef.current[id]);
-    delete timersRef.current[id];
+      setCurrentToast((prev) => {
+        if (prev && prev.id === id) return null;
+        return prev;
+      });
+    }, 200);
+    clearTimeout(timerRef.current);
   }, []);
 
   const toast = useCallback(
-    ({ variant = 'info', title, message, duration = 4000 }) => {
-      const id = Date.now() + Math.random();
-      setToasts((prev) => [...prev, { id, variant, title, message, exiting: false }]);
+    ({ variant = 'info', title, message, duration }) => {
+      // Clear any existing toast timer
+      clearTimeout(timerRef.current);
 
-      if (duration > 0) {
-        timersRef.current[id] = setTimeout(() => dismiss(id), duration);
+      const id = Date.now() + Math.random();
+      const config = VARIANT_CONFIG[variant] || VARIANT_CONFIG.info;
+      const autoDismiss = duration ?? config.duration;
+
+      // Replace current toast (max 1 visible)
+      setCurrentToast({ id, variant, title, message, exiting: false });
+
+      if (autoDismiss > 0) {
+        timerRef.current = setTimeout(() => dismiss(id), autoDismiss);
       }
 
       return id;
@@ -117,14 +137,23 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ toast, success, error, warning, info, dismiss }}>
       {children}
-      {/* Toast container */}
-      <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
-        {toasts.map((t) => (
-          <div key={t.id} className="pointer-events-auto">
-            <ToastItem toast={t} onDismiss={dismiss} />
+      {/* Toast container — centered, 90% width per design system */}
+      {currentToast && (
+        <div
+          className="fixed z-[100] pointer-events-none"
+          style={{
+            top: '16px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '90%',
+            maxWidth: '400px',
+          }}
+        >
+          <div className="pointer-events-auto">
+            <ToastItem toast={currentToast} onDismiss={dismiss} />
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </ToastContext.Provider>
   );
 }
