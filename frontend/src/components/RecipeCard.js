@@ -108,8 +108,7 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
         <div className="grid grid-cols-2 gap-3 mb-6">
           <button
             onClick={() => onSelect(recipe)}
-            className="flex items-center justify-center gap-2 py-3.5 rounded-full font-bold text-sm text-white transition-all active:scale-[0.97]"
-            style={{ backgroundColor: '#1A1A2E' }}
+            className="flex items-center justify-center gap-2 py-3.5 rounded-full font-bold text-sm text-white bg-warm-800 shadow-btn hover:shadow-btn-hover transition-all active:scale-[0.97]"
           >
             Börja laga <ArrowRight size={16} />
           </button>

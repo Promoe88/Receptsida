@@ -166,7 +166,7 @@ export function StoreMap() {
                       {formatDistance(store.distance)}
                     </span>
                     {store.openNow !== null && (
-                      <span className={`text-xs font-medium ${store.openNow ? 'text-green-600' : 'text-terra-500'}`}>
+                      <span className={`text-xs font-medium ${store.openNow ? 'text-success-600' : 'text-terra-500'}`}>
                         {store.openNow ? 'Öppet' : 'Stängt'}
                       </span>
                     )}
