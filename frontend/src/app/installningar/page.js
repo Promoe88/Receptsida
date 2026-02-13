@@ -166,7 +166,7 @@ export default function SettingsPage() {
                 {exporting ? (
                   <Loader2 size={18} className="text-sage-400 animate-spin" />
                 ) : exported ? (
-                  <Check size={18} className="text-green-500" />
+                  <Check size={18} className="text-success" />
                 ) : (
                   <Download size={18} className="text-sage-400" />
                 )}

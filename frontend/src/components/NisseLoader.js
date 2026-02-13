@@ -21,7 +21,7 @@ export function NisseLoader({ size = 48, className = '' }) {
         {/* Main sparkle */}
         <path
           d="M24 4L27.5 18.5L42 16L30 24L42 32L27.5 29.5L24 44L20.5 29.5L6 32L18 24L6 16L20.5 18.5L24 4Z"
-          fill="#5A7D6C"
+          fill="#2ABFBF"
           fillOpacity="0.9"
         />
         {/* Inner glow */}
