@@ -42,7 +42,7 @@ export function NisseButton({
       className={`
         inline-flex items-center justify-center rounded-full font-bold
         transition-colors duration-200
-        disabled:opacity-40 disabled:cursor-not-allowed
+        disabled:opacity-50 disabled:cursor-not-allowed
         ${VARIANTS[variant]}
         ${SIZES[size]}
         ${fullWidth ? 'w-full' : ''}

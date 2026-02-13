@@ -104,8 +104,8 @@ function RegisterForm() {
     <div className="card p-6 shadow-card-deep">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">
-            Namn <span className="text-warm-400 font-normal normal-case">(valfritt)</span>
+          <label className="text-sm font-medium text-warm-800 mb-1.5 block">
+            Namn <span className="text-warm-400">(valfritt)</span>
           </label>
           <input
             type="text"
@@ -117,7 +117,7 @@ function RegisterForm() {
         </div>
 
         <div>
-          <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">E-post</label>
+          <label className="text-sm font-medium text-warm-800 mb-1.5 block">E-post</label>
           <input
             type="email"
             value={email}
@@ -129,7 +129,7 @@ function RegisterForm() {
         </div>
 
         <div>
-          <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">Lösenord</label>
+          <label className="text-sm font-medium text-warm-800 mb-1.5 block">Lösenord</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}

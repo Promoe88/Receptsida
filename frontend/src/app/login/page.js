@@ -12,8 +12,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../lib/store';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
-import { LogIn, Eye, EyeOff, ChefHat, Loader2, ArrowRight } from 'lucide-react';
-import { SocialLoginSection } from '../../components/SocialLoginButtons';
+import { Eye, EyeOff, ChefHat, Loader2, ArrowRight } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -40,13 +39,9 @@ function LoginForm() {
 
   return (
     <div className="card p-6 shadow-card-deep">
-      {/* Social login */}
-      <SocialLoginSection redirectTo={redirect} />
-
-      {/* Email/password form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">E-post</label>
+          <label className="text-sm font-medium text-warm-800 mb-1.5 block">E-post</label>
           <input
             type="email"
             value={email}
@@ -57,7 +52,7 @@ function LoginForm() {
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-1.5 block">Lösenord</label>
+          <label className="text-sm font-medium text-warm-800 mb-1.5 block">Lösenord</label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
