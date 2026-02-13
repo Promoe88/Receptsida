@@ -164,8 +164,8 @@ export default function StoresPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-4 left-4 right-4 z-30 bg-terra-50 border border-terra-200 text-terra-600
-                       px-4 py-3 rounded-2xl text-sm flex items-center gap-2 shadow-medium"
+              className="absolute top-4 left-4 right-4 z-30 bg-danger-50 border border-danger/20 text-terra-600
+                       px-4 py-3 rounded-xl text-sm flex items-center gap-2 shadow-medium"
             >
               <AlertCircle size={16} className="flex-shrink-0" />
               <span className="flex-1">{error}</span>
@@ -235,7 +235,7 @@ export default function StoresPage() {
                                 {formatDistance(store.distance)}
                               </span>
                               {store.openNow !== null && (
-                                <span className={`text-xs font-medium ${store.openNow ? 'text-green-600' : 'text-terra-500'}`}>
+                                <span className={`text-xs font-medium ${store.openNow ? 'text-success-600' : 'text-terra-500'}`}>
                                   {store.openNow ? 'Öppet' : 'Stängt'}
                                 </span>
                               )}

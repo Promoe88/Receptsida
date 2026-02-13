@@ -108,8 +108,7 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
         <div className="grid grid-cols-2 gap-3 mb-6">
           <button
             onClick={() => onSelect(recipe)}
-            className="flex items-center justify-center gap-2 py-3.5 rounded-full font-bold text-sm text-white transition-all active:scale-[0.97]"
-            style={{ backgroundColor: '#1A1A2E' }}
+            className="flex items-center justify-center gap-2 py-3.5 rounded-full font-bold text-sm text-white bg-warm-800 shadow-btn hover:shadow-btn-hover transition-all active:scale-[0.97]"
           >
             Börja laga <ArrowRight size={16} />
           </button>
@@ -192,7 +191,7 @@ export function RecipeCard({ recipe, onToggleFavorite, onSelect }) {
               className="flex gap-4 py-4"
             >
               <span className="w-8 h-8 bg-sage-400 text-white rounded-full flex items-center justify-center
-                             text-xs font-bold flex-shrink-0 mt-0.5 shadow-sage-glow">
+                             text-xs font-bold flex-shrink-0 mt-0.5 shadow-teal-glow">
                 {idx + 1}
               </span>
               <p className="text-sm text-warm-700 leading-relaxed flex-1">

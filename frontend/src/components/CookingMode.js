@@ -48,9 +48,9 @@ function CountdownTimer({ duration, onComplete }) {
     <div className="flex flex-col items-center gap-4">
       <div className="relative w-28 h-28">
         <svg className="w-28 h-28 -rotate-90" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="#E8E4DF" strokeWidth="4" />
+          <circle cx="40" cy="40" r="36" fill="none" stroke="#E8E8E8" strokeWidth="4" />
           <circle cx="40" cy="40" r="36" fill="none"
-            stroke={remaining === 0 ? '#7C9A82' : '#C4704B'}
+            stroke={remaining === 0 ? '#2ABFBF' : '#FF7A50'}
             strokeWidth="4" strokeLinecap="round" className="timer-ring"
             style={{ strokeDasharray: circumference, strokeDashoffset: circumference - (progress / 100) * circumference }}
           />
@@ -200,7 +200,7 @@ export function CookingMode({ recipe, onClose }) {
             {steps.map((_, idx) => (
               <button key={idx} onClick={() => setCurrentStep(idx)}
                 className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-150
-                  ${idx === currentStep ? 'bg-sage-400 scale-125 shadow-sage-glow'
+                  ${idx === currentStep ? 'bg-sage-400 scale-125 shadow-teal-glow'
                     : completedSteps.has(idx) ? 'bg-sage-300' : 'bg-cream-400'}`}
               />
             ))}

@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               {error && (
-                <div className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-2.5 rounded-2xl text-sm">
+                <div className="bg-danger-50 border border-danger/20 text-terra-600 px-4 py-2.5 rounded-xl text-sm">
                   {error}
                 </div>
               )}

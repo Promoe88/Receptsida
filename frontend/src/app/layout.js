@@ -5,6 +5,7 @@
 
 import '../styles/globals.css';
 import { AuthProvider } from '../components/AuthProvider';
+import { ToastProvider } from '../components/Toast';
 import { LayoutShell } from '../components/LayoutShell';
 
 export const metadata = {
@@ -33,7 +34,9 @@ export default function RootLayout({ children }) {
     <html lang="sv">
       <body className="min-h-screen flex flex-col">
         <AuthProvider>
-          <LayoutShell>{children}</LayoutShell>
+          <ToastProvider>
+            <LayoutShell>{children}</LayoutShell>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

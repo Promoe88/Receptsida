@@ -75,7 +75,7 @@ export default function HomePage() {
           <SourceBanner sources={results.sources} />
 
           {error && (
-            <div className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-3 rounded-2xl text-sm mb-4">
+            <div className="bg-danger-50 border border-danger/20 text-terra-600 px-4 py-3 rounded-xl text-sm mb-4">
               {error}
             </div>
           )}
@@ -145,7 +145,7 @@ export default function HomePage() {
 
       {error && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto px-4 mt-8">
-          <div className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-3 rounded-2xl text-sm text-center">
+          <div className="bg-danger-50 border border-danger/20 text-terra-600 px-4 py-3 rounded-xl text-sm text-center">
             {error}
           </div>
         </motion.div>
@@ -221,7 +221,7 @@ function StepCard({ number, icon, title, text }) {
       transition={{ duration: 0.5, delay: Number(number) * 0.1 }}
       className="card p-6 text-center shadow-card"
     >
-      <div className="w-14 h-14 rounded-full bg-sage-400 text-white flex items-center justify-center mx-auto mb-4 shadow-sage-glow">
+      <div className="w-14 h-14 rounded-full bg-sage-400 text-white flex items-center justify-center mx-auto mb-4 shadow-teal-glow">
         {icon}
       </div>
       <span className="text-xs font-bold text-sage-400 uppercase tracking-widest">Steg {number}</span>

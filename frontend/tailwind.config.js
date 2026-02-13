@@ -14,19 +14,19 @@ module.exports = {
           400: '#E0E0E0',
           500: '#D4D4D4',
         },
-        // Sage green — primary accent (#7C9A6E)
+        // Teal — primary accent (#2ABFBF)
         sage: {
-          50: '#F2F7F0',
-          100: '#E0ECDC',
-          200: '#C2D9B9',
-          300: '#9FC093',
-          400: '#7C9A6E',
-          DEFAULT: '#7C9A6E',
-          500: '#658C55',
-          600: '#507040',
-          700: '#3D5630',
-          800: '#2B3D22',
-          900: '#1A2615',
+          50: '#E8F8F8',
+          100: '#C8EEEE',
+          200: '#8DE1E1',
+          300: '#55D2D2',
+          400: '#2ABFBF',
+          DEFAULT: '#2ABFBF',
+          500: '#22A8A8',
+          600: '#1B8C8C',
+          700: '#146B6B',
+          800: '#0E4D4D',
+          900: '#083333',
         },
         // Warm Orange — secondary accent (#FF7A50)
         terra: {
@@ -55,6 +55,29 @@ module.exports = {
           800: '#1A1A2E',
           900: '#0F0F1E',
         },
+        // Semantic colors
+        success: {
+          DEFAULT: '#34C759',
+          50: '#EAFBEF',
+          500: '#34C759',
+          600: '#28A745',
+        },
+        danger: {
+          DEFAULT: '#FF3B30',
+          50: '#FFF0EF',
+          500: '#FF3B30',
+          600: '#E0342B',
+        },
+        warning: {
+          DEFAULT: '#FF9500',
+          50: '#FFF6E6',
+          500: '#FF9500',
+        },
+        info: {
+          DEFAULT: '#007AFF',
+          50: '#EBF3FF',
+          500: '#007AFF',
+        },
       },
       fontFamily: {
         display: ['Inter', 'system-ui', 'sans-serif'],
@@ -74,14 +97,17 @@ module.exports = {
       },
       boxShadow: {
         soft: '0 2px 16px rgba(0,0,0,0.04)',
-        card: '0 4px 40px rgba(0,0,0,0.05)',
+        card: '0 4px 24px rgba(0,0,0,0.06)',
+        'card-hover': '0 8px 40px rgba(0,0,0,0.10)',
         'card-deep': '0 8px 24px rgba(0,0,0,0.06), 0 24px 60px rgba(0,0,0,0.12)',
         medium: '0 8px 32px rgba(0,0,0,0.06)',
         elevated: '0 12px 48px rgba(0,0,0,0.08)',
         strong: '0 20px 60px rgba(0,0,0,0.10)',
         glass: '0 4px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)',
         'inner-soft': 'inset 0 1px 0 rgba(255,255,255,0.8)',
-        'sage-glow': '0 4px 24px rgba(124,154,110,0.25)',
+        btn: '0 2px 8px rgba(26,26,46,0.18)',
+        'btn-hover': '0 4px 16px rgba(26,26,46,0.22)',
+        'teal-glow': '0 4px 24px rgba(42,191,191,0.25)',
         'terra-glow': '0 4px 24px rgba(255,122,80,0.25)',
         'float': '0 8px 40px rgba(0,0,0,0.12)',
       },
@@ -92,6 +118,12 @@ module.exports = {
         'slide-up': 'slideUp 0.35s cubic-bezier(0.22,1,0.36,1) forwards',
         'ticker': 'ticker 20s linear infinite',
         'pulse-soft': 'pulseSoft 2.5s ease-in-out infinite',
+        'shake': 'shake 0.3s ease-in-out',
+        'heart-pop': 'heartPop 0.4s cubic-bezier(0.22,1,0.36,1)',
+        'check-draw': 'checkDraw 0.5s ease forwards',
+        'shimmer': 'shimmer 1.5s ease-in-out infinite',
+        'toast-in': 'toastIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards',
+        'toast-out': 'toastOut 0.25s ease-in forwards',
       },
       keyframes: {
         fadeUp: {
@@ -117,6 +149,32 @@ module.exports = {
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.6' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '25%': { transform: 'translateX(-3px)' },
+          '75%': { transform: 'translateX(3px)' },
+        },
+        heartPop: {
+          '0%': { transform: 'scale(1)' },
+          '40%': { transform: 'scale(1.3)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        checkDraw: {
+          from: { 'stroke-dashoffset': '24' },
+          to: { 'stroke-dashoffset': '0' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        toastIn: {
+          from: { opacity: '0', transform: 'translateY(-12px) scale(0.95)' },
+          to: { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        toastOut: {
+          from: { opacity: '1', transform: 'translateY(0) scale(1)' },
+          to: { opacity: '0', transform: 'translateY(-12px) scale(0.95)' },
         },
       },
     },

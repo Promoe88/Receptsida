@@ -147,7 +147,7 @@ export default function TutorialPage() {
               key={s.id}
               animate={{
                 width: i === step ? 32 : 8,
-                backgroundColor: i === step ? '#5A7D6C' : i < step ? '#9FBFAE' : '#E8E4DF',
+                backgroundColor: i === step ? '#2ABFBF' : i < step ? '#8DE1E1' : '#E8E8E8',
               }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
               className="h-2 rounded-full"

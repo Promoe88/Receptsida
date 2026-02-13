@@ -175,7 +175,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
               type="submit"
               whileTap={{ scale: 0.9 }}
               disabled={loading || (!query.trim() && !transcript.trim())}
-              className="bg-sage-400 text-white rounded-full p-2.5 shadow-sage-glow
+              className="bg-sage-400 text-white rounded-full p-2.5 shadow-teal-glow
                        disabled:opacity-30 transition-all duration-150"
             >
               {loading ? (
@@ -198,7 +198,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
                   onClick={() => setHouseholdSize(n)}
                   className={`w-7 h-7 rounded-full text-xs font-bold transition-all duration-150
                     ${householdSize === n
-                      ? 'bg-sage-400 text-white shadow-sage-glow'
+                      ? 'bg-sage-400 text-white shadow-teal-glow'
                       : 'bg-cream-200 text-warm-500 active:bg-sage-100'
                     }`}
                 >
@@ -227,7 +227,7 @@ export function AppHome({ onSearch, loading, recentSearches }) {
                 className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-[13px] font-semibold
                   transition-all duration-150
                   ${active
-                    ? 'bg-sage-400 text-white shadow-sage-glow'
+                    ? 'bg-sage-400 text-white shadow-teal-glow'
                     : 'bg-white text-warm-600 shadow-soft'
                   }`}
               >
