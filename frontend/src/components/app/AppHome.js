@@ -73,6 +73,17 @@ export function AppHome({ onSearch, onStartSearch }) {
     }
   }, [inputValue, ingredients, addIngredient, removeIngredient]);
 
+  // Space-to-tag: when user types space after a word, convert it to a tag
+  const handleInputChange = useCallback((e) => {
+    const val = e.target.value;
+    if (val.endsWith(' ') && val.trim().length > 0) {
+      addIngredient(val);
+      setInputValue('');
+    } else {
+      setInputValue(val);
+    }
+  }, [addIngredient]);
+
   // ── Scenario chips ──
 
   const handleScenarioTap = useCallback((scenario) => {
@@ -195,7 +206,7 @@ export function AppHome({ onSearch, onStartSearch }) {
               ref={inputRef}
               type="text"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
               placeholder={
                 ingredients.length === 0
