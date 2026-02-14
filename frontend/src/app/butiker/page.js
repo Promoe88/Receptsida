@@ -1,31 +1,41 @@
 // ============================================
-// Butiker — Map-centric store finder
-// Full-height map area with sliding list overlay
-// Uses global useLocation hook + Capacitor Geolocation
+// Butiker — Full Google Maps store finder
+// Real map with chain-specific pins (ICA, Coop, Willys, Lidl…)
+// Sliding store list + tap-to-navigate + InfoWindow
 // ============================================
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Navigation, Store, Loader2, AlertCircle, ChevronUp, ChevronDown, LocateFixed } from 'lucide-react';
+import {
+  MapPin, Navigation, Store, Loader2, AlertCircle,
+  ChevronUp, ChevronDown, LocateFixed, Car, Bike, Footprints,
+} from 'lucide-react';
 import { locations } from '../../lib/api';
 import { isApp } from '../../lib/platform';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
+import { StoreGoogleMap } from '../../components/StoreGoogleMap';
 import { useLocation } from '../../hooks/useLocation';
 
 const CHAIN_COLORS = {
-  ICA: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
-  Willys: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-  Coop: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200' },
-  Lidl: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
-  Hemköp: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200' },
-  'City Gross': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+  ICA: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200', dot: '#E3000B' },
+  Willys: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: '#C8102E' },
+  Coop: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200', dot: '#00843D' },
+  Lidl: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', dot: '#0050AA' },
+  Hemköp: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200', dot: '#F07D00' },
+  'City Gross': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', dot: '#FFD700' },
 };
 
+const TRAVEL_MODES = [
+  { key: 'driving', icon: Car, label: 'Bil' },
+  { key: 'walking', icon: Footprints, label: 'Gång' },
+  { key: 'bicycling', icon: Bike, label: 'Cykel' },
+];
+
 function getChainStyle(chain) {
-  return CHAIN_COLORS[chain] || { bg: 'bg-warm-50', text: 'text-warm-600', border: 'border-warm-200' };
+  return CHAIN_COLORS[chain] || { bg: 'bg-warm-50', text: 'text-warm-600', border: 'border-warm-200', dot: '#5A7D6C' };
 }
 
 function formatDistance(meters) {
@@ -39,6 +49,8 @@ export default function StoresPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [listExpanded, setListExpanded] = useState(false);
+  const [selectedStoreId, setSelectedStoreId] = useState(null);
+  const [travelMode, setTravelMode] = useState('driving');
 
   const fetchStores = useCallback(async (lat, lng) => {
     setLoading(true);
@@ -54,7 +66,6 @@ export default function StoresPage() {
     }
   }, []);
 
-  // Fetch stores whenever position updates
   useEffect(() => {
     if (hasPosition) fetchStores(lat, lng);
   }, [hasPosition, lat, lng, fetchStores]);
@@ -62,7 +73,7 @@ export default function StoresPage() {
   async function openDirections(store) {
     if (!hasPosition) return;
     try {
-      const data = await locations.directions(lat, lng, store.lat, store.lng, 'driving');
+      const data = await locations.directions(lat, lng, store.lat, store.lng, travelMode);
       window.open(data.directionsUrl, '_blank');
     } catch {
       window.open(
@@ -72,73 +83,92 @@ export default function StoresPage() {
     }
   }
 
+  function handleStoreSelect(storeId) {
+    setSelectedStoreId(storeId);
+  }
+
+  function handleListStoreClick(store) {
+    setSelectedStoreId(store.id);
+  }
+
   const isLoading = locLoading || loading;
   const displayError = locError || error;
+  const hasGoogleMapsKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   return (
     <PageTransition className={isApp ? 'safe-top' : ''}>
       <div className="relative flex flex-col" style={{ minHeight: isApp ? 'calc(100vh - 64px)' : 'calc(100vh - 80px)' }}>
 
-        {/* Map placeholder area */}
-        <div className="flex-1 bg-cream-200 relative flex items-center justify-center">
-          {/* Decorative map grid */}
-          <div className="absolute inset-0 opacity-[0.08]"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(45,42,38,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(45,42,38,0.3) 1px, transparent 1px)',
-              backgroundSize: '40px 40px',
-            }}
+        {/* Map area — real Google Maps or placeholder */}
+        {hasGoogleMapsKey && hasPosition ? (
+          <StoreGoogleMap
+            stores={stores}
+            userLat={lat}
+            userLng={lng}
+            selectedStoreId={selectedStoreId}
+            onStoreSelect={handleStoreSelect}
+            onNavigate={openDirections}
           />
+        ) : (
+          <div className="flex-1 bg-cream-200 relative flex items-center justify-center">
+            {/* Decorative grid fallback when no API key or no position */}
+            <div className="absolute inset-0 opacity-[0.08]"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(45,42,38,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(45,42,38,0.3) 1px, transparent 1px)',
+                backgroundSize: '40px 40px',
+              }}
+            />
 
-          {!hasPosition && !isLoading && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center z-10 px-6"
-            >
-              <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-elevated">
-                <MapPin size={36} className="text-sage-400" />
+            {!hasPosition && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center z-10 px-6"
+              >
+                <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-elevated">
+                  <MapPin size={36} className="text-sage-400" />
+                </div>
+                <h2 className="font-display text-2xl text-warm-800 mb-2">Hitta butiker nära dig</h2>
+                <p className="text-sm text-warm-500 mb-6 max-w-xs mx-auto">
+                  Aktivera platsåtkomst för att se ICA, Coop, Willys och fler på kartan
+                </p>
+                <NisseButton variant="primary" size="lg" onClick={requestLocation}>
+                  <LocateFixed size={18} /> Hitta min plats
+                </NisseButton>
+              </motion.div>
+            )}
+
+            {isLoading && stores.length === 0 && (
+              <div className="text-center z-10">
+                <Loader2 size={32} className="animate-spin text-sage-400 mx-auto mb-3" />
+                <p className="text-sm text-warm-500 font-medium">Söker efter butiker...</p>
               </div>
-              <h2 className="font-display text-2xl text-warm-800 mb-2">Hitta butiker nära dig</h2>
-              <p className="text-sm text-warm-500 mb-6 max-w-xs mx-auto">
-                Aktivera platsåtkomst för att se ICA, Willys, Coop och Lidl i närheten
-              </p>
-              <NisseButton variant="primary" size="lg" onClick={requestLocation}>
-                <LocateFixed size={18} /> Hitta min plats
-              </NisseButton>
-            </motion.div>
-          )}
+            )}
 
-          {isLoading && stores.length === 0 && (
-            <div className="text-center z-10">
-              <Loader2 size={32} className="animate-spin text-sage-400 mx-auto mb-3" />
-              <p className="text-sm text-warm-500 font-medium">Söker efter butiker...</p>
-            </div>
-          )}
+            {hasPosition && !isLoading && stores.length === 0 && !displayError && (
+              <div className="text-center z-10 px-6">
+                <Store size={32} className="text-warm-400 mx-auto mb-3" />
+                <p className="text-warm-500">Inga butiker hittades i närheten</p>
+              </div>
+            )}
 
-          {hasPosition && !isLoading && stores.length === 0 && !displayError && (
-            <div className="text-center z-10 px-6">
-              <Store size={32} className="text-warm-400 mx-auto mb-3" />
-              <p className="text-warm-500">Inga butiker hittades i närheten</p>
-            </div>
-          )}
-
-          {/* Floating locate button (when stores loaded) */}
-          {hasPosition && stores.length > 0 && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              onClick={requestLocation}
-              className="absolute top-4 right-4 z-20 w-11 h-11 bg-white rounded-full shadow-elevated
-                       flex items-center justify-center active:scale-95 transition-transform"
-            >
-              {isLoading ? (
-                <Loader2 size={18} className="animate-spin text-sage-400" />
-              ) : (
-                <LocateFixed size={18} className="text-sage-400" />
-              )}
-            </motion.button>
-          )}
-        </div>
+            {hasPosition && stores.length > 0 && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={requestLocation}
+                className="absolute top-4 right-4 z-20 w-11 h-11 bg-white rounded-full shadow-elevated
+                         flex items-center justify-center active:scale-95 transition-transform"
+              >
+                {isLoading ? (
+                  <Loader2 size={18} className="animate-spin text-sage-400" />
+                ) : (
+                  <LocateFixed size={18} className="text-sage-400" />
+                )}
+              </motion.button>
+            )}
+          </div>
+        )}
 
         {/* Error banner */}
         <AnimatePresence>
@@ -179,35 +209,73 @@ export default function StoresPage() {
               </div>
             </button>
 
-            {/* Store list */}
+            {/* Travel mode picker */}
             <AnimatePresence>
               {listExpanded && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   className="overflow-hidden"
                 >
+                  {/* Travel mode tabs */}
+                  <div className="px-4 pb-2 flex gap-2">
+                    {TRAVEL_MODES.map(({ key, icon: Icon, label }) => (
+                      <button
+                        key={key}
+                        onClick={() => setTravelMode(key)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                          ${travelMode === key
+                            ? 'bg-sage-400 text-white shadow-sm'
+                            : 'bg-cream-100 text-warm-500 hover:bg-cream-200'
+                          }`}
+                      >
+                        <Icon size={13} />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Store cards */}
                   <div className="px-4 pb-4 space-y-2.5 max-h-[50vh] soft-scroll">
                     {stores.map((store, idx) => {
                       const style = getChainStyle(store.chain);
+                      const isSelected = store.id === selectedStoreId;
                       return (
                         <motion.div
                           key={store.id}
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: idx * 0.04 }}
-                          className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-cream-100 border border-warm-100"
+                          onClick={() => handleListStoreClick(store)}
+                          className={`flex items-center gap-3.5 p-3.5 rounded-2xl cursor-pointer transition-all
+                            ${isSelected
+                              ? 'bg-sage-50 border-2 border-sage-300 shadow-sm'
+                              : 'bg-cream-100 border border-warm-100 hover:border-warm-200'
+                            }`}
                         >
-                          <div className={`w-11 h-11 ${style.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                            <Store size={18} className={style.text} />
+                          {/* Chain color dot */}
+                          <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0`}
+                            style={{ backgroundColor: style.dot + '15' }}
+                          >
+                            <div className="w-5 h-5 rounded-lg flex items-center justify-center"
+                              style={{ backgroundColor: style.dot }}
+                            >
+                              <Store size={12} className="text-white" />
+                            </div>
                           </div>
+
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <h3 className="font-semibold text-warm-800 text-sm truncate">{store.name}</h3>
                               {store.chain && (
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${style.bg} ${style.text} font-semibold`}>
+                                <span
+                                  className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                                  style={{
+                                    backgroundColor: style.dot + '15',
+                                    color: style.dot,
+                                  }}
+                                >
                                   {store.chain}
                                 </span>
                               )}
@@ -218,15 +286,26 @@ export default function StoresPage() {
                                 {formatDistance(store.distance)}
                               </span>
                               {store.openNow !== null && (
-                                <span className={`text-xs font-medium ${store.openNow ? 'text-success-600' : 'text-terra-500'}`}>
-                                  {store.openNow ? 'Öppet' : 'Stängt'}
+                                <span className="flex items-center gap-1">
+                                  <span
+                                    className="w-1.5 h-1.5 rounded-full"
+                                    style={{ backgroundColor: store.openNow ? '#16a34a' : '#dc2626' }}
+                                  />
+                                  <span className={`text-xs font-medium ${store.openNow ? 'text-success-600' : 'text-terra-500'}`}>
+                                    {store.openNow ? 'Öppet' : 'Stängt'}
+                                  </span>
                                 </span>
                               )}
                             </div>
                           </div>
+
+                          {/* Navigate button */}
                           <motion.button
                             whileTap={{ scale: 0.9 }}
-                            onClick={() => openDirections(store)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDirections(store);
+                            }}
                             className="flex-shrink-0 w-10 h-10 bg-sage-50 hover:bg-sage-100 rounded-xl
                                      flex items-center justify-center transition-colors"
                           >
