@@ -8,26 +8,26 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mic, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Mic, ArrowRight, Sparkles, Zap, Trash2, Flame, Package } from 'lucide-react';
 import { useAuthStore } from '../../lib/store';
 
-// ── Scenario quick-action chips ──
+// ── Scenario quick-action chips (Lucide icons, no emojis) ──
 
 const SCENARIOS = [
-  { id: 'snabbt', label: 'Snabbt & Billigt', emoji: '⚡️' },
-  { id: 'tom-kylen', label: 'Töm kylen', emoji: '🧹' },
-  { id: 'middag', label: 'Middag för två', emoji: '🕯️' },
-  { id: 'matlador', label: 'Perfekt för matlådor', emoji: '📦' },
+  { id: 'snabbt', label: 'Snabbt & Billigt', Icon: Zap },
+  { id: 'tom-kylen', label: 'Töm kylen', Icon: Trash2 },
+  { id: 'middag', label: 'Middag för två', Icon: Flame },
+  { id: 'matlador', label: 'Perfekt för matlådor', Icon: Package },
 ];
 
-// ── Animation variants ──
+// ── Animation variants (spring-based) ──
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    transition: { type: 'spring', stiffness: 300, damping: 30 },
   },
 };
 
@@ -101,19 +101,23 @@ export function AppHome({ onSearch, onStartSearch }) {
   const canExecute = ingredients.length > 0 || activeScenario;
 
   return (
-    <div className="h-full flex flex-col" style={{ background: '#F5F5F7' }}>
+    <div className="h-full flex flex-col" style={{ background: '#EBEDF0' }}>
       <motion.div
         className="flex-1 flex flex-col justify-center px-6 pb-12"
         variants={stagger}
         initial="hidden"
         animate="show"
       >
-        {/* ═══ NISSE SPARKLE — AI presence ═══ */}
+        {/* ═══ NISSE SPARKLE — AI presence (larger, accent glow) ═══ */}
         <motion.div variants={fadeUp} className="flex justify-center mb-5">
           <motion.div
             animate={{
               scale: [1, 1.08, 1],
-              opacity: [0.75, 1, 0.75],
+              filter: [
+                'drop-shadow(0 0 8px rgba(255,107,53,0.15))',
+                'drop-shadow(0 0 20px rgba(255,107,53,0.35))',
+                'drop-shadow(0 0 8px rgba(255,107,53,0.15))',
+              ],
             }}
             transition={{
               duration: 3,
@@ -130,7 +134,10 @@ export function AppHome({ onSearch, onStartSearch }) {
           <p className="font-body text-[13px] text-warm-400 mb-1">
             Hej {firstName}
           </p>
-          <h1 className="font-display text-[32px] font-bold text-warm-800 leading-tight tracking-tight mb-2">
+          <h1
+            className="font-display text-[34px] font-extrabold leading-tight tracking-tight mb-2"
+            style={{ color: '#1A1A1A' }}
+          >
             Vad lagar vi idag?
           </h1>
           <p className="font-body text-[14px] text-warm-400 max-w-[260px] mx-auto">
@@ -145,12 +152,12 @@ export function AppHome({ onSearch, onStartSearch }) {
             style={{
               borderRadius: '20px',
               padding: '12px 16px',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 30px 60px -12px rgba(50,50,93,0.12), 0 18px 36px -18px rgba(0,0,0,0.15)',
+              border: '1px solid #D1D5DB',
             }}
             onClick={() => inputRef.current?.focus()}
           >
-            {/* Ingredient tags */}
+            {/* Ingredient tags — accent color when active */}
             <AnimatePresence mode="popLayout">
               {ingredients.map((ingredient) => (
                 <motion.span
@@ -159,12 +166,12 @@ export function AppHome({ onSearch, onStartSearch }) {
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ duration: 0.15 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
                            text-[13px] font-medium select-none"
                   style={{
-                    background: '#EEF3F0',
-                    color: '#5A7D6C',
+                    background: '#FFF0E8',
+                    color: '#FF6B35',
                   }}
                 >
                   {ingredient}
@@ -175,9 +182,9 @@ export function AppHome({ onSearch, onStartSearch }) {
                     }}
                     className="flex items-center justify-center w-4 h-4 rounded-full
                              transition-colors"
-                    style={{ background: 'rgba(90,125,108,0.15)' }}
+                    style={{ background: 'rgba(255,107,53,0.15)' }}
                   >
-                    <X size={10} strokeWidth={2.5} style={{ color: '#5A7D6C' }} />
+                    <X size={10} strokeWidth={2.5} style={{ color: '#FF6B35' }} />
                   </button>
                 </motion.span>
               ))}
@@ -203,7 +210,7 @@ export function AppHome({ onSearch, onStartSearch }) {
             <button
               className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
                        transition-colors"
-              style={{ background: '#F5F5F7' }}
+              style={{ background: '#F0F1F3' }}
               aria-label="Röstinmatning"
             >
               <Mic size={16} className="text-warm-400" strokeWidth={1.5} />
@@ -211,11 +218,12 @@ export function AppHome({ onSearch, onStartSearch }) {
           </div>
         </motion.div>
 
-        {/* ═══ SCENARIO CHIPS ═══ */}
+        {/* ═══ SCENARIO CHIPS (Lucide icons, no emojis) ═══ */}
         <motion.div variants={fadeUp} className="mb-8">
           <div className="flex flex-wrap gap-2.5 justify-center">
             {SCENARIOS.map((scenario) => {
               const active = activeScenario === scenario.id;
+              const ScenarioIcon = scenario.Icon;
               return (
                 <motion.button
                   key={scenario.id}
@@ -225,15 +233,19 @@ export function AppHome({ onSearch, onStartSearch }) {
                            text-[13px] font-medium whitespace-nowrap
                            transition-all duration-200"
                   style={{
-                    background: active ? '#111111' : '#FFFFFF',
+                    background: active ? '#FF6B35' : '#FFFFFF',
                     color: active ? '#FFFFFF' : '#48484A',
                     boxShadow: active
-                      ? '0 4px 16px rgba(17,17,17,0.2)'
-                      : '0 2px 8px rgba(0,0,0,0.04)',
-                    border: active ? '1px solid transparent' : '1px solid rgba(0,0,0,0.04)',
+                      ? '0 8px 24px rgba(255,107,53,0.3)'
+                      : '0 30px 60px -12px rgba(50,50,93,0.08), 0 18px 36px -18px rgba(0,0,0,0.1)',
+                    border: active ? '1px solid transparent' : '1px solid #D1D5DB',
                   }}
                 >
-                  <span className="text-[15px]">{scenario.emoji}</span>
+                  <ScenarioIcon
+                    size={15}
+                    strokeWidth={1.5}
+                    style={{ color: active ? '#FFFFFF' : '#8E8E93' }}
+                  />
                   {scenario.label}
                 </motion.button>
               );
@@ -241,7 +253,7 @@ export function AppHome({ onSearch, onStartSearch }) {
           </div>
         </motion.div>
 
-        {/* ═══ EXECUTE BUTTON ═══ */}
+        {/* ═══ EXECUTE BUTTON — Vibrant accent ═══ */}
         <motion.div variants={fadeUp} className="flex justify-center">
           <AnimatePresence>
             {canExecute && (
@@ -250,13 +262,13 @@ export function AppHome({ onSearch, onStartSearch }) {
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 10 }}
                 whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 onClick={handleExecute}
                 className="execute-glow inline-flex items-center gap-2.5 px-8 py-4 rounded-full
                          font-body font-semibold text-[15px] text-white"
                 style={{
-                  background: '#111111',
-                  boxShadow: '0 8px 32px rgba(17,17,17,0.25)',
+                  background: '#FF6B35',
+                  boxShadow: '0 8px 32px rgba(255,107,53,0.35)',
                 }}
               >
                 <Sparkles size={18} strokeWidth={2} />
@@ -271,26 +283,26 @@ export function AppHome({ onSearch, onStartSearch }) {
   );
 }
 
-// ── Nisse Sparkle — small 4-pointed AI presence indicator ──
+// ── Nisse Sparkle — larger, accent #FF6B35, with soft glow ──
 
 function NisseSparkle() {
   return (
-    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
-      <circle cx="26" cy="26" r="24" fill="rgba(217,119,87,0.06)" />
+    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <circle cx="32" cy="32" r="30" fill="rgba(255,107,53,0.06)" />
       <path
-        d="M 26 6 C 27.5 15, 33 20.5, 42 22
-           C 33 23.5, 27.5 29, 26 38
-           C 24.5 29, 19 23.5, 10 22
-           C 19 20.5, 24.5 15, 26 6 Z"
-        fill="#D97757"
+        d="M 32 6 C 34 17, 41 24.5, 54 26.5
+           C 41 28.5, 34 36, 32 47
+           C 30 36, 23 28.5, 10 26.5
+           C 23 24.5, 30 17, 32 6 Z"
+        fill="#FF6B35"
       />
       <path
-        d="M 39 9 C 39.5 11.5, 41.5 13.5, 44 14
-           C 41.5 14.5, 39.5 16.5, 39 19
-           C 38.5 16.5, 36.5 14.5, 34 14
-           C 36.5 13.5, 38.5 11.5, 39 9 Z"
-        fill="#D97757"
-        opacity="0.5"
+        d="M 49 10 C 49.6 13, 52 15.5, 55 16
+           C 52 16.5, 49.6 19, 49 22
+           C 48.4 19, 46 16.5, 43 16
+           C 46 15.5, 48.4 13, 49 10 Z"
+        fill="#FF6B35"
+        opacity="0.45"
       />
     </svg>
   );

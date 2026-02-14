@@ -42,12 +42,12 @@ export function AppShell({ children }) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="fixed inset-0 z-[9999] flex flex-col items-center justify-center"
-            style={{ background: '#F5F5F7' }}
+            style={{ background: '#EBEDF0' }}
           >
             <motion.div
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             >
               <NisseLogo variant="full" size={180} />
             </motion.div>

@@ -11,7 +11,7 @@
 
   body {
     @apply bg-cream text-warm-800 font-body antialiased;
-    background: #F5F5F7;
+    background: #EBEDF0;
     background-attachment: fixed;
   }
 
@@ -282,7 +282,8 @@
 /* ── Keyboard open state (set by Capacitor keyboard plugin) ── */
 
 /* Hide tab bar when keyboard is open */
-body.keyboard-open .app-tab-bar {
+body.keyboard-open .app-tab-bar,
+body.keyboard-open nav[aria-label="Huvudnavigering"] {
   display: none;
 }
 
@@ -322,7 +323,7 @@ body.keyboard-open .app-main--scroll {
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   overflow: hidden;
-  background: #F5F5F7;
+  background: #EBEDF0;
   transition: bottom 0.25s cubic-bezier(0.2, 0.8, 0.4, 1),
               padding-bottom 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);
 }
@@ -336,7 +337,7 @@ body.keyboard-open .app-main--scroll {
 .app-main--scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
 }
 
 .app-main--fixed {
@@ -414,9 +415,9 @@ body.keyboard-open .app-main--scroll {
 
 @keyframes executeGlow {
   0%, 100% {
-    box-shadow: 0 8px 32px rgba(17, 17, 17, 0.25);
+    box-shadow: 0 8px 32px rgba(255, 107, 53, 0.35);
   }
   50% {
-    box-shadow: 0 8px 40px rgba(17, 17, 17, 0.35), 0 0 0 6px rgba(17, 17, 17, 0.06);
+    box-shadow: 0 8px 40px rgba(255, 107, 53, 0.5), 0 0 0 8px rgba(255, 107, 53, 0.08);
   }
 }

@@ -6,7 +6,7 @@ module.exports = {
       colors: {
         // Background system
         cream: {
-          DEFAULT: '#F5F5F7',
+          DEFAULT: '#EBEDF0',
           50: '#FFFFFF',
           100: '#FAFAFA',
           200: '#F2F2F2',
@@ -153,6 +153,7 @@ module.exports = {
         'editorial': '0 20px 50px rgba(0,0,0,0.06)',
         'editorial-hover': '0 24px 60px rgba(0,0,0,0.10)',
         'search-pill': '0 8px 32px rgba(0,0,0,0.08)',
+        'ambient': '0 30px 60px -12px rgba(50,50,93,0.12), 0 18px 36px -18px rgba(0,0,0,0.15)',
       },
       spacing: {
         // Design system spacing (8px base)
