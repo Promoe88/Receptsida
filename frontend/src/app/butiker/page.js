@@ -1,6 +1,7 @@
 // ============================================
 // Butiker — Map-centric store finder
 // Full-height map area with sliding list overlay
+// Uses global useLocation hook + Capacitor Geolocation
 // ============================================
 
 'use client';
@@ -12,6 +13,7 @@ import { locations } from '../../lib/api';
 import { isApp } from '../../lib/platform';
 import { NisseButton } from '../../components/NisseButton';
 import { PageTransition } from '../../components/PageTransition';
+import { useLocation } from '../../hooks/useLocation';
 
 const CHAIN_COLORS = {
   ICA: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
@@ -32,10 +34,10 @@ function formatDistance(meters) {
 }
 
 export default function StoresPage() {
+  const { lat, lng, loading: locLoading, error: locError, hasPosition, requestLocation } = useLocation();
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
   const [listExpanded, setListExpanded] = useState(false);
 
   const fetchStores = useCallback(async (lat, lng) => {
@@ -52,45 +54,26 @@ export default function StoresPage() {
     }
   }, []);
 
-  function requestLocation() {
-    if (!navigator.geolocation) {
-      setError('Din webbläsare stöder inte platsåtkomst.');
-      return;
-    }
-    setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude });
-        fetchStores(latitude, longitude);
-      },
-      (err) => {
-        setLoading(false);
-        if (err.code === err.PERMISSION_DENIED) {
-          setError('Platsåtkomst nekad. Aktivera plats i inställningarna.');
-        } else {
-          setError('Kunde inte hämta din position. Försök igen.');
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
-  }
+  // Fetch stores whenever position updates
+  useEffect(() => {
+    if (hasPosition) fetchStores(lat, lng);
+  }, [hasPosition, lat, lng, fetchStores]);
 
   async function openDirections(store) {
-    if (!userLocation) return;
+    if (!hasPosition) return;
     try {
-      const data = await locations.directions(
-        userLocation.lat, userLocation.lng,
-        store.lat, store.lng, 'driving'
-      );
+      const data = await locations.directions(lat, lng, store.lat, store.lng, 'driving');
       window.open(data.directionsUrl, '_blank');
     } catch {
       window.open(
-        `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${store.lat},${store.lng}`,
+        `https://www.google.com/maps/dir/${lat},${lng}/${store.lat},${store.lng}`,
         '_blank'
       );
     }
   }
+
+  const isLoading = locLoading || loading;
+  const displayError = locError || error;
 
   return (
     <PageTransition className={isApp ? 'safe-top' : ''}>
@@ -106,7 +89,7 @@ export default function StoresPage() {
             }}
           />
 
-          {!userLocation && !loading && (
+          {!hasPosition && !isLoading && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -125,14 +108,14 @@ export default function StoresPage() {
             </motion.div>
           )}
 
-          {loading && stores.length === 0 && (
+          {isLoading && stores.length === 0 && (
             <div className="text-center z-10">
               <Loader2 size={32} className="animate-spin text-sage-400 mx-auto mb-3" />
               <p className="text-sm text-warm-500 font-medium">Söker efter butiker...</p>
             </div>
           )}
 
-          {userLocation && !loading && stores.length === 0 && !error && (
+          {hasPosition && !isLoading && stores.length === 0 && !displayError && (
             <div className="text-center z-10 px-6">
               <Store size={32} className="text-warm-400 mx-auto mb-3" />
               <p className="text-warm-500">Inga butiker hittades i närheten</p>
@@ -140,7 +123,7 @@ export default function StoresPage() {
           )}
 
           {/* Floating locate button (when stores loaded) */}
-          {userLocation && stores.length > 0 && (
+          {hasPosition && stores.length > 0 && (
             <motion.button
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -148,7 +131,7 @@ export default function StoresPage() {
               className="absolute top-4 right-4 z-20 w-11 h-11 bg-white rounded-full shadow-elevated
                        flex items-center justify-center active:scale-95 transition-transform"
             >
-              {loading ? (
+              {isLoading ? (
                 <Loader2 size={18} className="animate-spin text-sage-400" />
               ) : (
                 <LocateFixed size={18} className="text-sage-400" />
@@ -159,7 +142,7 @@ export default function StoresPage() {
 
         {/* Error banner */}
         <AnimatePresence>
-          {error && (
+          {displayError && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -168,7 +151,7 @@ export default function StoresPage() {
                        px-4 py-3 rounded-xl text-sm flex items-center gap-2 shadow-medium"
             >
               <AlertCircle size={16} className="flex-shrink-0" />
-              <span className="flex-1">{error}</span>
+              <span className="flex-1">{displayError}</span>
               <button onClick={() => setError(null)} className="text-terra-400 font-bold text-lg leading-none">&times;</button>
             </motion.div>
           )}

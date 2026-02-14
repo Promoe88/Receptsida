@@ -47,5 +47,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MatKompass använder din plats för att hitta matbutiker nära dig och visa avstånd till dem.</string>
 </dict>
 </plist>

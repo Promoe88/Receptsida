@@ -24,6 +24,62 @@ function scrollFocusedInputIntoView() {
   });
 }
 
+/**
+ * Get current position using Capacitor Geolocation (native) or Web API (fallback).
+ * Returns { latitude, longitude, accuracy }.
+ */
+export async function getCurrentPosition(options = {}) {
+  const opts = { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000, ...options };
+
+  if (isNative) {
+    try {
+      const { Geolocation } = await import('@capacitor/geolocation');
+      const pos = await Geolocation.getCurrentPosition(opts);
+      return pos.coords;
+    } catch (err) {
+      console.warn('Capacitor Geolocation failed, trying Web API:', err.message);
+    }
+  }
+
+  // Web fallback
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      return reject(new Error('Geolocation stöds inte av denna enhet.'));
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve(pos.coords),
+      (err) => reject(err),
+      opts
+    );
+  });
+}
+
+/**
+ * Check geolocation permission status (native only).
+ * Returns 'granted' | 'denied' | 'prompt'.
+ */
+export async function checkLocationPermission() {
+  if (!isNative) return 'prompt';
+  try {
+    const { Geolocation } = await import('@capacitor/geolocation');
+    const status = await Geolocation.checkPermissions();
+    return status.location;
+  } catch {
+    return 'prompt';
+  }
+}
+
+export async function requestLocationPermission() {
+  if (!isNative) return 'granted';
+  try {
+    const { Geolocation } = await import('@capacitor/geolocation');
+    const status = await Geolocation.requestPermissions();
+    return status.location;
+  } catch {
+    return 'denied';
+  }
+}
+
 export async function initNativePlugins() {
   if (!isNative) return;
 
