@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Nisse Logo — Icon Only -->
+  <!-- Cloche (serving dome) with AI sparkle -->
+
+  <defs>
+    <!-- Subtle gradient for sparkle glow -->
+    <radialGradient id="sparkle-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D97757" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#D97757" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Sparkle glow (subtle background) -->
+  <circle cx="100" cy="52" r="18" fill="url(#sparkle-glow)"/>
+
+  <!-- Cloche dome — smooth arc -->
+  <path
+    d="M 40 130
+       C 40 130, 40 62, 100 50
+       C 160 62, 160 130, 160 130"
+    fill="none"
+    stroke="#5A7D6C"
+    stroke-width="5.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Base plate — slightly wider than dome -->
+  <line
+    x1="32" y1="130"
+    x2="168" y2="130"
+    stroke="#5A7D6C"
+    stroke-width="5.5"
+    stroke-linecap="round"
+  />
+
+  <!-- Plate lip / subtle bottom line -->
+  <path
+    d="M 38 138 Q 100 146, 162 138"
+    fill="none"
+    stroke="#5A7D6C"
+    stroke-width="3.5"
+    stroke-linecap="round"
+    opacity="0.5"
+  />
+
+  <!-- 4-pointed AI sparkle at top (replaces handle) -->
+  <path
+    d="M 100 30
+       C 101.5 36, 104 38.5, 110 40
+       C 104 41.5, 101.5 44, 100 50
+       C 98.5 44, 96 41.5, 90 40
+       C 96 38.5, 98.5 36, 100 30 Z"
+    fill="#D97757"
+    stroke="none"
+  />
+
+  <!-- Tiny secondary sparkle (top-right accent) -->
+  <path
+    d="M 124 46
+       C 124.6 48, 126 49.4, 128 50
+       C 126 50.6, 124.6 52, 124 54
+       C 123.4 52, 122 50.6, 120 50
+       C 122 49.4, 123.4 48, 124 46 Z"
+    fill="#D97757"
+    opacity="0.55"
+  />
+
+  <!-- Steam lines (subtle, rising from dome) -->
+  <path
+    d="M 78 60 C 76 52, 82 48, 80 40"
+    fill="none"
+    stroke="#5A7D6C"
+    stroke-width="2"
+    stroke-linecap="round"
+    opacity="0.18"
+  />
+  <path
+    d="M 118 56 C 120 48, 116 44, 118 36"
+    fill="none"
+    stroke="#5A7D6C"
+    stroke-width="2"
+    stroke-linecap="round"
+    opacity="0.14"
+  />
+</svg>
