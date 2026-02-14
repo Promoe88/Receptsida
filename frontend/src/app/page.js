@@ -133,20 +133,12 @@ export default function HomePage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.25 }}
-            className="h-full overflow-y-auto"
+            className="h-full"
           >
             <AppHome
+              onSearch={(query) => handleSearch(query)}
               onStartSearch={() => setAppView('search')}
-              onSelectPopularRecipe={(recipe) => setSelectedRecipe(recipe)}
             />
-            <AnimatePresence>
-              {selectedRecipe && (
-                <RecipeDetail
-                  recipe={selectedRecipe}
-                  onClose={() => setSelectedRecipe(null)}
-                />
-              )}
-            </AnimatePresence>
           </motion.div>
         )}
 
