@@ -10,6 +10,7 @@ import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mic, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../../lib/store';
+import { NisseLogo } from '../NisseLogo';
 
 // ── Scenario quick-action chips ──
 
@@ -108,12 +109,12 @@ export function AppHome({ onSearch, onStartSearch }) {
         initial="hidden"
         animate="show"
       >
-        {/* ═══ NISSE SPARKLE — AI presence ═══ */}
-        <motion.div variants={fadeUp} className="flex justify-center mb-5">
+        {/* ═══ NISSE LOGO — AI presence ═══ */}
+        <motion.div variants={fadeUp} className="flex justify-center mb-6">
           <motion.div
             animate={{
-              scale: [1, 1.08, 1],
-              opacity: [0.75, 1, 0.75],
+              scale: [1, 1.04, 1],
+              opacity: [0.85, 1, 0.85],
             }}
             transition={{
               duration: 3,
@@ -121,7 +122,7 @@ export function AppHome({ onSearch, onStartSearch }) {
               ease: 'easeInOut',
             }}
           >
-            <NisseSparkle />
+            <NisseLogo variant="icon" size={72} />
           </motion.div>
         </motion.div>
 
@@ -268,33 +269,5 @@ export function AppHome({ onSearch, onStartSearch }) {
         </motion.div>
       </motion.div>
     </div>
-  );
-}
-
-// ── Nisse Sparkle — 4-pointed AI presence indicator ──
-
-function NisseSparkle() {
-  return (
-    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
-      {/* Soft glow */}
-      <circle cx="26" cy="26" r="24" fill="rgba(217,119,87,0.06)" />
-      {/* Main 4-pointed sparkle */}
-      <path
-        d="M 26 6 C 27.5 15, 33 20.5, 42 22
-           C 33 23.5, 27.5 29, 26 38
-           C 24.5 29, 19 23.5, 10 22
-           C 19 20.5, 24.5 15, 26 6 Z"
-        fill="#D97757"
-      />
-      {/* Secondary sparkle */}
-      <path
-        d="M 39 9 C 39.5 11.5, 41.5 13.5, 44 14
-           C 41.5 14.5, 39.5 16.5, 39 19
-           C 38.5 16.5, 36.5 14.5, 34 14
-           C 36.5 13.5, 38.5 11.5, 39 9 Z"
-        fill="#D97757"
-        opacity="0.5"
-      />
-    </svg>
   );
 }
