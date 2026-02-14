@@ -1,7 +1,7 @@
 // ============================================
-// Tutorial / Onboarding — "Three-Steg-Raket"
-// Fixed 100vh native-feel, mesh gradient, pill progress,
-// glassmorphism bottom nav, staggered entrances
+// Tutorial / Onboarding — "Netflix-Premium" Cinematic Intro
+// Fixed 100dvh, z-layer architecture, one-shot impact animations,
+// floating glass island nav, radar scanning, materializing sparkle
 // ============================================
 
 'use client';
@@ -13,175 +13,530 @@ import { gdpr } from '../../lib/api';
 import { isApp } from '../../lib/platform';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles,
-  Search, ShoppingBag, Mic, MapPin, Shield,
-  Tag, ChefHat,
+  Search, Tag, MapPin, Shield, ChefHat,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Spring physics ──
-const SPRING = { type: 'spring', stiffness: 260, damping: 20 };
-const SPRING_TIGHT = { type: 'spring', stiffness: 300, damping: 30 };
+// ── Design tokens ──
+const CHARCOAL = '#0F172A';
+const CORAL = '#FF6B35';
+const SAGE = '#5A7D6C';
 
-// ── Slide variants for AnimatePresence ──
-const slideVariants = {
-  enter: (dir) => ({ x: dir > 0 ? 80 : -80, opacity: 0, scale: 0.97 }),
-  center: { x: 0, opacity: 1, scale: 1 },
-  exit: (dir) => ({ x: dir > 0 ? -80 : 80, opacity: 0, scale: 0.97 }),
+// ── Springs ──
+const SPRING = { type: 'spring', stiffness: 260, damping: 22 };
+const SPRING_IMPACT = { type: 'spring', stiffness: 400, damping: 25 };
+
+// ── Cinematic entrance — blur-fade-scale (one-shot) ──
+const cinematicIn = {
+  hidden: { opacity: 0, y: 40, scale: 0.9, filter: 'blur(10px)' },
+  show: { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' },
 };
 
-// ── Staggered child entrance (0.1s between each) ──
-const staggerIn = {
+// ── Stagger container ──
+const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.12 } },
 };
 
-const popUp = {
-  hidden: { opacity: 0, y: 28, scale: 0.95 },
-  show: { opacity: 1, y: 0, scale: 1, transition: SPRING },
+// ── AnimatePresence slide variants ──
+const pageVariants = {
+  enter: (dir) => ({
+    x: dir > 0 ? 60 : -60,
+    opacity: 0,
+    scale: 0.95,
+    filter: 'blur(6px)',
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    filter: 'blur(0px)',
+  },
+  exit: (dir) => ({
+    x: dir > 0 ? -60 : 60,
+    opacity: 0,
+    scale: 0.95,
+    filter: 'blur(6px)',
+  }),
 };
 
-// ── Feature card cascade ──
-const cardCascade = (i) => ({
-  hidden: { opacity: 0, y: 36, scale: 0.93 },
+// ── Feature tiles (step 2) — 2x2 grid ──
+const FEATURES = [
+  { icon: Search, label: 'Sök recept', desc: 'Baserat på vad du har hemma', accent: CORAL },
+  { icon: Tag, label: 'Jämför priser', desc: 'ICA, Willys, Coop & Lidl', accent: SAGE },
+  { icon: MapPin, label: 'Hitta butiker', desc: 'GPS-guidad vägbeskrivning', accent: '#2ABFBF' },
+  { icon: ChefHat, label: 'Kokassistent', desc: 'Röststyrd steg-för-steg', accent: '#D97757' },
+];
+
+// ── Impact entrance for grid tiles (one-shot, no loop) ──
+const tileImpact = (i) => ({
+  hidden: { opacity: 0, y: 50, scale: 0.85, filter: 'blur(8px)' },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { ...SPRING, delay: 0.15 + i * 0.1 },
+    filter: 'blur(0px)',
+    transition: { ...SPRING_IMPACT, delay: 0.1 + i * 0.08 },
   },
 });
 
-// ── Feature card data (step 2) ──
-const FEATURE_CARDS = [
-  {
-    icon: Search,
-    label: 'Sök recept',
-    desc: 'Hitta recept baserat på ingredienser du har hemma',
-    color: '#FF6B35',
-    bg: 'rgba(255,107,53,0.08)',
-    anim: 'pulse',
-  },
-  {
-    icon: Tag,
-    label: 'Jämför priser',
-    desc: 'Se vilken butik som har billigast ingredienser',
-    color: '#5A7D6C',
-    bg: 'rgba(90,125,108,0.08)',
-    anim: 'tilt',
-  },
-  {
-    icon: MapPin,
-    label: 'Hitta butiker',
-    desc: 'GPS-guidad vägbeskrivning till närmaste mataffär',
-    color: '#2ABFBF',
-    bg: 'rgba(42,191,191,0.08)',
-    anim: 'float',
-  },
-  {
-    icon: ChefHat,
-    label: 'Kokassistent',
-    desc: 'Röststyrd steg-för-steg-hjälp när du lagar mat',
-    color: '#D97757',
-    bg: 'rgba(217,119,87,0.08)',
-    anim: 'float',
-  },
-];
+// ═══════════════════════════════════════════
+// LAYER 20 — Progress Bar (fixed top)
+// ═══════════════════════════════════════════
 
-const iconAnims = {
-  pulse: { scale: [1, 1.14, 1] },
-  tilt: { rotate: [0, -8, 0, 8, 0] },
-  float: { y: [0, -4, 0] },
-};
+function ProgressBar({ step }) {
+  return (
+    <div
+      className="absolute top-0 left-0 right-0 z-20 flex justify-center items-center gap-2 pt-3 pb-3"
+      style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
+    >
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          layout
+          transition={SPRING}
+          className="h-[6px] rounded-full"
+          style={{
+            width: i === step ? 48 : 10,
+            backgroundColor: i === step ? CORAL : i < step ? '#FFAA85' : '#D4D4D8',
+            boxShadow: i === step ? `0 0 14px ${CORAL}66` : 'none',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
-// ── Floating Nisse Sparkle ──
-function HeroSparkle() {
+// ═══════════════════════════════════════════
+// STEP 1 — The Persona (Materializing AI)
+// ═══════════════════════════════════════════
+
+function StepPersona() {
   return (
     <motion.div
-      className="flex justify-center"
-      animate={{ y: [0, -8, 0] }}
-      transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col items-center text-center"
     >
+      {/* LARGE Nisse Sparkle — materializing from blur */}
       <motion.div
-        animate={{
-          scale: [1, 1.1, 1],
-          filter: [
-            'drop-shadow(0 0 14px rgba(90,125,108,0.15))',
-            'drop-shadow(0 0 32px rgba(90,125,108,0.4))',
-            'drop-shadow(0 0 14px rgba(90,125,108,0.15))',
-          ],
-        }}
-        transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0 }}
+        className="relative mb-8"
+        style={{ zIndex: 15 }}
       >
-        <svg width="52" height="52" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-          <circle cx="32" cy="32" r="30" fill="rgba(90,125,108,0.06)" />
-          <path
-            d="M 32 6 C 34 17, 41 24.5, 54 26.5 C 41 28.5, 34 36, 32 47 C 30 36, 23 28.5, 10 26.5 C 23 24.5, 30 17, 32 6 Z"
-            fill="#5A7D6C"
-          />
-          <path
-            d="M 49 10 C 49.6 13, 52 15.5, 55 16 C 52 16.5, 49.6 19, 49 22 C 48.4 19, 46 16.5, 43 16 C 46 15.5, 48.4 13, 49 10 Z"
-            fill="#5A7D6C"
-            opacity="0.4"
-          />
-        </svg>
+        <div
+          className="w-28 h-28 rounded-[32px] flex items-center justify-center"
+          style={{
+            background: 'rgba(255,255,255,0.9)',
+            boxShadow: `0 24px 80px rgba(255,107,53,0.15), 0 0 60px rgba(255,107,53,0.08)`,
+            border: '1px solid rgba(255,107,53,0.1)',
+          }}
+        >
+          <Sparkles size={52} style={{ color: CORAL }} />
+        </div>
+        {/* Glow ring behind sparkle */}
+        <motion.div
+          className="absolute inset-0 rounded-[32px]"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: [0, 0.5, 0], scale: [0.8, 1.3, 1.5] }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
+          style={{ background: `radial-gradient(circle, ${CORAL}20 0%, transparent 70%)` }}
+        />
+      </motion.div>
+
+      {/* Accent tag */}
+      <motion.p
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.1 }}
+        className="text-[10px] font-extrabold uppercase tracking-[0.25em] mb-4"
+        style={{ color: CORAL }}
+      >
+        Din personliga matassistent
+      </motion.p>
+
+      {/* Massive Headline */}
+      <motion.h1
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.2 }}
+        className="font-display text-[38px] font-extrabold tracking-tight leading-[1.1] mb-4"
+        style={{ color: CHARCOAL }}
+      >
+        Hej! Jag heter{' '}
+        <span style={{ color: CORAL }}>Nisse</span>
+      </motion.h1>
+
+      {/* Subtitle */}
+      <motion.p
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.3 }}
+        className="text-[15px] leading-relaxed font-medium max-w-[280px]"
+        style={{ color: '#64748B' }}
+      >
+        Jag hjälper dig hitta recept, jämföra priser och guida dig till närmaste butik.
+      </motion.p>
+    </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// STEP 2 — The Power (2x2 Impact Grid)
+// ═══════════════════════════════════════════
+
+function StepPower() {
+  return (
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col items-center"
+    >
+      {/* Header */}
+      <motion.p
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0 }}
+        className="text-[10px] font-extrabold uppercase tracking-[0.25em] mb-3"
+        style={{ color: CORAL }}
+      >
+        Allt du behöver i köket
+      </motion.p>
+      <motion.h1
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.05 }}
+        className="font-display text-[36px] font-extrabold tracking-tight leading-[1.1] mb-8 text-center"
+        style={{ color: CHARCOAL }}
+      >
+        Vad kan Nisse?
+      </motion.h1>
+
+      {/* 2x2 Glassmorphism Grid */}
+      <div className="grid grid-cols-2 gap-3 w-full max-w-[340px]">
+        {FEATURES.map((feat, i) => {
+          const Icon = feat.icon;
+          return (
+            <motion.div
+              key={i}
+              variants={tileImpact(i)}
+              className="flex flex-col items-center text-center gap-2.5 py-5 px-3 rounded-2xl"
+              style={{
+                background: 'rgba(255,255,255,0.7)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.8)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.8) inset',
+              }}
+            >
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center"
+                style={{
+                  background: `${feat.accent}12`,
+                  boxShadow: `0 4px 16px ${feat.accent}15`,
+                }}
+              >
+                <Icon size={22} style={{ color: feat.accent }} />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold" style={{ color: CHARCOAL }}>{feat.label}</p>
+                <p className="text-[11px] mt-0.5" style={{ color: '#94A3B8' }}>{feat.desc}</p>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// STEP 3 — The Trust (Radar Scan + Consent)
+// ═══════════════════════════════════════════
+
+function RadarIcon() {
+  return (
+    <div className="relative w-24 h-24 flex items-center justify-center mx-auto mb-6">
+      {/* Radar scanning waves — one-shot burst then subtle repeat */}
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          className="absolute inset-0 rounded-full"
+          style={{ border: `2px solid ${CORAL}30` }}
+          initial={{ scale: 0.4, opacity: 0.9 }}
+          animate={{ scale: 2.4, opacity: 0 }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            delay: i * 0.6,
+            ease: 'easeOut',
+          }}
+        />
+      ))}
+      {/* Core icon */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+        transition={{ ...SPRING_IMPACT, delay: 0.15 }}
+        className="w-20 h-20 rounded-3xl flex items-center justify-center relative z-10"
+        style={{
+          background: 'rgba(255,255,255,0.9)',
+          boxShadow: `0 20px 60px ${CORAL}18`,
+          border: '1px solid rgba(255,107,53,0.12)',
+        }}
+      >
+        <MapPin size={36} style={{ color: CORAL }} />
+      </motion.div>
+    </div>
+  );
+}
+
+function StepTrust({ locationGranted, onLocationToggle, privacyAccepted, onPrivacyToggle }) {
+  return (
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col items-center"
+    >
+      {/* Radar icon */}
+      <motion.div variants={cinematicIn} transition={{ ...SPRING, delay: 0 }}>
+        <RadarIcon />
+      </motion.div>
+
+      {/* Heading */}
+      <motion.p
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.08 }}
+        className="text-[10px] font-extrabold uppercase tracking-[0.25em] mb-3"
+        style={{ color: CORAL }}
+      >
+        Tryggt och säkert
+      </motion.p>
+      <motion.h1
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.14 }}
+        className="font-display text-[36px] font-extrabold tracking-tight leading-[1.1] mb-6 text-center"
+        style={{ color: CHARCOAL }}
+      >
+        Plats & Integritet
+      </motion.h1>
+
+      {/* Trust card */}
+      <motion.div
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.22 }}
+        className="w-full max-w-[340px] rounded-3xl p-5"
+        style={{
+          background: 'rgba(255,255,255,0.75)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.85)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.08)',
+        }}
+      >
+        {/* Location toggle */}
+        <motion.button
+          onClick={onLocationToggle}
+          whileTap={{ scale: 0.98 }}
+          className="w-full py-3.5 px-4 rounded-2xl border-2 flex items-center justify-between mb-4 transition-all"
+          style={{
+            borderColor: locationGranted ? SAGE : '#E2E8F0',
+            background: locationGranted ? `${SAGE}08` : 'white',
+            boxShadow: locationGranted ? `0 0 20px ${SAGE}20` : 'none',
+          }}
+        >
+          <span className="text-sm font-semibold" style={{ color: CHARCOAL }}>
+            {locationGranted ? 'Platsåtkomst aktiverad' : 'Aktivera platsåtkomst'}
+          </span>
+          <div
+            className="w-12 h-7 rounded-full flex items-center transition-all duration-300"
+            style={{
+              background: locationGranted ? SAGE : '#CBD5E1',
+              justifyContent: locationGranted ? 'flex-end' : 'flex-start',
+            }}
+          >
+            <motion.div
+              layout
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              className="w-5.5 h-5.5 bg-white rounded-full mx-1"
+              style={{ width: 22, height: 22, boxShadow: '0 1px 6px rgba(0,0,0,0.15)' }}
+            />
+          </div>
+        </motion.button>
+
+        {/* Privacy bullets */}
+        <div className="space-y-2 mb-4">
+          {[
+            'Data krypteras och lagras inom EU',
+            'Exportera eller radera när som helst',
+            'Vi säljer aldrig dina uppgifter',
+          ].map((text, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: 14 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ ...SPRING, delay: 0.35 + i * 0.08 }}
+              className="flex items-center gap-2 text-[13px]"
+              style={{ color: '#64748B' }}
+            >
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: `${SAGE}12` }}
+              >
+                <Shield size={10} style={{ color: SAGE }} />
+              </div>
+              {text}
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Privacy checkbox */}
+        <label
+          className="flex gap-3 cursor-pointer items-start p-3 rounded-xl"
+          style={{ background: 'rgba(241,245,249,0.6)', border: '1px solid #F1F5F9' }}
+        >
+          <div className="relative mt-0.5">
+            <input
+              type="checkbox"
+              checked={privacyAccepted}
+              onChange={(e) => onPrivacyToggle(e.target.checked)}
+              className="sr-only"
+            />
+            <motion.div
+              className="w-5 h-5 rounded-md border-2 flex items-center justify-center"
+              animate={{
+                borderColor: privacyAccepted ? SAGE : '#CBD5E1',
+                backgroundColor: privacyAccepted ? SAGE : 'transparent',
+              }}
+              transition={{ duration: 0.15 }}
+            >
+              <AnimatePresence>
+                {privacyAccepted && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  >
+                    <Check size={12} className="text-white" strokeWidth={3} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+          <span className="text-[13px] leading-relaxed" style={{ color: '#475569' }}>
+            Jag godkänner{' '}
+            <a href="/integritetspolicy" target="_blank" style={{ color: SAGE }} className="underline font-medium">
+              integritetspolicyn
+            </a>{' '}
+            och samtycker till behandling av mina personuppgifter.
+          </span>
+        </label>
       </motion.div>
     </motion.div>
   );
 }
 
-// ── Pill Progress Bar ──
-function PillProgress({ step }) {
-  return (
-    <div className="flex justify-center items-center gap-2">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          animate={{
-            width: i === step ? 44 : 10,
-            height: 10,
-            backgroundColor: i === step ? '#5A7D6C' : i < step ? '#A3C4B5' : '#D4D4D8',
-            boxShadow: i === step ? '0 0 16px rgba(90,125,108,0.45)' : '0 0 0 transparent',
-          }}
-          transition={SPRING}
-          className="rounded-full"
-        />
-      ))}
-    </div>
-  );
-}
+// ═══════════════════════════════════════════
+// LAYER 30 — Glass Navigation Island
+// ═══════════════════════════════════════════
 
-// ── Pulse ring for location step ──
-function PulseRing() {
+function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
   return (
-    <div className="relative w-20 h-20 flex items-center justify-center mx-auto">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="absolute inset-0 rounded-full border-2 border-sage-400/30"
-          initial={{ scale: 0.5, opacity: 0.8 }}
-          animate={{ scale: 2.2, opacity: 0 }}
-          transition={{
-            duration: 2.4,
-            repeat: Infinity,
-            delay: i * 0.8,
-            ease: 'easeOut',
-          }}
-        />
-      ))}
-      <motion.div
-        initial={{ scale: 0.6, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ ...SPRING, delay: 0.1 }}
-        className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center relative z-10"
-        style={{ boxShadow: '0 12px 40px rgba(90,125,108,0.15)' }}
+    <div
+      className="absolute bottom-0 left-0 right-0 z-30 flex justify-center"
+      style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+    >
+      <div
+        className="w-[90%] max-w-[400px] rounded-3xl px-4 py-3"
+        style={{
+          background: 'rgba(255,255,255,0.6)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          border: '1px solid rgba(255,255,255,0.7)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.9) inset',
+        }}
       >
-        <MapPin size={36} className="text-sage-400" />
-      </motion.div>
+        <div className="flex items-center justify-between gap-3">
+          {/* Left — Back / Skip */}
+          <div className="min-w-[80px]">
+            {step > 0 ? (
+              <motion.button
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={SPRING}
+                onClick={onBack}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-1 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors"
+                style={{ color: '#94A3B8' }}
+              >
+                <ArrowLeft size={14} />
+                Tillbaka
+              </motion.button>
+            ) : (
+              <button
+                onClick={onSkip}
+                className="text-[11px] font-medium px-3 py-2.5 transition-colors"
+                style={{ color: '#94A3B8' }}
+              >
+                Hoppa över
+              </button>
+            )}
+          </div>
+
+          {/* Right — Next / CTA */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onNext}
+            disabled={!canProceed}
+            className="relative flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-[14px] font-bold
+                     overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed flex-1 max-w-[200px]"
+            style={{
+              background: '#111111',
+              color: '#FFFFFF',
+              boxShadow: isLast && canProceed
+                ? '0 8px 32px rgba(0,0,0,0.3)'
+                : '0 4px 20px rgba(0,0,0,0.15)',
+            }}
+          >
+            {/* Shimmer */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 55%, transparent 70%)',
+              }}
+              animate={{ x: ['-200%', '200%'] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
+            />
+            <span className="relative z-10 flex items-center gap-2">
+              {isLast ? (
+                <>Kom igång <Check size={15} /></>
+              ) : (
+                <>Nästa <ArrowRight size={15} /></>
+              )}
+            </span>
+          </motion.button>
+        </div>
+
+        {/* Skip on middle steps */}
+        {step > 0 && !isLast && (
+          <div className="text-center mt-1.5">
+            <button
+              onClick={onSkip}
+              className="text-[10px] font-medium transition-colors"
+              style={{ color: '#CBD5E1' }}
+            >
+              Hoppa över introduktionen
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// ── Main component ──
+// ═══════════════════════════════════════════
+// Main Component
+// ═══════════════════════════════════════════
 
 export default function TutorialPage() {
   const router = useRouter();
@@ -191,8 +546,7 @@ export default function TutorialPage() {
   const [locationGranted, setLocationGranted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
-  const totalSteps = 3;
-  const isLast = step === totalSteps - 1;
+  const isLast = step === 2;
   const canProceed = step === 2 ? privacyAccepted : true;
 
   const handleLocationConsent = useCallback(() => {
@@ -236,426 +590,91 @@ export default function TutorialPage() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col overflow-hidden"
+      className="relative h-[100dvh] overflow-hidden"
       style={{
+        // LAYER 0 — Mesh gradient background
         background: `
-          radial-gradient(ellipse 80% 60% at 20% 10%, rgba(90,125,108,0.08) 0%, transparent 60%),
-          radial-gradient(ellipse 70% 50% at 80% 90%, rgba(90,125,108,0.06) 0%, transparent 50%),
-          linear-gradient(170deg, #F8F8FA 0%, #F0F1F3 40%, #EBEDF0 100%)
+          radial-gradient(ellipse 90% 70% at 15% 5%, rgba(255,107,53,0.06) 0%, transparent 50%),
+          radial-gradient(ellipse 80% 60% at 85% 80%, rgba(90,125,108,0.06) 0%, transparent 50%),
+          radial-gradient(ellipse 60% 40% at 50% 50%, rgba(255,107,53,0.03) 0%, transparent 60%),
+          linear-gradient(175deg, #FAFBFC 0%, #F1F3F5 35%, #EBEDF0 70%, #E8EAED 100%)
         `,
-        paddingTop: 'env(safe-area-inset-top)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      {/* ═══ TOP SECTION — Sparkle + Pill Progress ═══ */}
-      <div className="flex flex-col items-center gap-4 pt-10 pb-4 px-6">
-        <HeroSparkle />
-        <PillProgress step={step} />
-      </div>
+      {/* LAYER 20 — Progress Bar */}
+      <ProgressBar step={step} />
 
-      {/* ═══ STEP CONTENT — fills remaining space, vertically centered ═══ */}
-      <div className="flex-1 flex flex-col justify-center px-6 min-h-0 overflow-y-auto scrollbar-none">
+      {/* LAYER 10 — Main Content (centered, padded for header + footer) */}
+      <div
+        className="absolute inset-0 z-10 flex items-center justify-center px-7"
+        style={{
+          // 52px header + 100px footer island = safe content zone
+          paddingTop: 'max(52px, calc(env(safe-area-inset-top) + 52px))',
+          paddingBottom: 'max(100px, calc(env(safe-area-inset-bottom) + 100px))',
+        }}
+      >
         <AnimatePresence mode="wait" custom={direction}>
-          {/* ─── STEP 1: IDENTITY ─── */}
           {step === 0 && (
             <motion.div
-              key="step-0"
+              key="s0"
               custom={direction}
-              variants={slideVariants}
+              variants={pageVariants}
               initial="enter"
               animate="center"
               exit="exit"
               transition={SPRING}
+              className="w-full max-w-[380px]"
             >
-              <motion.div
-                variants={staggerIn}
-                initial="hidden"
-                animate="show"
-                className="text-center mb-6"
-              >
-                {/* Accent label */}
-                <motion.p
-                  variants={popUp}
-                  className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4"
-                  style={{ color: '#5A7D6C' }}
-                >
-                  Din personliga matassistent
-                </motion.p>
-
-                {/* Icon */}
-                <motion.div
-                  variants={popUp}
-                  className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-5"
-                  style={{ boxShadow: '0 16px 48px rgba(90,125,108,0.12)' }}
-                >
-                  <Sparkles size={36} style={{ color: '#5A7D6C' }} />
-                </motion.div>
-
-                {/* Headline */}
-                <motion.h1
-                  variants={popUp}
-                  className="font-display text-[34px] font-extrabold tracking-tight leading-[1.15]"
-                  style={{ color: '#1A1A1A' }}
-                >
-                  Hej! Jag heter Nisse
-                </motion.h1>
-
-                {/* Subtitle */}
-                <motion.p variants={popUp} className="text-warm-400 mt-3 text-base font-medium">
-                  Jag hjälper dig hitta recept, jämföra priser och guida dig till närmaste butik.
-                </motion.p>
-              </motion.div>
-
-              {/* Feature boxes with borders + different float speeds */}
-              <motion.div
-                className="flex gap-3"
-                variants={staggerIn}
-                initial="hidden"
-                animate="show"
-              >
-                {[
-                  { icon: Search, label: 'Sök recept', speed: 2.4 },
-                  { icon: ShoppingBag, label: 'Handla smart', speed: 3.0 },
-                  { icon: Mic, label: 'Röststyrt', speed: 2.7 },
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    variants={popUp}
-                    className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl bg-white"
-                    style={{
-                      border: '1px solid #E5E5E5',
-                      boxShadow: '0 30px 60px rgba(0,0,0,0.12)',
-                    }}
-                  >
-                    <motion.div
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{
-                        duration: item.speed,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                        delay: i * 0.3,
-                      }}
-                      className="w-12 h-12 bg-white rounded-xl flex items-center justify-center"
-                      style={{
-                        boxShadow: '0 4px 20px rgba(90,125,108,0.1)',
-                        border: '1px solid rgba(90,125,108,0.08)',
-                      }}
-                    >
-                      <item.icon size={22} style={{ color: '#5A7D6C' }} />
-                    </motion.div>
-                    <span className="text-xs font-bold text-warm-700 tracking-wide">{item.label}</span>
-                  </motion.div>
-                ))}
-              </motion.div>
+              <StepPersona />
             </motion.div>
           )}
 
-          {/* ─── STEP 2: VALUE & PROOF ─── */}
           {step === 1 && (
             <motion.div
-              key="step-1"
+              key="s1"
               custom={direction}
-              variants={slideVariants}
+              variants={pageVariants}
               initial="enter"
               animate="center"
               exit="exit"
               transition={SPRING}
+              className="w-full max-w-[380px]"
             >
-              <motion.div
-                variants={staggerIn}
-                initial="hidden"
-                animate="show"
-                className="text-center mb-6"
-              >
-                <motion.p
-                  variants={popUp}
-                  className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3"
-                  style={{ color: '#5A7D6C' }}
-                >
-                  Allt du behöver i köket
-                </motion.p>
-                <motion.h1
-                  variants={popUp}
-                  className="font-display text-[34px] font-extrabold tracking-tight leading-[1.15]"
-                  style={{ color: '#1A1A1A' }}
-                >
-                  Vad kan Nisse?
-                </motion.h1>
-              </motion.div>
-
-              {/* Feature Cards — deep shadows, 1px border, icon animations */}
-              <div className="space-y-3">
-                {FEATURE_CARDS.map((card, i) => {
-                  const Icon = card.icon;
-                  return (
-                    <motion.div
-                      key={i}
-                      variants={cardCascade(i)}
-                      initial="hidden"
-                      animate="show"
-                      className="flex gap-4 p-4 rounded-2xl bg-white relative"
-                      style={{
-                        border: '1px solid #E5E5E5',
-                        boxShadow: '0 30px 60px rgba(0,0,0,0.12)',
-                        zIndex: FEATURE_CARDS.length - i,
-                      }}
-                    >
-                      <motion.div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: card.bg }}
-                        animate={iconAnims[card.anim] || {}}
-                        transition={{
-                          duration: card.anim === 'pulse' ? 2 : card.anim === 'tilt' ? 3 : 2.5,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                        }}
-                      >
-                        <Icon size={22} style={{ color: card.color }} />
-                      </motion.div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-[15px]" style={{ color: '#1A1A1A' }}>{card.label}</p>
-                        <p className="text-warm-500 text-sm leading-relaxed mt-0.5">{card.desc}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+              <StepPower />
             </motion.div>
           )}
 
-          {/* ─── STEP 3: TRUST & PRIVACY ─── */}
           {step === 2 && (
             <motion.div
-              key="step-2"
+              key="s2"
               custom={direction}
-              variants={slideVariants}
+              variants={pageVariants}
               initial="enter"
               animate="center"
               exit="exit"
               transition={SPRING}
+              className="w-full max-w-[380px]"
             >
-              <motion.div
-                variants={staggerIn}
-                initial="hidden"
-                animate="show"
-              >
-                {/* Pulse ring */}
-                <motion.div variants={popUp}>
-                  <PulseRing />
-                </motion.div>
-
-                <div className="text-center mt-5 mb-5">
-                  <motion.p
-                    variants={popUp}
-                    className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3"
-                    style={{ color: '#5A7D6C' }}
-                  >
-                    Tryggt och säkert
-                  </motion.p>
-                  <motion.h1
-                    variants={popUp}
-                    className="font-display text-[34px] font-extrabold tracking-tight leading-[1.15]"
-                    style={{ color: '#1A1A1A' }}
-                  >
-                    Plats & Integritet
-                  </motion.h1>
-                  <motion.p variants={popUp} className="text-warm-400 mt-3 text-base font-medium max-w-xs mx-auto">
-                    Hitta butiker nära dig — din data krypteras och delas aldrig utan samtycke.
-                  </motion.p>
-                </div>
-              </motion.div>
-
-              {/* Trust card */}
-              <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ ...SPRING, delay: 0.3 }}
-                className="bg-white rounded-3xl p-5"
-                style={{
-                  border: '1px solid #E5E5E5',
-                  boxShadow: '0 30px 60px rgba(0,0,0,0.12)',
-                }}
-              >
-                {/* Location toggle */}
-                <motion.button
-                  onClick={handleLocationConsent}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-4 px-5 rounded-2xl border-2 transition-all flex items-center justify-between mb-4"
-                  style={{
-                    borderColor: locationGranted ? '#5A7D6C' : '#E4E4E7',
-                    background: locationGranted ? 'rgba(90,125,108,0.04)' : 'white',
-                    boxShadow: locationGranted ? '0 0 24px rgba(90,125,108,0.15)' : 'none',
-                  }}
-                >
-                  <span className="text-sm font-semibold text-warm-700">
-                    {locationGranted ? 'Platsåtkomst aktiverad' : 'Aktivera platsåtkomst'}
-                  </span>
-                  <div
-                    className="w-14 h-8 rounded-full flex items-center transition-all duration-300"
-                    style={{
-                      background: locationGranted ? '#5A7D6C' : '#D4D4D8',
-                      justifyContent: locationGranted ? 'flex-end' : 'flex-start',
-                      boxShadow: locationGranted ? '0 0 16px rgba(90,125,108,0.3)' : 'none',
-                    }}
-                  >
-                    <motion.div
-                      layout
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      className="w-6 h-6 bg-white rounded-full mx-1"
-                      style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
-                    />
-                  </div>
-                </motion.button>
-
-                {/* Privacy bullets */}
-                <div className="space-y-2.5 mb-4">
-                  {[
-                    'All data krypteras och lagras inom EU',
-                    'Exportera eller radera din data när som helst',
-                    'Vi säljer aldrig dina personuppgifter',
-                  ].map((text, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: 16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ ...SPRING, delay: 0.35 + i * 0.1 }}
-                      className="flex gap-2.5 text-sm text-warm-600"
-                    >
-                      <div className="w-5 h-5 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Shield size={10} className="text-sage-500" />
-                      </div>
-                      {text}
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Privacy consent checkbox */}
-                <label className="flex gap-3 cursor-pointer items-start p-3.5 rounded-xl bg-cream-100/60 border border-warm-100/50">
-                  <div className="relative mt-0.5">
-                    <input
-                      type="checkbox"
-                      checked={privacyAccepted}
-                      onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                      className="sr-only"
-                    />
-                    <motion.div
-                      className="w-5 h-5 rounded-md border-2 flex items-center justify-center"
-                      animate={{
-                        borderColor: privacyAccepted ? '#5A7D6C' : '#D4D4D8',
-                        backgroundColor: privacyAccepted ? '#5A7D6C' : 'transparent',
-                      }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <AnimatePresence>
-                        {privacyAccepted && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                          >
-                            <Check size={12} className="text-white" strokeWidth={3} />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  </div>
-                  <span className="text-sm text-warm-600 leading-relaxed">
-                    Jag har läst och godkänner{' '}
-                    <a href="/integritetspolicy" target="_blank" className="text-sage-500 underline font-medium">
-                      integritetspolicyn
-                    </a>{' '}
-                    och samtycker till behandling av mina personuppgifter.
-                  </span>
-                </label>
-              </motion.div>
+              <StepTrust
+                locationGranted={locationGranted}
+                onLocationToggle={handleLocationConsent}
+                privacyAccepted={privacyAccepted}
+                onPrivacyToggle={setPrivacyAccepted}
+              />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ═══ FIXED BOTTOM NAV — Glassmorphism bar ═══ */}
-      <div
-        className="flex-shrink-0 px-6 pt-4 pb-6"
-        style={{
-          background: 'rgba(245,245,247,0.7)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-          borderTop: '1px solid rgba(0,0,0,0.04)',
-        }}
-      >
-        <div className="flex items-center justify-between">
-          {/* Left: Back / Skip */}
-          <div style={{ minWidth: 100 }}>
-            {step > 0 ? (
-              <motion.button
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={SPRING}
-                onClick={handleBack}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-1.5 px-4 py-3 rounded-full text-sm font-medium text-warm-500
-                         transition-colors hover:text-warm-700"
-              >
-                <ArrowLeft size={16} />
-                Tillbaka
-              </motion.button>
-            ) : (
-              <button
-                onClick={handleFinish}
-                className="text-xs text-warm-400 hover:text-warm-600 transition-colors px-3 py-3"
-              >
-                Hoppa över
-              </button>
-            )}
-          </div>
-
-          {/* Right: Next / CTA with shimmer */}
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={handleNext}
-            disabled={!canProceed}
-            className="relative flex items-center gap-2 px-8 py-4 rounded-full text-[15px] font-bold
-                     transition-all disabled:opacity-35 disabled:cursor-not-allowed overflow-hidden"
-            style={{
-              background: '#111111',
-              color: '#FFFFFF',
-              boxShadow: isLast && canProceed
-                ? '0 12px 40px rgba(0,0,0,0.35)'
-                : '0 6px 24px rgba(0,0,0,0.2)',
-            }}
-          >
-            {/* Shimmer animation — always visible */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.12) 55%, transparent 65%)',
-              }}
-              animate={{ x: ['-200%', '200%'] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.5 }}
-            />
-            <span className="relative z-10 flex items-center gap-2">
-              {isLast ? (
-                <>Kom igång <Check size={16} /></>
-              ) : (
-                <>Nästa <ArrowRight size={16} /></>
-              )}
-            </span>
-          </motion.button>
-        </div>
-
-        {/* Skip link on middle steps */}
-        {step > 0 && !isLast && (
-          <div className="text-center mt-3">
-            <button
-              onClick={handleFinish}
-              className="text-xs text-warm-400 hover:text-warm-600 transition-colors"
-            >
-              Hoppa över introduktionen
-            </button>
-          </div>
-        )}
-      </div>
+      {/* LAYER 30 — Glass Navigation Island */}
+      <NavIsland
+        step={step}
+        isLast={isLast}
+        canProceed={canProceed}
+        onNext={handleNext}
+        onBack={handleBack}
+        onSkip={handleFinish}
+      />
     </div>
   );
 }
