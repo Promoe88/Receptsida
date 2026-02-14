@@ -17,22 +17,28 @@ export function generalRateLimit(req, res, next) {
 }
 
 /**
- * Recipe search rate limiter (per user)
- * FREE: 10/hour, PREMIUM: 100/hour
+ * Recipe search rate limiter (per user or per IP for anonymous)
+ * Logged in — FREE: 10/hour, PREMIUM: 100/hour
+ * Anonymous — 5/hour (IP-based)
  */
 export function recipeSearchRateLimit(req, res, next) {
-  if (!req.user) {
-    return res.status(401).json({ error: 'unauthorized' });
+  if (req.user) {
+    const limit =
+      req.user.plan === 'PREMIUM' || req.user.plan === 'ADMIN'
+        ? config.RECIPE_SEARCH_LIMIT_PER_HOUR_PREMIUM
+        : config.RECIPE_SEARCH_LIMIT_PER_HOUR;
+
+    return rateLimitByKey(
+      `rl:recipe:${req.user.id}`,
+      limit,
+      3600
+    )(req, res, next);
   }
 
-  const limit =
-    req.user.plan === 'PREMIUM' || req.user.plan === 'ADMIN'
-      ? config.RECIPE_SEARCH_LIMIT_PER_HOUR_PREMIUM
-      : config.RECIPE_SEARCH_LIMIT_PER_HOUR;
-
+  // Anonymous users: IP-based rate limit (5/hour)
   return rateLimitByKey(
-    `rl:recipe:${req.user.id}`,
-    limit,
+    `rl:recipe:anon:${req.ip}`,
+    5,
     3600
   )(req, res, next);
 }
