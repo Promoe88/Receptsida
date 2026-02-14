@@ -47,40 +47,24 @@ export function AppShell({ children }) {
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="flex flex-col items-center gap-5"
             >
-              {/* Sparkle icon — matches AppHome branding */}
-              <motion.div
-                animate={{
-                  scale: [1, 1.08, 1],
-                  filter: [
-                    'drop-shadow(0 0 8px rgba(255,107,53,0.15))',
-                    'drop-shadow(0 0 24px rgba(255,107,53,0.4))',
-                    'drop-shadow(0 0 8px rgba(255,107,53,0.15))',
-                  ],
-                }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <svg width="80" height="80" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-                  <circle cx="32" cy="32" r="30" fill="rgba(255,107,53,0.06)" />
-                  <path
-                    d="M 32 6 C 34 17, 41 24.5, 54 26.5 C 41 28.5, 34 36, 32 47 C 30 36, 23 28.5, 10 26.5 C 23 24.5, 30 17, 32 6 Z"
-                    fill="#FF6B35"
-                  />
-                  <path
-                    d="M 49 10 C 49.6 13, 52 15.5, 55 16 C 52 16.5, 49.6 19, 49 22 C 48.4 19, 46 16.5, 43 16 C 46 15.5, 48.4 13, 49 10 Z"
-                    fill="#FF6B35"
-                    opacity="0.45"
-                  />
-                </svg>
-              </motion.div>
-              {/* App name */}
-              <p
-                className="font-display text-[15px] font-semibold tracking-[0.35em] uppercase"
-                style={{ color: '#48484A' }}
-              >
-                MatKompass
-              </p>
+              <svg width="120" height="96" viewBox="0 0 200 160" fill="none" aria-label="Nisse" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="splash-sg" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#D97757" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#D97757" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <circle cx="100" cy="52" r="18" fill="url(#splash-sg)" />
+                <path
+                  d="M 40 130 C 40 130, 40 62, 100 50 C 160 62, 160 130, 160 130"
+                  fill="none" stroke="#5A7D6C" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round"
+                />
+                <line x1="32" y1="130" x2="168" y2="130" stroke="#5A7D6C" strokeWidth="5.5" strokeLinecap="round" />
+                <path d="M 38 138 Q 100 146, 162 138" fill="none" stroke="#5A7D6C" strokeWidth="3.5" strokeLinecap="round" opacity="0.5" />
+                <path d="M 100 30 C 101.5 36, 104 38.5, 110 40 C 104 41.5, 101.5 44, 100 50 C 98.5 44, 96 41.5, 90 40 C 96 38.5, 98.5 36, 100 30 Z" fill="#D97757" />
+                <path d="M 124 46 C 124.6 48, 126 49.4, 128 50 C 126 50.6, 124.6 52, 124 54 C 123.4 52, 122 50.6, 120 50 C 122 49.4, 123.4 48, 124 46 Z" fill="#D97757" opacity="0.55" />
+              </svg>
             </motion.div>
           </motion.div>
         )}
