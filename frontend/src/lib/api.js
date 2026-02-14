@@ -315,6 +315,43 @@ export const recipes = {
   },
 };
 
+// ── Meal Plan API ──
+
+export const mealPlans = {
+  async generate(weekStart, householdSize, preferences) {
+    return apiFetch('/meal-plans/generate', {
+      method: 'POST',
+      body: JSON.stringify({ weekStart, householdSize, preferences }),
+    });
+  },
+
+  async list() {
+    return apiFetch('/meal-plans');
+  },
+
+  async get(id) {
+    return apiFetch(`/meal-plans/${id}`);
+  },
+
+  async swap(planId, dayIndex, mealType) {
+    return apiFetch(`/meal-plans/${planId}/swap`, {
+      method: 'POST',
+      body: JSON.stringify({ dayIndex, mealType }),
+    });
+  },
+
+  async lockMeal(planId, mealId, locked) {
+    return apiFetch(`/meal-plans/${planId}/meals/${mealId}/lock`, {
+      method: 'PATCH',
+      body: JSON.stringify({ locked }),
+    });
+  },
+
+  async remove(id) {
+    return apiFetch(`/meal-plans/${id}`, { method: 'DELETE' });
+  },
+};
+
 // ── Lexicon API ──
 
 export const lexicon = {
@@ -323,4 +360,4 @@ export const lexicon = {
   },
 };
 
-export default { auth, recipes, lexicon, gdpr, locations };
+export default { auth, recipes, lexicon, gdpr, locations, mealPlans };

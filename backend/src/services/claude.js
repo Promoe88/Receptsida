@@ -463,6 +463,107 @@ SÄKERHET & HÄLSA:
 }
 
 // ──────────────────────────────────────────
+// Meal Plan Generation
+// ──────────────────────────────────────────
+
+const DAY_NAMES = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag'];
+
+export async function generateMealPlan(householdSize = 2, preferences = {}, lockedMeals = []) {
+  const householdLabel = getHouseholdLabel(householdSize);
+
+  const dietaryStr = preferences.dietary?.length
+    ? `\nKostpreferenser: ${preferences.dietary.join(', ')}.`
+    : '';
+  const budgetStr = preferences.maxBudget
+    ? `\nMaxbudget för hela veckan: ${preferences.maxBudget} kr.`
+    : '';
+
+  const mealsPerDay = preferences.mealsPerDay || 'dinner';
+  const mealTypes = mealsPerDay === 'both'
+    ? ['lunch', 'middag']
+    : mealsPerDay === 'lunch'
+      ? ['lunch']
+      : ['middag'];
+
+  const mealTypesStr = mealTypes.join(' och ');
+
+  const lockedStr = lockedMeals.length > 0
+    ? `\n\nDESSA MÅLTIDER ÄR LÅSTA (behåll exakt som de är):\n${lockedMeals.map((m) => `- ${DAY_NAMES[m.dayIndex]} ${m.mealType}: ${m.title}`).join('\n')}`
+    : '';
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 6000,
+    system: `${MATKOMPASS_IDENTITY}\n\nDu agerar nu som MENYPLANERAREN — du skapar varierade, realistiska veckomenyer som svenska familjer faktiskt vill laga.`,
+    tools: [{ type: 'web_search_20250305' }],
+    messages: [
+      {
+        role: 'user',
+        content: `Skapa en veckomeny (${mealTypesStr}) för ${householdLabel} (${householdSize} portioner).
+${dietaryStr}${budgetStr}${lockedStr}
+
+REGLER:
+- Variation: minst 3 olika proteinkällor under veckan
+- Realistiskt: rätter som tar max 45 min på vardagar, mer ambitiöst på helg
+- Säsong: anpassa efter svensk säsong
+- Budget: om inte annat anges, sikta på 40-80 kr per måltid
+- Smart: återanvänd ingredienser mellan dagar (t.ex. kyckling mån → kycklingwrap tis)
+- Fredagsmys: fredag ska kännas lite extra
+- Söndag: gärna något som ger bra matlådor till måndag
+
+Sök på nätet efter riktiga recept. Använd svenska receptkällor (ICA, Coop, köket.se).
+
+Svara ENBART med giltig JSON (ingen markdown, inga backticks):
+{
+  "meals": [
+    {
+      "dayIndex": 0,
+      "dayName": "Måndag",
+      "mealType": "DINNER",
+      "title": "Receptnamn",
+      "description": "Kort beskrivning (1 mening)",
+      "time_minutes": 30,
+      "difficulty": "Enkel",
+      "servings": ${householdSize},
+      "cost_estimate": "ca 60 kr",
+      "source_name": "ICA",
+      "source_url": "https://...",
+      "ingredients": [
+        { "name": "Kycklingfilé", "amount": "400g", "have": false, "aisle": "Kött & Fisk" }
+      ],
+      "steps": [
+        { "text": "Steg 1...", "voice_cue": "Börja med att..." }
+      ],
+      "tools": ["Stekpanna", "Kniv"]
+    }
+  ],
+  "shopping_list": [
+    { "name": "Kycklingfilé", "amount": "800g", "est_price": "90 kr", "aisle": "Kött & Fisk", "forDays": [0, 2] }
+  ],
+  "total_estimated_cost": "ca 450-600 kr",
+  "weekly_tip": "Tips för veckan..."
+}`,
+      },
+    ],
+  });
+
+  let text = '';
+  for (const block of response.content) {
+    if (block.type === 'text') text += block.text + '\n';
+  }
+
+  const cleanJSON = text.replace(/```json|```/g, '').trim();
+
+  try {
+    return JSON.parse(cleanJSON);
+  } catch {
+    const match = cleanJSON.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error('Failed to parse meal plan JSON from AI response');
+  }
+}
+
+// ──────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────
 

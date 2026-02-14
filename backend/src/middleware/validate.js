@@ -171,6 +171,33 @@ export const shareRecipeSchema = z.object({
   toEmail: z.string().email('Ogiltig mottagaradress'),
 });
 
+// ──────────────────────────────────────────
+// Meal plan schemas
+// ──────────────────────────────────────────
+
+export const generateMealPlanSchema = z.object({
+  weekStart: z.string().min(1, 'Veckostart krävs'), // ISO date string
+  householdSize: z.number().int().min(1).max(20).optional(),
+  preferences: z
+    .object({
+      dietary: z
+        .array(z.enum(['vegetarisk', 'vegan', 'glutenfri', 'laktosfri', 'lchf']))
+        .optional(),
+      maxBudget: z.number().int().min(10).max(5000).optional(),
+      mealsPerDay: z.enum(['lunch', 'dinner', 'both']).optional().default('dinner'),
+    })
+    .optional(),
+});
+
+export const swapMealSchema = z.object({
+  dayIndex: z.number().int().min(0).max(6),
+  mealType: z.enum(['LUNCH', 'DINNER']),
+});
+
+export const lockMealSchema = z.object({
+  locked: z.boolean(),
+});
+
 export const suggestRecipesSchema = z.object({
   ingredients: z
     .array(z.string().min(1).max(100))

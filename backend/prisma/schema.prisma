@@ -43,6 +43,7 @@ model User {
   favorites      Favorite[]
   searchQuota    SearchQuota?
   consentRecords ConsentRecord[]
+  mealPlans      MealPlan[]
 
   @@index([authProvider, providerId])
   @@map("users")
@@ -147,11 +148,12 @@ model Recipe {
   tips          String?
   createdAt     DateTime @default(now()) @map("created_at")
 
-  search      RecipeSearch   @relation(fields: [searchId], references: [id], onDelete: Cascade)
-  ingredients Ingredient[]
-  steps       Step[]
-  tools       Tool[]
-  favorites   Favorite[]
+  search       RecipeSearch   @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  ingredients  Ingredient[]
+  steps        Step[]
+  tools        Tool[]
+  favorites    Favorite[]
+  mealPlanDays MealPlanDay[]
 
   @@index([slug])
   @@index([searchId])
@@ -206,6 +208,50 @@ model Favorite {
 
   @@unique([userId, recipeId])
   @@map("favorites")
+}
+
+// ──────────────────────────────────────────
+// Meal Plans — Weekly meal planning
+// ──────────────────────────────────────────
+
+model MealPlan {
+  id              String     @id @default(cuid())
+  userId          String     @map("user_id")
+  name            String?    // e.g. "Vecka 8" — auto-generated if blank
+  weekStart       DateTime   @map("week_start") // Monday of the target week
+  householdSize   Int        @default(2) @map("household_size")
+  preferences     Json?      // { dietary: [], maxBudget: null, ... }
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meals MealPlanDay[]
+
+  @@index([userId, weekStart(sort: Desc)])
+  @@map("meal_plans")
+}
+
+model MealPlanDay {
+  id         String   @id @default(cuid())
+  planId     String   @map("plan_id")
+  dayIndex   Int      @map("day_index") // 0=Monday, 6=Sunday
+  mealType   MealType @map("meal_type")
+  title      String   // Recipe title
+  recipeData Json     @map("recipe_data") // Full recipe object for offline
+  recipeId   String?  @map("recipe_id") // Link to Recipe if saved
+  locked     Boolean  @default(false) // User locked = don't regenerate
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  plan   MealPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  recipe Recipe?  @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+
+  @@index([planId])
+  @@map("meal_plan_days")
+}
+
+enum MealType {
+  LUNCH
+  DINNER
 }
 
 // ──────────────────────────────────────────

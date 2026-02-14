@@ -3,7 +3,7 @@
 // ============================================
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { recipes, lexicon } from '../lib/api';
+import { recipes, lexicon, mealPlans } from '../lib/api';
 
 // ── useRecipeSearch ──
 export function useRecipeSearch() {
@@ -208,4 +208,93 @@ export function useShoppingAssistant(recipe) {
   const clearMessages = useCallback(() => setMessages([]), []);
 
   return { messages, loading, ask, clearMessages };
+}
+
+// ── useMealPlan ──
+export function useMealPlan() {
+  const [plans, setPlans] = useState([]);
+  const [currentPlan, setCurrentPlan] = useState(null);
+  const [shoppingList, setShoppingList] = useState([]);
+  const [weeklyTip, setWeeklyTip] = useState('');
+  const [totalCost, setTotalCost] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState(null);
+
+  const loadPlans = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await mealPlans.list();
+      setPlans(data.plans || []);
+      if (data.plans?.length > 0) {
+        setCurrentPlan(data.plans[0]);
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const generate = useCallback(async (weekStart, householdSize, preferences) => {
+    setGenerating(true);
+    setError(null);
+    try {
+      const data = await mealPlans.generate(weekStart, householdSize, preferences);
+      setCurrentPlan(data.plan);
+      setShoppingList(data.shopping_list || []);
+      setWeeklyTip(data.weekly_tip || '');
+      setTotalCost(data.total_estimated_cost || '');
+      loadPlans();
+      return data;
+    } catch (err) {
+      setError(err.message || 'Kunde inte generera veckomenyn.');
+      throw err;
+    } finally {
+      setGenerating(false);
+    }
+  }, [loadPlans]);
+
+  const swapMeal = useCallback(async (dayIndex, mealType) => {
+    if (!currentPlan) return;
+    try {
+      const data = await mealPlans.swap(currentPlan.id, dayIndex, mealType);
+      setCurrentPlan(data.plan);
+    } catch (err) {
+      setError(err.message || 'Kunde inte byta rätt.');
+    }
+  }, [currentPlan]);
+
+  const toggleLock = useCallback(async (mealId, locked) => {
+    if (!currentPlan) return;
+    try {
+      await mealPlans.lockMeal(currentPlan.id, mealId, locked);
+      setCurrentPlan((prev) => ({
+        ...prev,
+        meals: prev.meals.map((m) =>
+          m.id === mealId ? { ...m, locked } : m
+        ),
+      }));
+    } catch {
+      // Silently fail
+    }
+  }, [currentPlan]);
+
+  const selectPlan = useCallback(async (planId) => {
+    setLoading(true);
+    try {
+      const data = await mealPlans.get(planId);
+      setCurrentPlan(data.plan);
+    } catch {
+      // Silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    plans, currentPlan, shoppingList, weeklyTip, totalCost,
+    loading, generating, error,
+    loadPlans, generate, swapMeal, toggleLock, selectPlan,
+  };
 }

@@ -8,12 +8,12 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Home, Search, Plus, Heart, User } from 'lucide-react';
+import { Home, Search, CalendarDays, Heart, User } from 'lucide-react';
 
 const TABS = [
   { href: '/', label: 'Hem', icon: Home },
   { href: '/butiker', label: 'Sök', icon: Search },
-  { href: '/ny', label: '', icon: Plus, isCenter: true },
+  { href: '/ny', label: '', icon: CalendarDays, isCenter: true },
   { href: '/favoriter', label: 'Favoriter', icon: Heart },
   { href: '/installningar', label: 'Profil', icon: User },
 ];
@@ -64,7 +64,7 @@ export function BottomTabBar() {
                 key={`tab-${i}`}
                 href={tab.href}
                 onClick={handleTap}
-                aria-label="Lägg till nytt"
+                aria-label="Veckomeny"
                 className="flex items-center justify-center flex-1"
               >
                 <motion.div
