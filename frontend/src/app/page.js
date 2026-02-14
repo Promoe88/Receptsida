@@ -44,10 +44,15 @@ export default function HomePage() {
   // App navigation state
   const [appView, setAppView] = useState('home'); // 'home' | 'search' | 'results'
 
-  function handleSearch(query, householdSize, preferences) {
+  async function handleSearch(query, householdSize, preferences) {
     setLastQuery(query);
-    search(query, householdSize, preferences);
     if (isApp) setAppView('results');
+    try {
+      await search(query, householdSize, preferences);
+    } catch {
+      // Error state is already set in the hook — stay on results view
+      // so the user sees the error message
+    }
   }
 
   function handleReset() {
@@ -122,6 +127,22 @@ export default function HomePage() {
   }
 
   if (loading) return <LoadingState />;
+
+  // ── App: error view (when search failed and no results) ──
+  if (isApp && error && !results && appView === 'results') {
+    return (
+      <PageTransition>
+        <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
+          <span className="text-4xl mb-4">😔</span>
+          <h2 className="font-display text-xl font-bold text-warm-800 mb-2">Sökningen misslyckades</h2>
+          <p className="text-sm text-warm-500 mb-6 max-w-xs leading-relaxed">{error}</p>
+          <NisseButton variant="primary" onClick={handleReset}>
+            <ArrowLeft size={16} /> Försök igen
+          </NisseButton>
+        </div>
+      </PageTransition>
+    );
+  }
 
   // ── App: new design with home + ingredient search flow ──
   if (isApp) {
