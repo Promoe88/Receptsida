@@ -284,9 +284,9 @@ export default function RegisterPage() {
   // ── Web: Dual panel split-screen ──
   if (isWeb) {
     return (
-      <div className="min-h-[calc(100vh-72px)] grid lg:grid-cols-2">
+      <div className="min-h-[calc(100vh-60px)] grid lg:grid-cols-2">
         {/* Left panel — form */}
-        <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12 bg-white">
+        <div className="flex flex-col justify-center px-5 sm:px-12 lg:px-20 py-8 sm:py-12 bg-white">
           <div className="w-full max-w-md mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -301,10 +301,10 @@ export default function RegisterPage() {
                 <ChevronLeft size={20} />
                 Tillbaka till inloggning
               </Link>
-              <h1 className="font-display text-4xl font-bold tracking-tight mb-2" style={{ color: '#111111' }}>
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight mb-2" style={{ color: '#111111' }}>
                 Skapa konto
               </h1>
-              <p className="text-warm-500 text-base">
+              <p className="text-warm-500 text-sm sm:text-base">
                 Kom igång med Nisse — helt gratis
               </p>
             </motion.div>

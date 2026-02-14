@@ -49,7 +49,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className="flex justify-between items-center transition-all duration-300"
-          style={{ height: scrolled ? '56px' : '72px' }}
+          style={{ height: scrolled ? '52px' : '60px' }}
         >
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -192,12 +192,14 @@ export function Navbar() {
                     </button>
                   </>
                 ) : (
-                  <div className="flex gap-2 px-4 pt-2">
-                    <Link href="/login" className="btn-outline flex-1 text-center text-sm"
+                  <div className="flex gap-2.5 px-4 pt-3 pb-1">
+                    <Link href="/login"
+                          className="btn-outline flex-1 text-center text-sm py-3"
                           onClick={() => setMobileOpen(false)}>
                       Logga in
                     </Link>
-                    <Link href="/register" className="btn-primary flex-1 text-center text-sm"
+                    <Link href="/register"
+                          className="btn-primary flex-1 text-center text-sm py-3"
                           onClick={() => setMobileOpen(false)}>
                       Kom igång
                     </Link>

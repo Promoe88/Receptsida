@@ -194,18 +194,18 @@ export default function HomePage() {
       )}
 
       {/* How it works — 3-column grid with hover-scale */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
+      <section className="py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-14">
             <h2
-              className="font-display text-display-sm sm:text-display-md font-bold tracking-tight mb-3"
+              className="font-display text-2xl sm:text-display-sm md:text-display-md font-bold tracking-tight mb-2 sm:mb-3"
               style={{ color: '#111111' }}
             >
               Från kylskåp till middagsbord
             </h2>
-            <p className="text-warm-500 max-w-md mx-auto text-base">Tre steg. Noll beslutströtthet.</p>
+            <p className="text-warm-500 max-w-md mx-auto text-sm sm:text-base">Tre steg. Noll beslutströtthet.</p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <StepCard number="1" icon={<ChefHat size={24} />} title="Sök" text="Skriv vad du har hemma, en maträtt, eller din budget. AI hittar de bästa recepten åt dig." />
             <StepCard number="2" icon={<ShoppingBag size={24} />} title="Handla" text="Röststyrd inköpslista som guidar dig genom butiken, hylla för hylla. Handsfree." />
             <StepCard number="3" icon={<Mic size={24} />} title="Laga" text="Steg-för-steg med timer och AI-kock som svarar på dina frågor. Som en kock i örat." />
@@ -214,9 +214,9 @@ export default function HomePage() {
       </section>
 
       {/* Features — 3-column grid */}
-      <section className="py-20 border-y border-warm-200/20" style={{ background: 'rgba(245,245,247,0.6)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-3 gap-6 lg:gap-8">
+      <section className="py-12 sm:py-20 border-y border-warm-200/20" style={{ background: 'rgba(245,245,247,0.6)' }}>
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <FeatureCard icon={<Leaf size={22} className="text-forest-400" />} title="Hållbar matlagning" text="Minimera matsvinn genom att laga mat med vad du redan har." />
             <FeatureCard icon={<TrendingDown size={22} className="text-terra-400" />} title="Bästa priset" text="Se pris per portion och jämför ICA, Willys, Coop & Lidl." />
             <FeatureCard icon={<Headphones size={22} className="text-forest-400" />} title="Röststyrt" text="Handla och laga helt handsfree med röstkommandon." />
@@ -226,24 +226,25 @@ export default function HomePage() {
 
       {/* CTA */}
       {!user && (
-        <section className="py-20">
-          <div className="max-w-xl mx-auto text-center px-4">
-            <div className="card p-10" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.08)' }}>
-              <div className="w-16 h-16 bg-forest-50 rounded-3xl flex items-center justify-center mx-auto mb-5">
-                <Sparkles size={28} className="text-forest-400" />
+        <section className="py-12 sm:py-20">
+          <div className="max-w-xl mx-auto text-center px-5 sm:px-4">
+            <div className="card p-6 sm:p-10" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.08)' }}>
+              <div className="w-14 sm:w-16 h-14 sm:h-16 bg-forest-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-5">
+                <Sparkles size={24} className="text-forest-400 sm:hidden" />
+                <Sparkles size={28} className="text-forest-400 hidden sm:block" />
               </div>
               <h3
-                className="font-display text-2xl sm:text-3xl font-bold tracking-tight mb-3"
+                className="font-display text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mb-2 sm:mb-3"
                 style={{ color: '#111111' }}
               >
                 Börja laga smartare
               </h3>
-              <p className="text-warm-500 text-base mb-8 max-w-sm mx-auto leading-relaxed">
+              <p className="text-warm-500 text-sm sm:text-base mb-6 sm:mb-8 max-w-sm mx-auto leading-relaxed">
                 Skapa ett gratis konto för att söka bland tusentals recept, spara favoriter och få röststyrd matlagningshjälp.
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 text-white px-8 py-4 rounded-full font-semibold text-base
+                className="inline-flex items-center gap-2 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-full font-semibold text-sm sm:text-base
                          transition-all hover:-translate-y-0.5 hover:shadow-btn-hover active:scale-[0.97]"
                 style={{ background: '#111111', boxShadow: '0 4px 20px rgba(17,17,17,0.2)' }}
               >
@@ -262,7 +263,7 @@ function FeatureCard({ icon, title, text }) {
     <motion.div
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="card p-7 cursor-default"
+      className="card p-5 sm:p-7 cursor-default"
       style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.06)' }}
     >
       <div
@@ -285,7 +286,7 @@ function StepCard({ number, icon, title, text }) {
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: Number(number) * 0.12 }}
       whileHover={{ y: -4, scale: 1.02 }}
-      className="card p-8 text-center cursor-default"
+      className="card p-6 sm:p-8 text-center cursor-default"
       style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.06)' }}
     >
       <div
