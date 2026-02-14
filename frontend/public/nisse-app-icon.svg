@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Nisse App Icon — iOS/Android (512×512) -->
+  <!-- Cream background, centered cloche with sparkle -->
+
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#FEFCF9"/>
+      <stop offset="100%" stop-color="#F5F0E8"/>
+    </radialGradient>
+    <radialGradient id="sparkle-glow-app" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#D97757" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#D97757" stop-opacity="0"/>
+    </radialGradient>
+    <!-- iOS rounded rectangle clip -->
+    <clipPath id="ios-clip">
+      <rect width="512" height="512" rx="114" ry="114"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#ios-clip)">
+    <!-- Background -->
+    <rect width="512" height="512" fill="url(#bg-grad)"/>
+
+    <!-- Main icon group (centered) -->
+    <g transform="translate(106, 80) scale(1.5)">
+      <!-- Sparkle glow -->
+      <circle cx="100" cy="52" r="22" fill="url(#sparkle-glow-app)"/>
+
+      <!-- Cloche dome -->
+      <path
+        d="M 40 130
+           C 40 130, 40 62, 100 50
+           C 160 62, 160 130, 160 130"
+        fill="none"
+        stroke="#5A7D6C"
+        stroke-width="7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+
+      <!-- Base plate -->
+      <line
+        x1="30" y1="130"
+        x2="170" y2="130"
+        stroke="#5A7D6C"
+        stroke-width="7"
+        stroke-linecap="round"
+      />
+
+      <!-- Plate lip -->
+      <path
+        d="M 36 140 Q 100 150, 164 140"
+        fill="none"
+        stroke="#5A7D6C"
+        stroke-width="4.5"
+        stroke-linecap="round"
+        opacity="0.45"
+      />
+
+      <!-- 4-pointed AI sparkle (larger for app icon) -->
+      <path
+        d="M 100 26
+           C 102 34, 105 37, 114 40
+           C 105 43, 102 46, 100 54
+           C 98 46, 95 43, 86 40
+           C 95 37, 98 34, 100 26 Z"
+        fill="#D97757"
+      />
+
+      <!-- Secondary sparkle -->
+      <path
+        d="M 128 42
+           C 128.8 44.5, 130.5 46.2, 133 47
+           C 130.5 47.8, 128.8 49.5, 128 52
+           C 127.2 49.5, 125.5 47.8, 123 47
+           C 125.5 46.2, 127.2 44.5, 128 42 Z"
+        fill="#D97757"
+        opacity="0.5"
+      />
+
+      <!-- Third tiny sparkle (top-left) -->
+      <path
+        d="M 80 38
+           C 80.4 39.5, 81.5 40.6, 83 41
+           C 81.5 41.4, 80.4 42.5, 80 44
+           C 79.6 42.5, 78.5 41.4, 77 41
+           C 78.5 40.6, 79.6 39.5, 80 38 Z"
+        fill="#D97757"
+        opacity="0.3"
+      />
+    </g>
+  </g>
+</svg>
