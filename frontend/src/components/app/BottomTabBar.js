@@ -1,7 +1,7 @@
 // ============================================
-// BottomTabBar — Pixel-perfect bottom navigation
-// 80px height, teal center button, active tab has
-// dark circle background behind icon
+// BottomTabBar — Floating glassmorphism nav
+// 24px blur, Lucide 1.5px stroke, Sage Green
+// active icon with 4px dot underneath
 // ============================================
 
 'use client';
@@ -19,6 +19,8 @@ const TABS = [
   { href: '/installningar', label: 'Profil', icon: User },
 ];
 
+const SAGE_GREEN = '#5A7D6C';
+
 export function BottomTabBar() {
   const pathname = usePathname();
 
@@ -34,18 +36,21 @@ export function BottomTabBar() {
       className="app-tab-bar z-50"
       aria-label="Huvudnavigering"
       style={{
-        background: '#FFFFFF',
-        boxShadow: '0 -4px 20px rgba(0,0,0,0.04)',
+        background: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        boxShadow: '0 -1px 0 rgba(0,0,0,0.04), 0 -8px 32px rgba(0,0,0,0.06)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      <div className="flex items-center justify-around px-2" style={{ height: '80px' }}>
+      <div className="flex items-center justify-around px-3" style={{ height: '72px' }}>
         {TABS.map((tab, i) => {
           const Icon = tab.icon;
           const active = tab.href === '/'
             ? pathname === '/'
             : pathname.startsWith(tab.href);
 
+          // ── Center "plus" button ──
           if (tab.isCenter) {
             return (
               <Link
@@ -57,60 +62,66 @@ export function BottomTabBar() {
               >
                 <motion.div
                   whileTap={{ scale: 0.85 }}
-                  className="flex items-center justify-center -mt-5"
+                  className="flex items-center justify-center -mt-4"
                   style={{
                     width: '48px',
                     height: '48px',
                     borderRadius: '9999px',
-                    background: '#2ABFBF',
-                    boxShadow: '0 4px 24px rgba(42,191,191,0.25)',
+                    background: '#111111',
+                    boxShadow: '0 6px 20px rgba(17,17,17,0.25)',
                   }}
                 >
-                  <Icon size={24} strokeWidth={1.5} className="text-white" />
+                  <Icon size={22} strokeWidth={1.5} className="text-white" />
                 </motion.div>
               </Link>
             );
           }
 
+          // ── Regular tabs ──
           return (
             <Link
               key={`tab-${i}`}
               href={tab.href}
               onClick={handleTap}
               aria-label={tab.label}
-              className="flex flex-col items-center justify-center gap-1.5 flex-1 py-2 relative"
+              className="flex flex-col items-center justify-center gap-1 flex-1 py-2 relative"
             >
               <motion.div
                 whileTap={{ scale: 0.85 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-                className="relative flex items-center justify-center"
-                style={{ width: '40px', height: '40px' }}
               >
-                {/* Active: dark circle background behind icon */}
-                {active && (
-                  <motion.div
-                    layoutId="tab-active-bg"
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: '#1A1A2E' }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
                 <Icon
                   size={22}
-                  strokeWidth={1.8}
-                  className="relative z-10"
-                  style={{ color: active ? '#FFFFFF' : '#C7C7CC' }}
+                  strokeWidth={1.5}
+                  style={{ color: active ? SAGE_GREEN : '#C7C7CC' }}
                 />
               </motion.div>
+
               <span
-                className="text-tiny leading-tight"
+                className="text-[10px] leading-tight font-body"
                 style={{
-                  color: active ? '#1A1A2E' : '#C7C7CC',
-                  fontWeight: active ? '600' : '500',
+                  color: active ? SAGE_GREEN : '#C7C7CC',
+                  fontWeight: active ? '600' : '400',
+                  letterSpacing: '0.3px',
                 }}
               >
                 {tab.label}
               </span>
+
+              {/* Active dot indicator */}
+              {active && (
+                <motion.div
+                  layoutId="tab-active-dot"
+                  className="absolute rounded-full"
+                  style={{
+                    bottom: '2px',
+                    width: '4px',
+                    height: '4px',
+                    background: SAGE_GREEN,
+                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
             </Link>
           );
         })}

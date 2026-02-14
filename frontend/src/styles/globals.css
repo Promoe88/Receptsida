@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=DM+Mono:wght@400;500&display=swap');
 
 @layer base {
   html {
@@ -32,11 +32,12 @@
 @layer components {
   /* ── Buttons — Pill-shaped per design system ── */
   .btn-primary {
-    @apply bg-warm-800 text-white px-7 py-3.5 rounded-full font-medium text-label
+    @apply text-white px-7 py-3.5 rounded-full font-medium text-label
            transition-all duration-200
            disabled:opacity-40 disabled:cursor-not-allowed
            active:scale-[0.97];
-    box-shadow: 0 4px 12px rgba(26, 26, 46, 0.15);
+    background: #111111;
+    box-shadow: 0 4px 12px rgba(17, 17, 17, 0.18);
   }
 
   .btn-primary:hover {
@@ -93,26 +94,36 @@
            transition-all duration-200 active:scale-[0.95];
   }
 
-  /* ── Cards — No borders, shadow only, per design system ── */
+  /* ── Cards — Pure white, 32px radius, editorial shadow ── */
   .card {
-    @apply bg-white rounded-md shadow-card;
+    @apply bg-white;
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.06);
   }
 
   .card-elevated {
-    @apply bg-white rounded-md shadow-card
-           hover:shadow-card-hover hover:-translate-y-0.5
+    @apply bg-white
+           hover:-translate-y-0.5
            transition-all duration-200;
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.06);
+  }
+
+  .card-elevated:hover {
+    box-shadow: 0 24px 60px rgba(0,0,0,0.10);
   }
 
   .card-glass {
-    @apply rounded-md shadow-glass;
+    border-radius: 32px;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8);
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
 
   .card-flat {
-    @apply bg-cream-200 rounded-md;
+    @apply bg-cream-200;
+    border-radius: 32px;
   }
 
   /* ── Inputs — Teal focus glow, per design system ── */
@@ -236,6 +247,10 @@
     animation: shimmer 1.5s ease-in-out infinite;
   }
 }
+
+/* ── Hide scrollbar utility ── */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ── Line clamp ── */
 .line-clamp-2 {
