@@ -1,7 +1,7 @@
 // ============================================
-// Tutorial / Onboarding — 3-step "rocket" introduction
-// High-energy animated flow with premium motion design
-// Step 1: Identity — Step 2: Value — Step 3: Trust
+// Tutorial / Onboarding — "Three-Steg-Raket"
+// Fixed 100vh native-feel, mesh gradient, pill progress,
+// glassmorphism bottom nav, staggered entrances
 // ============================================
 
 'use client';
@@ -18,40 +18,40 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ── Spring physics — high-end iOS native feel ──
+// ── Spring physics ──
 const SPRING = { type: 'spring', stiffness: 260, damping: 20 };
 const SPRING_TIGHT = { type: 'spring', stiffness: 300, damping: 30 };
 
-// ── Slide variants ──
+// ── Slide variants for AnimatePresence ──
 const slideVariants = {
-  enter: (dir) => ({ x: dir > 0 ? 100 : -100, opacity: 0, scale: 0.96 }),
+  enter: (dir) => ({ x: dir > 0 ? 80 : -80, opacity: 0, scale: 0.97 }),
   center: { x: 0, opacity: 1, scale: 1 },
-  exit: (dir) => ({ x: dir > 0 ? -100 : 100, opacity: 0, scale: 0.96 }),
+  exit: (dir) => ({ x: dir > 0 ? -80 : 80, opacity: 0, scale: 0.97 }),
 };
 
-// ── Stagger container ──
-const stagger = {
+// ── Staggered child entrance (0.1s between each) ──
+const staggerIn = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.2, delayChildren: 0.15 } },
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
 };
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: SPRING },
+const popUp = {
+  hidden: { opacity: 0, y: 28, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: SPRING },
 };
 
-// ── Feature card float animation ──
-const floatVariant = (i) => ({
-  hidden: { opacity: 0, y: 40, scale: 0.92 },
+// ── Feature card cascade ──
+const cardCascade = (i) => ({
+  hidden: { opacity: 0, y: 36, scale: 0.93 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { ...SPRING, delay: 0.2 + i * 0.2 },
+    transition: { ...SPRING, delay: 0.15 + i * 0.1 },
   },
 });
 
-// ── Feature card data for step 2 ──
+// ── Feature card data (step 2) ──
 const FEATURE_CARDS = [
   {
     icon: Search,
@@ -59,7 +59,7 @@ const FEATURE_CARDS = [
     desc: 'Hitta recept baserat på ingredienser du har hemma',
     color: '#FF6B35',
     bg: 'rgba(255,107,53,0.08)',
-    pulse: true,
+    anim: 'pulse',
   },
   {
     icon: Tag,
@@ -67,7 +67,7 @@ const FEATURE_CARDS = [
     desc: 'Se vilken butik som har billigast ingredienser',
     color: '#5A7D6C',
     bg: 'rgba(90,125,108,0.08)',
-    tilt: true,
+    anim: 'tilt',
   },
   {
     icon: MapPin,
@@ -75,6 +75,7 @@ const FEATURE_CARDS = [
     desc: 'GPS-guidad vägbeskrivning till närmaste mataffär',
     color: '#2ABFBF',
     bg: 'rgba(42,191,191,0.08)',
+    anim: 'float',
   },
   {
     icon: ChefHat,
@@ -82,44 +83,45 @@ const FEATURE_CARDS = [
     desc: 'Röststyrd steg-för-steg-hjälp när du lagar mat',
     color: '#D97757',
     bg: 'rgba(217,119,87,0.08)',
+    anim: 'float',
   },
 ];
 
-// ── Nisse Sparkle (hero icon) ──
-function HeroSparkle({ step }) {
+const iconAnims = {
+  pulse: { scale: [1, 1.14, 1] },
+  tilt: { rotate: [0, -8, 0, 8, 0] },
+  float: { y: [0, -4, 0] },
+};
+
+// ── Floating Nisse Sparkle ──
+function HeroSparkle() {
   return (
     <motion.div
-      className="flex justify-center mb-6"
-      animate={{
-        y: [0, -6, 0],
-        x: step === 0 ? 0 : step === 1 ? -8 : 8,
-      }}
-      transition={{
-        y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-        x: { ...SPRING_TIGHT },
-      }}
+      className="flex justify-center"
+      animate={{ y: [0, -8, 0] }}
+      transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
     >
       <motion.div
         animate={{
-          scale: [1, 1.08, 1],
+          scale: [1, 1.1, 1],
           filter: [
-            'drop-shadow(0 0 12px rgba(255,107,53,0.2))',
-            'drop-shadow(0 0 28px rgba(255,107,53,0.45))',
-            'drop-shadow(0 0 12px rgba(255,107,53,0.2))',
+            'drop-shadow(0 0 14px rgba(90,125,108,0.15))',
+            'drop-shadow(0 0 32px rgba(90,125,108,0.4))',
+            'drop-shadow(0 0 14px rgba(90,125,108,0.15))',
           ],
         }}
         transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
       >
-        <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-          <circle cx="32" cy="32" r="30" fill="rgba(255,107,53,0.06)" />
+        <svg width="52" height="52" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <circle cx="32" cy="32" r="30" fill="rgba(90,125,108,0.06)" />
           <path
             d="M 32 6 C 34 17, 41 24.5, 54 26.5 C 41 28.5, 34 36, 32 47 C 30 36, 23 28.5, 10 26.5 C 23 24.5, 30 17, 32 6 Z"
-            fill="#FF6B35"
+            fill="#5A7D6C"
           />
           <path
             d="M 49 10 C 49.6 13, 52 15.5, 55 16 C 52 16.5, 49.6 19, 49 22 C 48.4 19, 46 16.5, 43 16 C 46 15.5, 48.4 13, 49 10 Z"
-            fill="#FF6B35"
-            opacity="0.45"
+            fill="#5A7D6C"
+            opacity="0.4"
           />
         </svg>
       </motion.div>
@@ -127,10 +129,31 @@ function HeroSparkle({ step }) {
   );
 }
 
+// ── Pill Progress Bar ──
+function PillProgress({ step }) {
+  return (
+    <div className="flex justify-center items-center gap-2">
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          animate={{
+            width: i === step ? 44 : 10,
+            height: 10,
+            backgroundColor: i === step ? '#5A7D6C' : i < step ? '#A3C4B5' : '#D4D4D8',
+            boxShadow: i === step ? '0 0 16px rgba(90,125,108,0.45)' : '0 0 0 transparent',
+          }}
+          transition={SPRING}
+          className="rounded-full"
+        />
+      ))}
+    </div>
+  );
+}
+
 // ── Pulse ring for location step ──
 function PulseRing() {
   return (
-    <div className="relative w-20 h-20 flex items-center justify-center mx-auto mb-5">
+    <div className="relative w-20 h-20 flex items-center justify-center mx-auto">
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
@@ -149,7 +172,8 @@ function PulseRing() {
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ ...SPRING, delay: 0.1 }}
-        className="w-20 h-20 bg-sage-50 rounded-3xl flex items-center justify-center shadow-soft relative z-10"
+        className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center relative z-10"
+        style={{ boxShadow: '0 12px 40px rgba(90,125,108,0.15)' }}
       >
         <MapPin size={36} className="text-sage-400" />
       </motion.div>
@@ -169,6 +193,7 @@ export default function TutorialPage() {
 
   const totalSteps = 3;
   const isLast = step === totalSteps - 1;
+  const canProceed = step === 2 ? privacyAccepted : true;
 
   const handleLocationConsent = useCallback(() => {
     setLocationGranted((prev) => {
@@ -209,38 +234,29 @@ export default function TutorialPage() {
     }
   }
 
-  const canProceed = step === 2 ? privacyAccepted : true;
-
   return (
     <div
-      className="flex-1 flex flex-col min-h-screen"
-      style={{ background: 'linear-gradient(180deg, #F5F5F7 0%, #EBEDF0 100%)' }}
+      className="fixed inset-0 flex flex-col overflow-hidden"
+      style={{
+        background: `
+          radial-gradient(ellipse 80% 60% at 20% 10%, rgba(90,125,108,0.08) 0%, transparent 60%),
+          radial-gradient(ellipse 70% 50% at 80% 90%, rgba(90,125,108,0.06) 0%, transparent 50%),
+          linear-gradient(170deg, #F8F8FA 0%, #F0F1F3 40%, #EBEDF0 100%)
+        `,
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
     >
-      {/* ═══ GUIDING SPARKLE — floats at top with parallax ═══ */}
-      <div className="pt-14 pb-2">
-        <HeroSparkle step={step} />
-
-        {/* ═══ PROGRESS DOTS — pill-shaped active with glow ═══ */}
-        <div className="flex justify-center gap-2.5">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              animate={{
-                width: i === step ? 36 : 8,
-                backgroundColor: i === step ? '#FF6B35' : i < step ? '#FFB899' : '#D4D4D8',
-                boxShadow: i === step ? '0 0 12px rgba(255,107,53,0.4)' : '0 0 0 transparent',
-              }}
-              transition={SPRING}
-              className="h-2 rounded-full"
-            />
-          ))}
-        </div>
+      {/* ═══ TOP SECTION — Sparkle + Pill Progress ═══ */}
+      <div className="flex flex-col items-center gap-4 pt-10 pb-4 px-6">
+        <HeroSparkle />
+        <PillProgress step={step} />
       </div>
 
-      {/* ═══ STEP CONTENT ═══ */}
-      <div className="flex-1 flex flex-col justify-center px-5 pb-4">
+      {/* ═══ STEP CONTENT — fills remaining space, vertically centered ═══ */}
+      <div className="flex-1 flex flex-col justify-center px-6 min-h-0 overflow-y-auto scrollbar-none">
         <AnimatePresence mode="wait" custom={direction}>
-          {/* ─── STEP 1: IDENTITY & MAGIC ─── */}
+          {/* ─── STEP 1: IDENTITY ─── */}
           {step === 0 && (
             <motion.div
               key="step-0"
@@ -251,68 +267,86 @@ export default function TutorialPage() {
               exit="exit"
               transition={SPRING}
             >
-              <div className="text-center mb-7">
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0, y: 30 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  transition={{ ...SPRING, delay: 0.05 }}
-                  className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-5"
-                  style={{ boxShadow: '0 8px 32px rgba(255,107,53,0.12)' }}
+              <motion.div
+                variants={staggerIn}
+                initial="hidden"
+                animate="show"
+                className="text-center mb-6"
+              >
+                {/* Accent label */}
+                <motion.p
+                  variants={popUp}
+                  className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4"
+                  style={{ color: '#5A7D6C' }}
                 >
-                  <Sparkles size={36} className="text-[#FF6B35]" />
+                  Din personliga matassistent
+                </motion.p>
+
+                {/* Icon */}
+                <motion.div
+                  variants={popUp}
+                  className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-5"
+                  style={{ boxShadow: '0 16px 48px rgba(90,125,108,0.12)' }}
+                >
+                  <Sparkles size={36} style={{ color: '#5A7D6C' }} />
                 </motion.div>
-                <h1
-                  className="font-display text-[32px] font-extrabold tracking-tight leading-tight"
-                  style={{ color: '#111111' }}
+
+                {/* Headline */}
+                <motion.h1
+                  variants={popUp}
+                  className="font-display text-[34px] font-extrabold tracking-tight leading-[1.15]"
+                  style={{ color: '#1A1A1A' }}
                 >
                   Hej! Jag heter Nisse
-                </h1>
-                <p className="text-warm-400 mt-2 text-base font-medium">
-                  Din personliga matassistent
-                </p>
-              </div>
+                </motion.h1>
 
-              <div className="card p-6" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.06)' }}>
-                <p className="text-warm-600 leading-relaxed mb-5 text-[15px]">
-                  Jag hjälper dig hitta recept, jämföra priser och guida dig till närmaste butik. Låt oss komma igång!
-                </p>
+                {/* Subtitle */}
+                <motion.p variants={popUp} className="text-warm-400 mt-3 text-base font-medium">
+                  Jag hjälper dig hitta recept, jämföra priser och guida dig till närmaste butik.
+                </motion.p>
+              </motion.div>
 
-                {/* Feature boxes — staggered float-in + hover-float */}
-                <motion.div
-                  className="flex gap-3"
-                  variants={stagger}
-                  initial="hidden"
-                  animate="show"
-                >
-                  {[
-                    { icon: Search, label: 'Sök recept' },
-                    { icon: ShoppingBag, label: 'Handla smart' },
-                    { icon: Mic, label: 'Röststyrt' },
-                  ].map((item, i) => (
+              {/* Feature boxes with borders + different float speeds */}
+              <motion.div
+                className="flex gap-3"
+                variants={staggerIn}
+                initial="hidden"
+                animate="show"
+              >
+                {[
+                  { icon: Search, label: 'Sök recept', speed: 2.4 },
+                  { icon: ShoppingBag, label: 'Handla smart', speed: 3.0 },
+                  { icon: Mic, label: 'Röststyrt', speed: 2.7 },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    variants={popUp}
+                    className="flex-1 flex flex-col items-center gap-3 py-5 rounded-2xl bg-white"
+                    style={{
+                      border: '1px solid #E5E5E5',
+                      boxShadow: '0 30px 60px rgba(0,0,0,0.12)',
+                    }}
+                  >
                     <motion.div
-                      key={i}
-                      variants={fadeUp}
-                      className="flex-1 flex flex-col items-center gap-2.5 py-5 rounded-2xl"
-                      style={{ background: 'rgba(245,245,247,0.8)' }}
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{
+                        duration: item.speed,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: i * 0.3,
+                      }}
+                      className="w-12 h-12 bg-white rounded-xl flex items-center justify-center"
+                      style={{
+                        boxShadow: '0 4px 20px rgba(90,125,108,0.1)',
+                        border: '1px solid rgba(90,125,108,0.08)',
+                      }}
                     >
-                      <motion.div
-                        animate={{ y: [0, -3, 0] }}
-                        transition={{
-                          duration: 2.5,
-                          repeat: Infinity,
-                          ease: 'easeInOut',
-                          delay: i * 0.4,
-                        }}
-                        className="w-11 h-11 bg-white rounded-xl flex items-center justify-center"
-                        style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}
-                      >
-                        <item.icon size={20} className="text-sage-400" />
-                      </motion.div>
-                      <span className="text-xs font-semibold text-warm-600">{item.label}</span>
+                      <item.icon size={22} style={{ color: '#5A7D6C' }} />
                     </motion.div>
-                  ))}
-                </motion.div>
-              </div>
+                    <span className="text-xs font-bold text-warm-700 tracking-wide">{item.label}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
             </motion.div>
           )}
 
@@ -327,54 +361,59 @@ export default function TutorialPage() {
               exit="exit"
               transition={SPRING}
             >
-              <div className="text-center mb-7">
-                <h1
-                  className="font-display text-[32px] font-extrabold tracking-tight leading-tight"
-                  style={{ color: '#111111' }}
+              <motion.div
+                variants={staggerIn}
+                initial="hidden"
+                animate="show"
+                className="text-center mb-6"
+              >
+                <motion.p
+                  variants={popUp}
+                  className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3"
+                  style={{ color: '#5A7D6C' }}
+                >
+                  Allt du behöver i köket
+                </motion.p>
+                <motion.h1
+                  variants={popUp}
+                  className="font-display text-[34px] font-extrabold tracking-tight leading-[1.15]"
+                  style={{ color: '#1A1A1A' }}
                 >
                   Vad kan Nisse?
-                </h1>
-                <p className="text-warm-400 mt-2 text-base font-medium">
-                  Allt du behöver i köket
-                </p>
-              </div>
+                </motion.h1>
+              </motion.div>
 
-              {/* Dynamic Feature Cards — slide-up with overlap depth */}
+              {/* Feature Cards — deep shadows, 1px border, icon animations */}
               <div className="space-y-3">
                 {FEATURE_CARDS.map((card, i) => {
                   const Icon = card.icon;
                   return (
                     <motion.div
                       key={i}
-                      variants={floatVariant(i)}
+                      variants={cardCascade(i)}
                       initial="hidden"
                       animate="show"
-                      className="flex gap-4 p-4 rounded-2xl bg-white border border-warm-100/60 relative"
+                      className="flex gap-4 p-4 rounded-2xl bg-white relative"
                       style={{
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.05)',
+                        border: '1px solid #E5E5E5',
+                        boxShadow: '0 30px 60px rgba(0,0,0,0.12)',
                         zIndex: FEATURE_CARDS.length - i,
                       }}
                     >
                       <motion.div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: card.bg }}
-                        animate={
-                          card.pulse
-                            ? { scale: [1, 1.12, 1] }
-                            : card.tilt
-                              ? { rotate: [0, -8, 0, 8, 0] }
-                              : {}
-                        }
+                        animate={iconAnims[card.anim] || {}}
                         transition={{
-                          duration: card.pulse ? 2 : 3,
+                          duration: card.anim === 'pulse' ? 2 : card.anim === 'tilt' ? 3 : 2.5,
                           repeat: Infinity,
                           ease: 'easeInOut',
                         }}
                       >
-                        <Icon size={20} style={{ color: card.color }} />
+                        <Icon size={22} style={{ color: card.color }} />
                       </motion.div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-warm-800 text-[15px]">{card.label}</p>
+                        <p className="font-bold text-[15px]" style={{ color: '#1A1A1A' }}>{card.label}</p>
                         <p className="text-warm-500 text-sm leading-relaxed mt-0.5">{card.desc}</p>
                       </div>
                     </motion.div>
@@ -384,7 +423,7 @@ export default function TutorialPage() {
             </motion.div>
           )}
 
-          {/* ─── STEP 3: TRUST & ACTION ─── */}
+          {/* ─── STEP 3: TRUST & PRIVACY ─── */}
           {step === 2 && (
             <motion.div
               key="step-2"
@@ -395,35 +434,57 @@ export default function TutorialPage() {
               exit="exit"
               transition={SPRING}
             >
-              {/* Location with pulse ring */}
-              <PulseRing />
+              <motion.div
+                variants={staggerIn}
+                initial="hidden"
+                animate="show"
+              >
+                {/* Pulse ring */}
+                <motion.div variants={popUp}>
+                  <PulseRing />
+                </motion.div>
 
-              <div className="text-center mb-6">
-                <h1
-                  className="font-display text-[32px] font-extrabold tracking-tight leading-tight"
-                  style={{ color: '#111111' }}
-                >
-                  Plats & Integritet
-                </h1>
-                <p className="text-warm-400 mt-2 text-base font-medium">
-                  Hitta butiker nära dig — tryggt och säkert
-                </p>
-              </div>
+                <div className="text-center mt-5 mb-5">
+                  <motion.p
+                    variants={popUp}
+                    className="text-[11px] font-bold uppercase tracking-[0.2em] mb-3"
+                    style={{ color: '#5A7D6C' }}
+                  >
+                    Tryggt och säkert
+                  </motion.p>
+                  <motion.h1
+                    variants={popUp}
+                    className="font-display text-[34px] font-extrabold tracking-tight leading-[1.15]"
+                    style={{ color: '#1A1A1A' }}
+                  >
+                    Plats & Integritet
+                  </motion.h1>
+                  <motion.p variants={popUp} className="text-warm-400 mt-3 text-base font-medium max-w-xs mx-auto">
+                    Hitta butiker nära dig — din data krypteras och delas aldrig utan samtycke.
+                  </motion.p>
+                </div>
+              </motion.div>
 
-              <div className="card p-6" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.06)' }}>
-                <p className="text-warm-600 leading-relaxed text-[15px] mb-5">
-                  För att visa närmaste mataffärer behöver vi din plats. Din data krypteras och delas aldrig utan samtycke.
-                </p>
-
-                {/* Location toggle — tactile with glow */}
+              {/* Trust card */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...SPRING, delay: 0.3 }}
+                className="bg-white rounded-3xl p-5"
+                style={{
+                  border: '1px solid #E5E5E5',
+                  boxShadow: '0 30px 60px rgba(0,0,0,0.12)',
+                }}
+              >
+                {/* Location toggle */}
                 <motion.button
                   onClick={handleLocationConsent}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-4 px-5 rounded-2xl border-2 transition-all flex items-center justify-between mb-5"
+                  className="w-full py-4 px-5 rounded-2xl border-2 transition-all flex items-center justify-between mb-4"
                   style={{
                     borderColor: locationGranted ? '#5A7D6C' : '#E4E4E7',
                     background: locationGranted ? 'rgba(90,125,108,0.04)' : 'white',
-                    boxShadow: locationGranted ? '0 0 20px rgba(90,125,108,0.15)' : 'none',
+                    boxShadow: locationGranted ? '0 0 24px rgba(90,125,108,0.15)' : 'none',
                   }}
                 >
                   <span className="text-sm font-semibold text-warm-700">
@@ -447,7 +508,7 @@ export default function TutorialPage() {
                 </motion.button>
 
                 {/* Privacy bullets */}
-                <div className="space-y-2.5 mb-5">
+                <div className="space-y-2.5 mb-4">
                   {[
                     'All data krypteras och lagras inom EU',
                     'Exportera eller radera din data när som helst',
@@ -457,7 +518,7 @@ export default function TutorialPage() {
                       key={i}
                       initial={{ opacity: 0, x: 16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ ...SPRING, delay: 0.3 + i * 0.1 }}
+                      transition={{ ...SPRING, delay: 0.35 + i * 0.1 }}
                       className="flex gap-2.5 text-sm text-warm-600"
                     >
                       <div className="w-5 h-5 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -469,7 +530,7 @@ export default function TutorialPage() {
                 </div>
 
                 {/* Privacy consent checkbox */}
-                <label className="flex gap-3 cursor-pointer items-start p-3 rounded-xl bg-cream-100/60">
+                <label className="flex gap-3 cursor-pointer items-start p-3.5 rounded-xl bg-cream-100/60 border border-warm-100/50">
                   <div className="relative mt-0.5">
                     <input
                       type="checkbox"
@@ -507,63 +568,72 @@ export default function TutorialPage() {
                     och samtycker till behandling av mina personuppgifter.
                   </span>
                 </label>
-              </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* ═══ NAVIGATION — fixed bottom bar ═══ */}
-      <div className="px-5 pb-8 pt-3">
+      {/* ═══ FIXED BOTTOM NAV — Glassmorphism bar ═══ */}
+      <div
+        className="flex-shrink-0 px-6 pt-4 pb-6"
+        style={{
+          background: 'rgba(245,245,247,0.7)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          borderTop: '1px solid rgba(0,0,0,0.04)',
+        }}
+      >
         <div className="flex items-center justify-between">
-          {/* Back button */}
-          {step > 0 ? (
-            <motion.button
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={SPRING}
-              onClick={handleBack}
-              className="flex items-center gap-1.5 px-5 py-3 rounded-full text-sm font-medium text-warm-500
-                       active:scale-95 transition-transform"
-            >
-              <ArrowLeft size={16} />
-              Tillbaka
-            </motion.button>
-          ) : (
-            <button
-              onClick={handleFinish}
-              className="text-xs text-warm-400 hover:text-warm-600 transition-colors px-3 py-3"
-            >
-              Hoppa över
-            </button>
-          )}
+          {/* Left: Back / Skip */}
+          <div style={{ minWidth: 100 }}>
+            {step > 0 ? (
+              <motion.button
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={SPRING}
+                onClick={handleBack}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-1.5 px-4 py-3 rounded-full text-sm font-medium text-warm-500
+                         transition-colors hover:text-warm-700"
+              >
+                <ArrowLeft size={16} />
+                Tillbaka
+              </motion.button>
+            ) : (
+              <button
+                onClick={handleFinish}
+                className="text-xs text-warm-400 hover:text-warm-600 transition-colors px-3 py-3"
+              >
+                Hoppa över
+              </button>
+            )}
+          </div>
 
-          {/* Next / CTA button */}
+          {/* Right: Next / CTA with shimmer */}
           <motion.button
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleNext}
             disabled={!canProceed}
-            className="relative flex items-center gap-2 px-7 py-3.5 rounded-full text-[15px] font-semibold
-                     transition-all disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden"
+            className="relative flex items-center gap-2 px-8 py-4 rounded-full text-[15px] font-bold
+                     transition-all disabled:opacity-35 disabled:cursor-not-allowed overflow-hidden"
             style={{
-              background: isLast && canProceed ? '#111111' : '#1A1A1A',
+              background: '#111111',
               color: '#FFFFFF',
               boxShadow: isLast && canProceed
-                ? '0 8px 32px rgba(0,0,0,0.3)'
-                : '0 4px 16px rgba(0,0,0,0.15)',
+                ? '0 12px 40px rgba(0,0,0,0.35)'
+                : '0 6px 24px rgba(0,0,0,0.2)',
             }}
           >
-            {/* Shimmer effect on final CTA */}
-            {isLast && canProceed && (
-              <motion.div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)',
-                }}
-                animate={{ x: ['-100%', '200%'] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 }}
-              />
-            )}
+            {/* Shimmer animation — always visible */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.12) 55%, transparent 65%)',
+              }}
+              animate={{ x: ['-200%', '200%'] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.5 }}
+            />
             <span className="relative z-10 flex items-center gap-2">
               {isLast ? (
                 <>Kom igång <Check size={16} /></>
@@ -574,9 +644,9 @@ export default function TutorialPage() {
           </motion.button>
         </div>
 
-        {/* Skip on other steps */}
+        {/* Skip link on middle steps */}
         {step > 0 && !isLast && (
-          <div className="text-center mt-4">
+          <div className="text-center mt-3">
             <button
               onClick={handleFinish}
               className="text-xs text-warm-400 hover:text-warm-600 transition-colors"
