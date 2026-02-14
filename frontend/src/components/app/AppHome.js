@@ -1,73 +1,29 @@
 // ============================================
-// AppHome — Editorial / Magazine Home Feed
-// Serif headlines, editorial cards, sticky search,
-// pill chips, staggered framer-motion entry
+// AppHome — Decision Engine / Command Center
+// "OpenAI for Food" — minimal, tool-like,
+// ingredient-first with Nisse AI presence
 // ============================================
 
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import {
-  Search, ArrowRight, Star, Clock, Flame, Leaf,
-  Users, Sparkles, Wine, Zap,
-} from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Mic, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../../lib/store';
 
-// ── Data ──
+// ── Scenario quick-action chips ──
 
-const HERO_RECIPE = {
-  id: 'hero-1',
-  title: 'Krämig Kycklingpasta',
-  subtitle: 'med soltorkade tomater & parmesan',
-  image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80',
-  rating: 4.8,
-  time: 25,
-  badge: 'Bästa pris',
-};
-
-const POPULAR_RECIPES = [
-  {
-    id: 'pop-1',
-    title: 'Laxbowl med avokado 🥑',
-    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80',
-    rating: 4.7,
-    time: 20,
-  },
-  {
-    id: 'pop-2',
-    title: 'Tacos med guacamole 🌮',
-    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80',
-    rating: 4.6,
-    time: 30,
-  },
-  {
-    id: 'pop-3',
-    title: 'Pasta Carbonara 🍝',
-    image: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=600&q=80',
-    rating: 4.9,
-    time: 20,
-  },
-];
-
-const CATEGORIES = [
-  { id: 'snabbt', label: 'Snabbt', icon: Zap },
-  { id: 'vegetariskt', label: 'Vegetariskt', icon: Leaf },
-  { id: 'familj', label: 'Familj', icon: Users },
-  { id: 'fest', label: 'Fest', icon: Sparkles },
-  { id: 'helg', label: 'Helg', icon: Wine },
-  { id: 'trending', label: 'Trending', icon: Flame },
+const SCENARIOS = [
+  { id: 'snabbt', label: 'Snabbt & Billigt', emoji: '⚡️' },
+  { id: 'tom-kylen', label: 'Töm kylen', emoji: '🧹' },
+  { id: 'middag', label: 'Middag för två', emoji: '🕯️' },
+  { id: 'matlador', label: 'Perfekt för matlådor', emoji: '📦' },
 ];
 
 // ── Animation variants ──
 
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
-};
-
-const slideUp = {
-  hidden: { opacity: 0, y: 30 },
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
   show: {
     opacity: 1,
     y: 0,
@@ -75,311 +31,270 @@ const slideUp = {
   },
 };
 
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.15 } },
+};
+
 // ── Component ──
 
-export function AppHome({ onStartSearch, onSelectPopularRecipe }) {
+export function AppHome({ onSearch, onStartSearch }) {
   const { user } = useAuthStore();
-  const [activeChip, setActiveChip] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isScrolled, setIsScrolled] = useState(false);
-  const scrollRef = useRef(null);
+  const [ingredients, setIngredients] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [activeScenario, setActiveScenario] = useState(null);
+  const inputRef = useRef(null);
 
   const firstName = user?.name ? user.name.split(' ')[0] : 'där';
 
-  // Scroll detection for sticky search bar
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setIsScrolled(el.scrollTop > 80);
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
+  // ── Ingredient management ──
+
+  const addIngredient = useCallback((text) => {
+    const cleaned = text.trim().toLowerCase();
+    if (cleaned && !ingredients.includes(cleaned)) {
+      setIngredients((prev) => [...prev, cleaned]);
+    }
+  }, [ingredients]);
+
+  const removeIngredient = useCallback((ingredient) => {
+    setIngredients((prev) => prev.filter((i) => i !== ingredient));
   }, []);
 
-  const handleSearchSubmit = useCallback((e) => {
-    e?.preventDefault();
-    if (searchQuery.trim()) {
-      onStartSearch?.(searchQuery.trim());
-    } else {
-      onStartSearch?.();
+  const handleInputKeyDown = useCallback((e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        addIngredient(inputValue);
+        setInputValue('');
+      }
     }
-  }, [searchQuery, onStartSearch]);
+    if (e.key === 'Backspace' && !inputValue && ingredients.length > 0) {
+      removeIngredient(ingredients[ingredients.length - 1]);
+    }
+  }, [inputValue, ingredients, addIngredient, removeIngredient]);
 
-  const handleChipTap = useCallback((chipId) => {
+  // ── Scenario chips ──
+
+  const handleScenarioTap = useCallback((scenario) => {
     import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
       Haptics.impact({ style: ImpactStyle.Light });
     }).catch(() => {});
-    setActiveChip((prev) => prev === chipId ? null : chipId);
+
+    setActiveScenario((prev) => (prev === scenario.id ? null : scenario.id));
   }, []);
 
+  // ── Execute search ──
+
+  const handleExecute = useCallback(() => {
+    import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+      Haptics.impact({ style: ImpactStyle.Medium });
+    }).catch(() => {});
+
+    if (ingredients.length > 0) {
+      onSearch?.(ingredients.join(', '));
+    } else if (activeScenario) {
+      const scenario = SCENARIOS.find((s) => s.id === activeScenario);
+      onSearch?.(scenario?.label || '');
+    }
+  }, [ingredients, activeScenario, onSearch]);
+
+  const canExecute = ingredients.length > 0 || activeScenario;
+
   return (
-    <div
-      ref={scrollRef}
-      className="h-full overflow-y-auto"
-      style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
-    >
+    <div className="h-full flex flex-col" style={{ background: '#F5F5F7' }}>
       <motion.div
-        className="pb-8"
+        className="flex-1 flex flex-col justify-center px-6 pb-12"
         variants={stagger}
         initial="hidden"
         animate="show"
       >
-        {/* ═══ HEADER — Serif greeting ═══ */}
-        <motion.div variants={slideUp} className="px-6 pt-4 pb-2">
-          <p className="font-body text-label text-warm-400 mb-0.5">
-            Hej {firstName},
+        {/* ═══ NISSE SPARKLE — AI presence ═══ */}
+        <motion.div variants={fadeUp} className="flex justify-center mb-5">
+          <motion.div
+            animate={{
+              scale: [1, 1.08, 1],
+              opacity: [0.75, 1, 0.75],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            <NisseSparkle />
+          </motion.div>
+        </motion.div>
+
+        {/* ═══ HEADLINE ═══ */}
+        <motion.div variants={fadeUp} className="text-center mb-8">
+          <p className="font-body text-[13px] text-warm-400 mb-1">
+            Hej {firstName}
           </p>
-          <h1 className="font-display text-[28px] font-bold text-warm-900 leading-tight tracking-tight">
+          <h1 className="font-display text-[32px] font-bold text-warm-800 leading-tight tracking-tight mb-2">
             Vad lagar vi idag?
           </h1>
+          <p className="font-body text-[14px] text-warm-400 max-w-[260px] mx-auto">
+            Berätta vad du har hemma — Nisse löser resten
+          </p>
         </motion.div>
 
-        {/* ═══ STICKY SEARCH HUD ═══ */}
-        <motion.div
-          variants={slideUp}
-          className="px-6 pt-3 pb-1 sticky top-0 z-30 transition-all duration-300"
-          style={{
-            ...(isScrolled ? {
-              background: 'rgba(245,245,247,0.85)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              paddingTop: '8px',
-              paddingBottom: '8px',
-            } : {}),
-          }}
-        >
-          <form onSubmit={handleSearchSubmit}>
-            <div
-              className="bg-white flex items-center gap-3 transition-all duration-300"
-              style={{
-                borderRadius: '9999px',
-                padding: isScrolled ? '10px 18px' : '14px 20px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-              }}
-            >
-              <Search
-                size={isScrolled ? 18 : 20}
-                className="text-warm-400 flex-shrink-0 transition-all duration-300"
-                strokeWidth={2}
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Sök recept, ingredienser..."
-                className="flex-1 bg-transparent border-none outline-none text-warm-800
-                         placeholder:text-warm-400 font-body transition-all duration-300"
-                style={{ fontSize: isScrolled ? '14px' : '15px' }}
-              />
-              {searchQuery.trim() && (
-                <motion.button
-                  type="submit"
+        {/* ═══ MASTER PROMPT — Ingredient input ═══ */}
+        <motion.div variants={fadeUp} className="mb-6">
+          <div
+            className="bg-white w-full min-h-[56px] flex flex-wrap items-center gap-2 cursor-text"
+            style={{
+              borderRadius: '20px',
+              padding: '12px 16px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+              border: '1px solid rgba(0,0,0,0.04)',
+            }}
+            onClick={() => inputRef.current?.focus()}
+          >
+            {/* Ingredient tags */}
+            <AnimatePresence mode="popLayout">
+              {ingredients.map((ingredient) => (
+                <motion.span
+                  key={ingredient}
+                  layout
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center"
-                  style={{ background: '#111111' }}
-                >
-                  <ArrowRight size={16} className="text-white" strokeWidth={2.5} />
-                </motion.button>
-              )}
-            </div>
-          </form>
-        </motion.div>
-
-        {/* ═══ CATEGORY CHIPS ═══ */}
-        <motion.div variants={slideUp} className="px-6 pt-4 pb-2">
-          <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              const active = activeChip === cat.id;
-              return (
-                <motion.button
-                  key={cat.id}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleChipTap(cat.id)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full
-                           text-[13px] font-semibold whitespace-nowrap flex-shrink-0
-                           transition-all duration-200"
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                           text-[13px] font-medium select-none"
                   style={{
-                    background: active ? '#5A7D6C' : '#EBEBEB',
-                    color: active ? '#FFFFFF' : '#48484A',
+                    background: '#EEF3F0',
+                    color: '#5A7D6C',
                   }}
                 >
-                  <Icon size={14} strokeWidth={2} />
-                  {cat.label}
+                  {ingredient}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeIngredient(ingredient);
+                    }}
+                    className="flex items-center justify-center w-4 h-4 rounded-full
+                             transition-colors"
+                    style={{ background: 'rgba(90,125,108,0.15)' }}
+                  >
+                    <X size={10} strokeWidth={2.5} style={{ color: '#5A7D6C' }} />
+                  </button>
+                </motion.span>
+              ))}
+            </AnimatePresence>
+
+            {/* Text input */}
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              placeholder={
+                ingredients.length === 0
+                  ? 'Lägg till ingredienser...'
+                  : 'Lägg till fler...'
+              }
+              className="flex-1 min-w-[100px] bg-transparent border-none outline-none
+                       text-warm-800 placeholder:text-warm-300 font-body text-[15px]"
+            />
+
+            {/* Mic icon */}
+            <button
+              className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                       transition-colors"
+              style={{ background: '#F5F5F7' }}
+              aria-label="Röstinmatning"
+            >
+              <Mic size={16} className="text-warm-400" strokeWidth={1.5} />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* ═══ SCENARIO CHIPS ═══ */}
+        <motion.div variants={fadeUp} className="mb-8">
+          <div className="flex flex-wrap gap-2.5 justify-center">
+            {SCENARIOS.map((scenario) => {
+              const active = activeScenario === scenario.id;
+              return (
+                <motion.button
+                  key={scenario.id}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleScenarioTap(scenario)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full
+                           text-[13px] font-medium whitespace-nowrap
+                           transition-all duration-200"
+                  style={{
+                    background: active ? '#111111' : '#FFFFFF',
+                    color: active ? '#FFFFFF' : '#48484A',
+                    boxShadow: active
+                      ? '0 4px 16px rgba(17,17,17,0.2)'
+                      : '0 2px 8px rgba(0,0,0,0.04)',
+                    border: active ? '1px solid transparent' : '1px solid rgba(0,0,0,0.04)',
+                  }}
+                >
+                  <span className="text-[15px]">{scenario.emoji}</span>
+                  {scenario.label}
                 </motion.button>
               );
             })}
           </div>
         </motion.div>
 
-        {/* ═══ HERO EDITORIAL CARD — Dagens Tips ═══ */}
-        <motion.div variants={slideUp} className="px-6 pt-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display text-[18px] font-semibold text-warm-800">
-              Dagens tips
-            </h2>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onSelectPopularRecipe?.(HERO_RECIPE)}
-            className="w-full relative overflow-hidden"
-            style={{
-              borderRadius: '32px',
-              height: '280px',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.06)',
-            }}
-          >
-            {/* Image */}
-            <img
-              src={HERO_RECIPE.image}
-              alt={HERO_RECIPE.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-
-            {/* Floating "Best Price" badge */}
-            <div
-              className="absolute top-4 right-4 px-3.5 py-1.5 rounded-full text-[11px] font-bold text-white"
-              style={{
-                background: '#D97757',
-                boxShadow: '0 4px 12px rgba(217,119,87,0.35)',
-              }}
-            >
-              {HERO_RECIPE.badge}
-            </div>
-
-            {/* Dark gradient overlay at bottom */}
-            <div
-              className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-6"
-              style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
-                height: '65%',
-              }}
-            >
-              <h3 className="font-display text-[22px] font-bold text-white text-left leading-tight mb-1">
-                {HERO_RECIPE.title}
-              </h3>
-              <p className="font-body text-[13px] text-white/70 text-left mb-3">
-                {HERO_RECIPE.subtitle}
-              </p>
-              <div className="flex items-center gap-3">
-                <span className="inline-flex items-center gap-1 text-white/90 text-[12px] font-semibold">
-                  <Star size={13} fill="#FFD60A" className="text-gold" />
-                  {HERO_RECIPE.rating}
-                </span>
-                <span
-                  className="inline-flex items-center gap-1.5 text-white/90 text-[12px] font-medium px-2.5 py-1 rounded-full"
-                  style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}
-                >
-                  <Clock size={12} />
-                  {HERO_RECIPE.time} min
-                </span>
-              </div>
-            </div>
-          </motion.button>
-        </motion.div>
-
-        {/* ═══ POPULÄRA RECEPT ═══ */}
-        <motion.div variants={slideUp} className="px-6 pt-7">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-[18px] font-semibold text-warm-800">
-              Populära recept
-            </h2>
-            <button className="font-body text-[13px] font-semibold" style={{ color: '#5A7D6C' }}>
-              Visa alla
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {POPULAR_RECIPES.map((recipe, idx) => (
+        {/* ═══ EXECUTE BUTTON ═══ */}
+        <motion.div variants={fadeUp} className="flex justify-center">
+          <AnimatePresence>
+            {canExecute && (
               <motion.button
-                key={recipe.id}
-                variants={slideUp}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => onSelectPopularRecipe?.(recipe)}
-                className="w-full bg-white flex items-center gap-4 p-3 text-left"
+                initial={{ scale: 0.9, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 10 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                onClick={handleExecute}
+                className="execute-glow inline-flex items-center gap-2.5 px-8 py-4 rounded-full
+                         font-body font-semibold text-[15px] text-white"
                 style={{
-                  borderRadius: '24px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.05)',
+                  background: '#111111',
+                  boxShadow: '0 8px 32px rgba(17,17,17,0.25)',
                 }}
               >
-                {/* Thumbnail */}
-                <div
-                  className="flex-shrink-0 overflow-hidden"
-                  style={{ width: '80px', height: '80px', borderRadius: '20px' }}
-                >
-                  <img
-                    src={recipe.image}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-[15px] font-semibold text-warm-800 leading-snug mb-1.5 truncate">
-                    {recipe.title}
-                  </h3>
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center gap-1 text-warm-500 text-[12px] font-medium">
-                      <Star size={12} fill="#FFD60A" className="text-gold" />
-                      {recipe.rating}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-warm-400 text-[12px] font-medium">
-                      <Clock size={12} />
-                      {recipe.time} min
-                    </span>
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div
-                  className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center"
-                  style={{ background: '#F2F2F2' }}
-                >
-                  <ArrowRight size={16} className="text-warm-600" strokeWidth={2} />
-                </div>
+                <Sparkles size={18} strokeWidth={2} />
+                Hitta recept
+                <ArrowRight size={16} strokeWidth={2.5} />
               </motion.button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ═══ CTA — Ingredient Search ═══ */}
-        <motion.div variants={slideUp} className="px-6 pt-7">
-          <div
-            className="bg-white p-6 flex flex-col items-center text-center"
-            style={{
-              borderRadius: '32px',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.06)',
-            }}
-          >
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: '#EEF3F0' }}
-            >
-              <Sparkles size={24} style={{ color: '#5A7D6C' }} />
-            </div>
-            <h3 className="font-display text-[17px] font-semibold text-warm-800 mb-1">
-              Vad har du i köket?
-            </h3>
-            <p className="font-body text-[13px] text-warm-400 mb-5 max-w-[240px]">
-              Lägg till ingredienser och låt Nisse hitta det perfekta receptet
-            </p>
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={() => onStartSearch?.()}
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full
-                       font-body font-semibold text-[14px] text-white"
-              style={{
-                background: '#111111',
-                boxShadow: '0 4px 12px rgba(17,17,17,0.18)',
-              }}
-            >
-              Börja nu <ArrowRight size={16} strokeWidth={2.5} />
-            </motion.button>
-          </div>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
     </div>
+  );
+}
+
+// ── Nisse Sparkle — 4-pointed AI presence indicator ──
+
+function NisseSparkle() {
+  return (
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+      {/* Soft glow */}
+      <circle cx="26" cy="26" r="24" fill="rgba(217,119,87,0.06)" />
+      {/* Main 4-pointed sparkle */}
+      <path
+        d="M 26 6 C 27.5 15, 33 20.5, 42 22
+           C 33 23.5, 27.5 29, 26 38
+           C 24.5 29, 19 23.5, 10 22
+           C 19 20.5, 24.5 15, 26 6 Z"
+        fill="#D97757"
+      />
+      {/* Secondary sparkle */}
+      <path
+        d="M 39 9 C 39.5 11.5, 41.5 13.5, 44 14
+           C 41.5 14.5, 39.5 16.5, 39 19
+           C 38.5 16.5, 36.5 14.5, 34 14
+           C 36.5 13.5, 38.5 11.5, 39 9 Z"
+        fill="#D97757"
+        opacity="0.5"
+      />
+    </svg>
   );
 }
