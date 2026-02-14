@@ -143,7 +143,7 @@ export function IngredientSearch({ onBack, onSearch, loading }) {
       </motion.div>
 
       {/* Ingredient list */}
-      <div className="flex-1 overflow-y-auto px-5 pb-4">
+      <div className="flex-1 soft-scroll px-5 pb-4">
         <AnimatePresence mode="popLayout">
           {ingredients.map((ingredient, idx) => (
             <motion.div

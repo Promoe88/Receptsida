@@ -187,7 +187,7 @@ export function GroceryMode({ recipe, onClose }) {
 
           {/* Aisle navigation */}
           {aisleGroups.length > 1 && (
-            <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+            <div className="flex gap-2 mt-3 soft-scroll-x pb-1">
               {aisleGroups.map((aisle, idx) => {
                 const allChecked = aisle.items.every((_, i) => checked.has(`${aisle.name}-${i}`));
                 return (
@@ -214,7 +214,7 @@ export function GroceryMode({ recipe, onClose }) {
         </div>
 
         {/* Items list */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+        <div className="flex-1 soft-scroll px-5 py-4 space-y-5">
           {aisleGroups.map((aisle, aisleIdx) => (
             <div key={aisle.name} className={aisleIdx !== currentAisle ? 'opacity-40' : ''}>
               <div className="flex items-center gap-2 mb-2.5">
@@ -286,7 +286,7 @@ export function GroceryMode({ recipe, onClose }) {
               transition={{ duration: 0.3 }}
               className="border-t border-warm-200 flex flex-col bg-cream-200/50 overflow-hidden"
             >
-              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+              <div className="flex-1 soft-scroll px-4 py-3 space-y-2">
                 {messages.length === 0 && (
                   <div className="text-center py-4">
                     <ShoppingBag size={24} className="text-warm-300 mx-auto mb-2" />
