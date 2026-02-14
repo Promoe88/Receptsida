@@ -295,22 +295,68 @@ export function RecipeDetail({ recipe, onClose, rank }) {
               </div>
             </div>
 
-            {/* ── Tools ── */}
-            {recipe.tools?.length > 0 && (
+            {/* ── Tools / Equipment ── */}
+            {(recipe.tools?.length > 0 || recipe.equipment_needed?.length > 0) && (
               <div className="mb-6">
                 <h3 className="flex items-center gap-2 text-body font-bold text-warm-800 mb-3">
                   <span className="w-8 h-8 rounded-xl bg-cream-200 flex items-center justify-center">
                     <Wrench size={15} className="text-warm-500" />
                   </span>
-                  Verktyg
+                  Verktyg du behöver
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {recipe.tools.map((tool, idx) => (
-                    <span key={idx} className="bg-white text-warm-600 px-4 py-2 rounded-full text-label font-medium shadow-sm">
-                      {typeof tool === 'string' ? tool : tool.name}
-                    </span>
-                  ))}
-                </div>
+
+                {/* Rich equipment cards (if backend provides equipment_needed) */}
+                {recipe.equipment_needed?.length > 0 ? (
+                  <div className="space-y-2">
+                    {recipe.equipment_needed.map((eq, idx) => {
+                      const item = typeof eq === 'string' ? { item: eq, essential: true } : eq;
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 shadow-sm"
+                        >
+                          <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={{
+                              background: item.essential !== false ? '#FFF5F0' : '#F8FAFC',
+                            }}
+                          >
+                            <Wrench
+                              size={15}
+                              style={{ color: item.essential !== false ? '#FF6B35' : '#94A3B8' }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-label font-medium text-warm-800">{item.item || item.name}</p>
+                            {item.alternative && (
+                              <p className="text-[11px] text-warm-400 mt-0.5 truncate">
+                                Alt: {item.alternative}
+                              </p>
+                            )}
+                          </div>
+                          {item.essential === false && (
+                            <span
+                              className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                              style={{ background: '#F1F5F9', color: '#94A3B8' }}
+                            >
+                              Valfri
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Fallback: simple tool pills */
+                  <div className="flex flex-wrap gap-2">
+                    {recipe.tools.map((tool, idx) => (
+                      <span key={idx} className="inline-flex items-center gap-1.5 bg-white text-warm-600 px-4 py-2.5 rounded-full text-label font-medium shadow-sm">
+                        <Wrench size={12} className="text-warm-400" />
+                        {typeof tool === 'string' ? tool : tool.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
