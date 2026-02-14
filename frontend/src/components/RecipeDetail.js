@@ -95,7 +95,7 @@ export function RecipeDetail({ recipe, onClose, rank }) {
 
       <div className="fixed inset-0 z-50 flex flex-col bg-cream">
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 soft-scroll">
           {/* ── Top bar ── */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
             <motion.button

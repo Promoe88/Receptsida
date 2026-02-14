@@ -206,7 +206,7 @@ export default function StoresPage() {
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 pb-4 space-y-2.5 max-h-[50vh] overflow-y-auto">
+                  <div className="px-4 pb-4 space-y-2.5 max-h-[50vh] soft-scroll">
                     {stores.map((store, idx) => {
                       const style = getChainStyle(store.chain);
                       return (

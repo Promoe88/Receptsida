@@ -326,7 +326,7 @@ export function CookingMode({ recipe, onClose }) {
                 <span style={{ fontSize: '14px', fontWeight: '600', color: '#FFFFFF' }}>AI-kockassistent</span>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+              <div className="flex-1 soft-scroll px-4 py-3 space-y-3">
                 {messages.length === 0 && (
                   <div className="text-center py-8">
                     <ChefHat size={32} style={{ color: 'rgba(255,255,255,0.2)' }} className="mx-auto mb-3" />

@@ -248,6 +248,25 @@
   }
 }
 
+/* ── Soft scroll — momentum-based, gentle deceleration ── */
+.soft-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+}
+.soft-scroll::-webkit-scrollbar { display: none; }
+.soft-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+.soft-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+}
+.soft-scroll-x::-webkit-scrollbar { display: none; }
+.soft-scroll-x { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* ── Hide scrollbar utility ── */
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
@@ -296,6 +315,8 @@ body.keyboard-open .app-viewport {
 body.keyboard-open .app-main--fixed {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
 }
 
 body.keyboard-open .app-main--fixed > * {
@@ -337,7 +358,8 @@ body.keyboard-open .app-main--scroll {
 .app-main--scroll {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
 }
 
 .app-main--fixed {
@@ -368,6 +390,7 @@ body.keyboard-open .app-main--scroll {
 .app-inner-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
 }
 .app-inner-scroll::-webkit-scrollbar {
   display: none;
