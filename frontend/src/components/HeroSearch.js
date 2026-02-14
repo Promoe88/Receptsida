@@ -1,7 +1,6 @@
 // ============================================
-// HeroSearch — Guided multi-step search hero
-// 70% viewport, native-feel with spring transitions
-// Multi-step: Input -> Context Chips -> Search
+// HeroSearch — Premium command center with massive serif headline
+// 800px wide, store logos row, spring transitions
 // ============================================
 
 'use client';
@@ -32,6 +31,13 @@ const CONTEXT_MAP = {
   vegetariskt: { dietary: ['vegetarisk'] },
   helg: { maxTimeMinutes: 60, occasion: 'fest' },
 };
+
+const STORE_LOGOS = [
+  { name: 'ICA', initials: 'ICA' },
+  { name: 'Willys', initials: 'W' },
+  { name: 'Coop', initials: 'Co' },
+  { name: 'Lidl', initials: 'Li' },
+];
 
 export function HeroSearch({ onSearch, loading }) {
   const [query, setQuery] = useState('');
@@ -97,24 +103,33 @@ export function HeroSearch({ onSearch, loading }) {
   }, [isListening, stopListening, startListening]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[75vh] px-4 sm:px-6">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-2xl text-center"
+        className="w-full text-center"
+        style={{ maxWidth: '800px' }}
       >
-        <h1 className="font-display text-display-sm sm:text-display-md lg:text-display-lg text-warm-800 mb-4 tracking-tight">
-          Vad lagar vi idag?
+        {/* Massive Serif Headline */}
+        <h1
+          className="font-display text-display-sm sm:text-display-md lg:text-display-lg tracking-tight mb-4 leading-tight"
+          style={{ color: '#111111' }}
+        >
+          Sveriges smartaste<br className="hidden sm:block" /> matassistent
         </h1>
-        <p className="text-warm-500 text-base sm:text-lg mb-10 max-w-md mx-auto leading-relaxed">
+        <p className="text-warm-500 text-base sm:text-lg mb-10 max-w-lg mx-auto leading-relaxed">
           Skriv ingredienser, en maträtt, eller berätta vad du är sugen på.
         </p>
 
-        {/* Search card */}
-        <motion.div layout className="card p-2 sm:p-3 relative">
+        {/* Premium search card */}
+        <motion.div
+          layout
+          className="card p-2 sm:p-3 relative"
+          style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.08)' }}
+        >
           <form onSubmit={handleSubmit}>
-            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4">
+            <div className="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4">
               <Search size={22} className="text-warm-400 flex-shrink-0" />
               <input
                 ref={inputRef}
@@ -160,7 +175,7 @@ export function HeroSearch({ onSearch, loading }) {
             </div>
 
             {/* Household size bar */}
-            <div className="flex items-center gap-3 px-5 py-2.5 border-t border-warm-100">
+            <div className="flex items-center gap-3 px-5 sm:px-6 py-2.5 border-t border-warm-100">
               <Users size={15} className="text-warm-400" />
               <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -195,7 +210,7 @@ export function HeroSearch({ onSearch, loading }) {
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                 className="overflow-hidden border-t border-warm-100"
               >
-                <div className="px-5 py-5">
+                <div className="px-5 sm:px-6 py-5">
                   <p className="text-sm text-warm-500 mb-4 flex items-center gap-2">
                     <Sparkles size={14} className="text-terra-400" />
                     Välj kontext för bättre resultat
@@ -244,6 +259,31 @@ export function HeroSearch({ onSearch, loading }) {
               </motion.div>
             )}
           </AnimatePresence>
+        </motion.div>
+
+        {/* Supported Stores row */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 flex items-center justify-center gap-6 flex-wrap"
+        >
+          <span className="text-xs text-warm-400 uppercase tracking-wider font-medium">Jämför priser hos</span>
+          <div className="flex items-center gap-4">
+            {STORE_LOGOS.map((store) => (
+              <div
+                key={store.name}
+                className="px-3.5 py-1.5 rounded-lg text-sm font-bold tracking-wide"
+                style={{
+                  color: '#B0B0B5',
+                  background: 'rgba(0,0,0,0.03)',
+                  border: '1px solid rgba(0,0,0,0.04)',
+                }}
+              >
+                {store.name}
+              </div>
+            ))}
+          </div>
         </motion.div>
 
         {/* Voice listening indicator */}

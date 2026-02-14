@@ -41,7 +41,8 @@
   }
 
   .btn-primary:hover {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(17, 17, 17, 0.22);
   }
 
   .btn-teal {

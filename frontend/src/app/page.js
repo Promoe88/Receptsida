@@ -1,6 +1,7 @@
 // ============================================
 // Home Page — Native-feel with ingredient search flow
 // Platform-aware: Web (Hero + marketing) vs App (New design)
+// Web: max-width 1280px, 3-col feature cards, staggered entries
 // ============================================
 
 'use client';
@@ -22,7 +23,7 @@ import { NisseButton } from '../components/NisseButton';
 import { PageTransition } from '../components/PageTransition';
 import {
   ArrowLeft, Leaf, TrendingDown, Headphones, ChefHat,
-  ShoppingBag, Mic,
+  ShoppingBag, Mic, Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -162,7 +163,7 @@ export default function HomePage() {
     );
   }
 
-  // ── Web: full marketing page ──
+  // ── Web: full marketing page (1280px max-width) ──
   return (
     <div className="min-h-screen">
       <section>
@@ -192,43 +193,60 @@ export default function HomePage() {
         </motion.div>
       )}
 
-      {/* How it works */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16">
-        <div className="text-center mb-10">
-          <h2 className="font-display text-display-sm font-bold text-warm-800 tracking-tight mb-3">Från kylskåp till middagsbord</h2>
-          <p className="text-warm-500 max-w-md mx-auto">Tre steg. Noll beslutströtthet.</p>
-        </div>
-        <div className="grid sm:grid-cols-3 gap-6">
-          <StepCard number="1" icon={<ChefHat size={22} />} title="Sök" text="Skriv vad du har hemma, en maträtt, eller din budget. AI hittar de bästa recepten åt dig." />
-          <StepCard number="2" icon={<ShoppingBag size={22} />} title="Handla" text="Röststyrd inköpslista som guidar dig genom butiken, hylla för hylla. Handsfree." />
-          <StepCard number="3" icon={<Mic size={22} />} title="Laga" text="Steg-för-steg med timer och AI-kock som svarar på dina frågor. Som en kock i örat." />
+      {/* How it works — 3-column grid with hover-scale */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2
+              className="font-display text-display-sm sm:text-display-md font-bold tracking-tight mb-3"
+              style={{ color: '#111111' }}
+            >
+              Från kylskåp till middagsbord
+            </h2>
+            <p className="text-warm-500 max-w-md mx-auto text-base">Tre steg. Noll beslutströtthet.</p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-6 lg:gap-8">
+            <StepCard number="1" icon={<ChefHat size={24} />} title="Sök" text="Skriv vad du har hemma, en maträtt, eller din budget. AI hittar de bästa recepten åt dig." />
+            <StepCard number="2" icon={<ShoppingBag size={24} />} title="Handla" text="Röststyrd inköpslista som guidar dig genom butiken, hylla för hylla. Handsfree." />
+            <StepCard number="3" icon={<Mic size={24} />} title="Laga" text="Steg-för-steg med timer och AI-kock som svarar på dina frågor. Som en kock i örat." />
+          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-cream-100/60 py-16 border-y border-warm-200/20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid sm:grid-cols-3 gap-6">
-            <FeatureCard icon={<Leaf size={20} className="text-sage-400" />} title="Hållbar matlagning" text="Minimera matsvinn genom att laga mat med vad du redan har." />
-            <FeatureCard icon={<TrendingDown size={20} className="text-terra-400" />} title="Bästa priset" text="Se pris per portion och jämför ICA, Willys, Coop & Lidl." />
-            <FeatureCard icon={<Headphones size={20} className="text-sage-400" />} title="Röststyrt" text="Handla och laga helt handsfree med röstkommandon." />
+      {/* Features — 3-column grid */}
+      <section className="py-20 border-y border-warm-200/20" style={{ background: 'rgba(245,245,247,0.6)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid sm:grid-cols-3 gap-6 lg:gap-8">
+            <FeatureCard icon={<Leaf size={22} className="text-forest-400" />} title="Hållbar matlagning" text="Minimera matsvinn genom att laga mat med vad du redan har." />
+            <FeatureCard icon={<TrendingDown size={22} className="text-terra-400" />} title="Bästa priset" text="Se pris per portion och jämför ICA, Willys, Coop & Lidl." />
+            <FeatureCard icon={<Headphones size={22} className="text-forest-400" />} title="Röststyrt" text="Handla och laga helt handsfree med röstkommandon." />
           </div>
         </div>
       </section>
 
       {/* CTA */}
       {!user && (
-        <section className="py-16">
-          <div className="max-w-lg mx-auto text-center px-4">
-            <div className="card p-8 shadow-card">
-              <div className="w-14 h-14 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-soft">
-                <ChefHat size={28} className="text-sage-400" />
+        <section className="py-20">
+          <div className="max-w-xl mx-auto text-center px-4">
+            <div className="card p-10" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.08)' }}>
+              <div className="w-16 h-16 bg-forest-50 rounded-3xl flex items-center justify-center mx-auto mb-5">
+                <Sparkles size={28} className="text-forest-400" />
               </div>
-              <h3 className="font-display text-2xl font-bold text-warm-800 tracking-tight mb-2">Börja laga smartare</h3>
-              <p className="text-warm-500 text-sm mb-6">
+              <h3
+                className="font-display text-2xl sm:text-3xl font-bold tracking-tight mb-3"
+                style={{ color: '#111111' }}
+              >
+                Börja laga smartare
+              </h3>
+              <p className="text-warm-500 text-base mb-8 max-w-sm mx-auto leading-relaxed">
                 Skapa ett gratis konto för att söka bland tusentals recept, spara favoriter och få röststyrd matlagningshjälp.
               </p>
-              <Link href="/register" className="btn-primary inline-flex items-center gap-2">
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 text-white px-8 py-4 rounded-full font-semibold text-base
+                         transition-all hover:-translate-y-0.5 hover:shadow-btn-hover active:scale-[0.97]"
+                style={{ background: '#111111', boxShadow: '0 4px 20px rgba(17,17,17,0.2)' }}
+              >
                 Skapa konto gratis
               </Link>
             </div>
@@ -242,12 +260,18 @@ export default function HomePage() {
 function FeatureCard({ icon, title, text }) {
   return (
     <motion.div
-      whileHover={{ y: -3 }}
+      whileHover={{ y: -4, scale: 1.02 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="card p-6 shadow-card"
+      className="card p-7 cursor-default"
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.06)' }}
     >
-      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 bg-cream-100">{icon}</div>
-      <h3 className="font-bold text-warm-800 mb-1">{title}</h3>
+      <div
+        className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
+        style={{ background: '#F5F5F7' }}
+      >
+        {icon}
+      </div>
+      <h3 className="font-bold text-warm-800 text-lg mb-1.5">{title}</h3>
       <p className="text-sm text-warm-500 leading-relaxed">{text}</p>
     </motion.div>
   );
@@ -256,17 +280,29 @@ function FeatureCard({ icon, title, text }) {
 function StepCard({ number, icon, title, text }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: Number(number) * 0.1 }}
-      className="card p-6 text-center shadow-card"
+      transition={{ duration: 0.6, delay: Number(number) * 0.12 }}
+      whileHover={{ y: -4, scale: 1.02 }}
+      className="card p-8 text-center cursor-default"
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.06)' }}
     >
-      <div className="w-14 h-14 rounded-full bg-sage-400 text-white flex items-center justify-center mx-auto mb-4 shadow-teal-glow">
-        {icon}
+      <div
+        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
+        style={{ background: '#5A7D6C', boxShadow: '0 4px 20px rgba(90,125,108,0.3)' }}
+      >
+        <span className="text-white">{icon}</span>
       </div>
-      <span className="text-xs font-bold text-sage-400 uppercase tracking-widest">Steg {number}</span>
-      <h3 className="font-display text-xl font-bold text-warm-800 tracking-tight mt-1 mb-2">{title}</h3>
+      <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#5A7D6C' }}>
+        Steg {number}
+      </span>
+      <h3
+        className="font-display text-xl font-bold tracking-tight mt-1.5 mb-2"
+        style={{ color: '#111111' }}
+      >
+        {title}
+      </h3>
       <p className="text-sm text-warm-500 leading-relaxed">{text}</p>
     </motion.div>
   );
