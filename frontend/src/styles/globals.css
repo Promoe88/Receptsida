@@ -287,6 +287,21 @@
   overflow: hidden;
 }
 
+/* ── Mobile web: tap highlight removal + font size override ── */
+@media (max-width: 768px) {
+  a, button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Prevent iOS zoom on input focus (force 16px minimum) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  /* Tighter card radius on small screens */
+  .card, .card-elevated, .card-glass, .card-flat {
+    border-radius: 24px;
+  }
+}
+
 /* ── Scrollbar (web only) ── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }

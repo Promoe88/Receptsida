@@ -164,9 +164,9 @@ export default function LoginPage() {
   // ── Web: Dual panel split-screen ──
   if (isWeb) {
     return (
-      <div className="min-h-[calc(100vh-72px)] grid lg:grid-cols-2">
+      <div className="min-h-[calc(100vh-60px)] grid lg:grid-cols-2">
         {/* Left panel — form */}
-        <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12 bg-white">
+        <div className="flex flex-col justify-center px-5 sm:px-12 lg:px-20 py-8 sm:py-12 bg-white">
           <div className="w-full max-w-md mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -174,10 +174,10 @@ export default function LoginPage() {
               transition={{ duration: 0.6 }}
               className="mb-10"
             >
-              <h1 className="font-display text-4xl font-bold tracking-tight mb-2" style={{ color: '#111111' }}>
+              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight mb-2" style={{ color: '#111111' }}>
                 Välkommen tillbaka
               </h1>
-              <p className="text-warm-500 text-base">
+              <p className="text-warm-500 text-sm sm:text-base">
                 Logga in på ditt Nisse-konto
               </p>
             </motion.div>

@@ -20,8 +20,8 @@ export function WebShell({ children }) {
 
       {/* Professional 4-column footer */}
       <footer className="border-t border-warm-200/50" style={{ background: '#111111' }}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10 sm:py-14">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-8">
             {/* Brand column */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2.5 mb-4">
@@ -65,7 +65,7 @@ export function WebShell({ children }) {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-12 pt-6 border-t border-warm-700/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="mt-8 sm:mt-12 pt-5 sm:pt-6 border-t border-warm-700/30 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-warm-500">&copy; {new Date().getFullYear()} Nisse. Alla rättigheter förbehållna.</p>
             <div className="flex items-center gap-5">
               <Link href="/integritetspolicy" className="text-xs text-warm-500 hover:text-white transition-colors">

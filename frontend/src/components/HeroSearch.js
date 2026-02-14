@@ -103,7 +103,7 @@ export function HeroSearch({ onSearch, loading }) {
   }, [isListening, stopListening, startListening]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[75vh] px-4 sm:px-6">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] sm:min-h-[75vh] px-4 sm:px-6 py-10 sm:py-0">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -118,7 +118,7 @@ export function HeroSearch({ onSearch, loading }) {
         >
           Sveriges smartaste<br className="hidden sm:block" /> matassistent
         </h1>
-        <p className="text-warm-500 text-base sm:text-lg mb-10 max-w-lg mx-auto leading-relaxed">
+        <p className="text-warm-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 max-w-lg mx-auto leading-relaxed">
           Skriv ingredienser, en maträtt, eller berätta vad du är sugen på.
         </p>
 
@@ -266,14 +266,14 @@ export function HeroSearch({ onSearch, loading }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="mt-8 flex items-center justify-center gap-6 flex-wrap"
+          className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-6"
         >
-          <span className="text-xs text-warm-400 uppercase tracking-wider font-medium">Jämför priser hos</span>
-          <div className="flex items-center gap-4">
+          <span className="text-[11px] sm:text-xs text-warm-400 uppercase tracking-wider font-medium">Jämför priser hos</span>
+          <div className="flex items-center gap-2.5 sm:gap-4">
             {STORE_LOGOS.map((store) => (
               <div
                 key={store.name}
-                className="px-3.5 py-1.5 rounded-lg text-sm font-bold tracking-wide"
+                className="px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-bold tracking-wide"
                 style={{
                   color: '#B0B0B5',
                   background: 'rgba(0,0,0,0.03)',
