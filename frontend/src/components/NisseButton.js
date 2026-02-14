@@ -57,7 +57,13 @@ export function NisseButton({
       onClick={onClick}
       disabled={disabled}
       whileTap={{ scale: 0.97 }}
-      whileHover={variant === 'primary' ? { opacity: 0.9 } : undefined}
+      whileHover={
+        variant === 'primary'
+          ? { y: -2, boxShadow: '0 6px 20px rgba(17,17,17,0.22)' }
+          : variant === 'outline'
+            ? { borderColor: '#5A7D6C', color: '#5A7D6C' }
+            : undefined
+      }
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
       className={`
         inline-flex items-center justify-center rounded-full font-medium
