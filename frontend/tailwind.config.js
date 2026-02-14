@@ -56,6 +56,20 @@ module.exports = {
           900: '#0F0F1E',
           muted: '#C7C7CC',
         },
+        // Sage Green — editorial accent (#5A7D6C)
+        forest: {
+          50: '#EEF3F0',
+          100: '#D5E0DA',
+          200: '#B3C7BC',
+          300: '#8EAD9D',
+          400: '#5A7D6C',
+          DEFAULT: '#5A7D6C',
+          500: '#4D6B5D',
+          600: '#3F584D',
+          700: '#32463D',
+          800: '#24332E',
+          900: '#17211E',
+        },
         // Gold — stars, premium, inspiration
         gold: {
           DEFAULT: '#FFD60A',
@@ -86,8 +100,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        display: ['"SF Pro Display"', 'Inter', '-apple-system', 'sans-serif'],
-        body: ['"SF Pro Display"', 'Inter', '-apple-system', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', '"Times New Roman"', 'serif'],
+        body: ['"Inter"', '-apple-system', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
         mono: ['"DM Mono"', 'monospace'],
       },
       fontSize: {
@@ -136,6 +150,9 @@ module.exports = {
         'terra-glow': '0 4px 24px rgba(255,122,80,0.25)',
         'float': '0 8px 40px rgba(0,0,0,0.12)',
         'nav': '0 -4px 20px rgba(0,0,0,0.04)',
+        'editorial': '0 20px 50px rgba(0,0,0,0.06)',
+        'editorial-hover': '0 24px 60px rgba(0,0,0,0.10)',
+        'search-pill': '0 8px 32px rgba(0,0,0,0.08)',
       },
       spacing: {
         // Design system spacing (8px base)
