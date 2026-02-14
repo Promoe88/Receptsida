@@ -1,4 +1,4 @@
-# MatKompass — Sveriges smartaste receptverktyg
+# Nisse — Sveriges smartaste receptverktyg
 
 Skriv in dina ingredienser — vi soker bland riktiga recept pa natet och anpassar dem efter dig.
 

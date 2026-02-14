@@ -10,7 +10,7 @@ import { create } from 'zustand';
 import { useCallback, useEffect, useRef } from 'react';
 import { getCurrentPosition, checkLocationPermission, requestLocationPermission } from '../lib/capacitor';
 
-const CACHE_KEY = 'matkompass_location';
+const CACHE_KEY = 'nisse_location';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // ── Read cached position from localStorage ──

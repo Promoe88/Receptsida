@@ -1,7 +1,7 @@
 {
   "name": "matkompass-backend",
   "version": "1.0.0",
-  "description": "MatKompass API — AI-driven recipe search engine",
+  "description": "Nisse API — AI-driven recipe search engine",
   "main": "src/index.js",
   "type": "module",
   "scripts": {

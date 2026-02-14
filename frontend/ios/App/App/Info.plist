@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>MatKompass</string>
+        <string>Nisse</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -48,6 +48,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>MatKompass använder din plats för att hitta matbutiker nära dig och visa avstånd till dem.</string>
+	<string>Nisse använder din plats för att hitta matbutiker nära dig och visa avstånd till dem.</string>
 </dict>
 </plist>

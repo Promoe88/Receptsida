@@ -1,5 +1,5 @@
 // ============================================
-// Nisse / MatKompass — Database Schema
+// Nisse — Database Schema
 // ============================================
 
 generator client {

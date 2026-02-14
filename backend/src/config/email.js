@@ -1,6 +1,6 @@
 // ============================================
 // Email Service — Resend integration
-// All email sending for MatKompass
+// All email sending for Nisse
 // ============================================
 
 import { Resend } from 'resend';
@@ -8,7 +8,7 @@ import { config } from './env.js';
 
 const resend = new Resend(config.RESEND_API_KEY);
 
-const FROM = config.EMAIL_FROM || 'MatKompass <noreply@matkompass.se>';
+const FROM = config.EMAIL_FROM || 'Nisse <noreply@matkompass.se>';
 const APP_URL = config.CORS_ORIGIN.split(',')[0].trim();
 
 // ──────────────────────────────────────────
@@ -21,10 +21,10 @@ export async function sendVerificationEmail(user, token) {
   await resend.emails.send({
     from: FROM,
     to: user.email,
-    subject: 'Verifiera din e-postadress — MatKompass',
+    subject: 'Verifiera din e-postadress — Nisse',
     html: layoutWrap(`
       <h1 style="font-family: 'DM Serif Display', Georgia, serif; color: #3D3529; font-size: 28px; margin-bottom: 8px;">
-        Välkommen till MatKompass!
+        Välkommen till Nisse!
       </h1>
       <p style="color: #6B6155; font-size: 16px; line-height: 1.6;">
         Tack för att du skapade ett konto${user.name ? `, ${user.name}` : ''}.
@@ -61,7 +61,7 @@ export async function sendWelcomeEmail(user) {
   await resend.emails.send({
     from: FROM,
     to: user.email,
-    subject: 'Välkommen till MatKompass! 🍳',
+    subject: 'Välkommen till Nisse! 🍳',
     html: layoutWrap(`
       <h1 style="font-family: 'DM Serif Display', Georgia, serif; color: #3D3529; font-size: 28px; margin-bottom: 8px;">
         Du är redo att börja laga mat!
@@ -117,13 +117,13 @@ export async function sendPasswordResetEmail(user, token) {
   await resend.emails.send({
     from: FROM,
     to: user.email,
-    subject: 'Återställ ditt lösenord — MatKompass',
+    subject: 'Återställ ditt lösenord — Nisse',
     html: layoutWrap(`
       <h1 style="font-family: 'DM Serif Display', Georgia, serif; color: #3D3529; font-size: 28px; margin-bottom: 8px;">
         Återställ ditt lösenord
       </h1>
       <p style="color: #6B6155; font-size: 16px; line-height: 1.6;">
-        Vi fick en förfrågan om att återställa lösenordet för ditt MatKompass-konto.
+        Vi fick en förfrågan om att återställa lösenordet för ditt Nisse-konto.
       </p>
       <div style="text-align: center; margin: 32px 0;">
         <a href="${resetUrl}" style="
@@ -169,7 +169,7 @@ export async function sendRecipeShareEmail(fromUser, toEmail, recipe) {
         ${recipe.title}
       </h1>
       <p style="color: #6B6155; font-size: 16px; line-height: 1.6;">
-        ${fromUser.name || 'En MatKompass-användare'} tyckte att du borde testa detta recept!
+        ${fromUser.name || 'En Nisse-användare'} tyckte att du borde testa detta recept!
       </p>
 
       <div style="background-color: #F3F0EB; border-radius: 16px; padding: 24px; margin: 24px 0;">
@@ -212,7 +212,7 @@ function layoutWrap(content) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MatKompass</title>
+  <title>Nisse</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #FDFBF7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FDFBF7;">
@@ -223,7 +223,7 @@ function layoutWrap(content) {
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <span style="font-family: 'DM Serif Display', Georgia, serif; font-size: 24px; color: #7C9A82; font-weight: 700;">
-                MatKompass
+                Nisse
               </span>
             </td>
           </tr>
@@ -237,8 +237,8 @@ function layoutWrap(content) {
           <tr>
             <td align="center" style="padding-top: 24px;">
               <p style="color: #C4C0BB; font-size: 12px; line-height: 1.5; margin: 0;">
-                MatKompass — Från kylskåp till middagsbord<br/>
-                Du får detta mail eftersom du har ett konto hos MatKompass.
+                Nisse — Från kylskåp till middagsbord<br/>
+                Du får detta mail eftersom du har ett konto hos Nisse.
               </p>
             </td>
           </tr>

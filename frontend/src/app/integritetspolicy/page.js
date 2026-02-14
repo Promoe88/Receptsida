@@ -5,7 +5,7 @@
 import { Shield, Mail } from 'lucide-react';
 
 export const metadata = {
-  title: 'Integritetspolicy — Nisse / MatKompass',
+  title: 'Integritetspolicy — Nisse',
   description: 'Vår integritetspolicy beskriver hur vi samlar in, använder och skyddar dina personuppgifter.',
 };
 
@@ -24,7 +24,7 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="font-display text-xl text-warm-800 mb-3">1. Personuppgiftsansvarig</h2>
           <p>
-            Nisse / MatKompass (&quot;vi&quot;, &quot;oss&quot;, &quot;vår&quot;) är personuppgiftsansvarig
+            Nisse (&quot;vi&quot;, &quot;oss&quot;, &quot;vår&quot;) är personuppgiftsansvarig
             för behandlingen av dina personuppgifter. Vi behandlar dina uppgifter i enlighet med EU:s
             dataskyddsförordning (GDPR) och svensk dataskyddslagstiftning.
           </p>

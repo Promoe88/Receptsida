@@ -6,7 +6,7 @@
 
 import * as cheerio from 'cheerio';
 
-const USER_AGENT = 'MatKompass/1.0 (recipe indexer; contact@matkompass.se)';
+const USER_AGENT = 'Nisse/1.0 (recipe indexer; contact@matkompass.se)';
 const FETCH_TIMEOUT = 15000;
 
 /**

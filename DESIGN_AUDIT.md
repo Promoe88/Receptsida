@@ -1,4 +1,4 @@
-# MatKompass — Design System Audit
+# Nisse — Design System Audit
 # Nuvarande kod vs. DESIGN_SYSTEM.md
 # ═══════════════════════════════════════════════════
 

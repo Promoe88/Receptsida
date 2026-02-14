@@ -1,4 +1,4 @@
-# MatKompass — Designsystem v1.0
+# Nisse — Designsystem v1.0
 # ═══════════════════════════════════════════════════════
 # Detta dokument är den enda källan till sanning för all UI/UX.
 # Varje komponent, sida och vy MÅSTE följa detta system.
