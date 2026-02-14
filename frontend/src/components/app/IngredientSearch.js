@@ -72,7 +72,27 @@ export function IngredientSearch({ onBack, onSearch, loading }) {
       e.preventDefault();
       addIngredient();
     }
-  }, [addIngredient]);
+    if (e.key === 'Backspace' && !input && ingredients.length > 0) {
+      setIngredients((prev) => prev.slice(0, -1));
+    }
+  }, [addIngredient, input, ingredients]);
+
+  // Space-to-tag: when user types space after a word, convert it to a tag
+  const handleInputChange = useCallback((e) => {
+    const val = e.target.value;
+    if (val.endsWith(' ') && val.trim().length > 0) {
+      const name = val.trim();
+      if (name && !ingredients.some((i) => i.name.toLowerCase() === name.toLowerCase())) {
+        setIngredients((prev) => [
+          ...prev,
+          { id: Date.now(), name, emoji: getEmoji(name) },
+        ]);
+      }
+      setInput('');
+    } else {
+      setInput(val);
+    }
+  }, [ingredients]);
 
   const handleSearch = useCallback(() => {
     if (ingredients.length === 0 || loading) return;
@@ -121,7 +141,7 @@ export function IngredientSearch({ onBack, onSearch, loading }) {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="T.ex. kyckling, pasta, tomat..."
             className="input flex-1"

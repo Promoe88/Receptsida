@@ -27,7 +27,12 @@ router.post(
     const effectiveHouseholdSize =
       householdSize || (req.user ? await getUserHouseholdSize(req.user.id) : 2);
 
-    const parsed = await parseIngredients(query);
+    let parsed = { recognized: [], unrecognized: [] };
+    try {
+      parsed = await parseIngredients(query);
+    } catch (err) {
+      console.warn('Ingredient parsing failed, continuing with search:', err.message);
+    }
 
     const result = await searchRecipes(query, effectiveHouseholdSize, preferences || {});
 

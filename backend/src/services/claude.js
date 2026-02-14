@@ -54,19 +54,35 @@ export async function searchRecipes(query, householdSize = 1, preferences = {}) 
     return { ...cached, cached: true };
   }
 
-  const searchResult = await searchWebForRecipes(query, householdSize, preferences);
+  let searchResult;
+  try {
+    searchResult = await searchWebForRecipes(query, householdSize, preferences);
+  } catch (err) {
+    console.error('Web search failed:', err.message);
+    throw new Error('Kunde inte söka efter recept just nu. Försök igen om en stund.');
+  }
 
-  const structured = await structureRecipes(
-    searchResult.text,
-    searchResult.sources,
-    query,
-    householdSize,
-    preferences
-  );
+  if (!searchResult.text || searchResult.text.trim().length === 0) {
+    throw new Error('Inga recept hittades. Prova att söka med andra ingredienser.');
+  }
+
+  let structured;
+  try {
+    structured = await structureRecipes(
+      searchResult.text,
+      searchResult.sources,
+      query,
+      householdSize,
+      preferences
+    );
+  } catch (err) {
+    console.error('Recipe structuring failed:', err.message);
+    throw new Error('Kunde inte bearbeta recepten. Försök igen.');
+  }
 
   const result = {
-    recipes: structured.recipes,
-    shopping_list: structured.shopping_list,
+    recipes: structured.recipes || [],
+    shopping_list: structured.shopping_list || [],
     sources: searchResult.sources,
     cached: false,
   };
@@ -105,7 +121,7 @@ async function searchWebForRecipes(query, householdSize, preferences) {
     system: `${MATKOMPASS_IDENTITY}
 
 Du agerar nu som RECEPTRÅDGIVAREN — du förstår vad användaren vill och hittar de bästa recepten.`,
-    tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+    tools: [{ type: 'web_search_20250305' }],
     messages: [
       {
         role: 'user',
