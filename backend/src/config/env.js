@@ -20,7 +20,7 @@ const envSchema = z.object({
   RECIPE_SEARCH_LIMIT_PER_HOUR: z.coerce.number().default(10),
   RECIPE_SEARCH_LIMIT_PER_HOUR_PREMIUM: z.coerce.number().default(100),
   RESEND_API_KEY: z.string().min(5),
-  EMAIL_FROM: z.string().default('MatKompass <noreply@matkompass.se>'),
+  EMAIL_FROM: z.string().default('Nisse <noreply@matkompass.se>'),
   // Social auth (optional — set to enable)
   GOOGLE_CLIENT_ID: z.string().optional().default(''),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(''),

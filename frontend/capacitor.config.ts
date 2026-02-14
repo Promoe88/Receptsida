@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.matkompass.app',
-  appName: 'MatKompass',
+  appName: 'Nisse',
   webDir: 'out',
   server: {
     // Production API — all requests go directly to Railway backend
@@ -32,7 +32,7 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'never',
     preferredContentMode: 'mobile',
-    scheme: 'MatKompass',
+    scheme: 'Nisse',
   },
 };
 

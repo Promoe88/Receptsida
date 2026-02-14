@@ -101,7 +101,7 @@ export async function generateRecipeSuggestions(params) {
   const lexiconContext = await buildLexiconContext(ingredients);
   const similarRecipes = await findSimilarRecipes(ingredients, style);
 
-  const prompt = `Du är MatKompass receptgenerator — Sveriges smartaste matassistent.
+  const prompt = `Du är Nisse receptgenerator — Sveriges smartaste matassistent.
 
 DITT ORDFÖRRÅD (från vårt recept-lexikon):
 ${lexiconContext.summary}
@@ -168,7 +168,7 @@ ${similarRecipes.map((r) => {
 }).join('\n')}`
     : '';
 
-  return `Du är MatKompass receptgenerator — Sveriges smartaste matassistent.
+  return `Du är Nisse receptgenerator — Sveriges smartaste matassistent.
 Du skapar ORIGINELLA svenska recept baserat på vårt omfattande recept-lexikon.
 
 DITT RECEPT-LEXIKON (vanligaste orden från ${lexiconContext.totalWords} analyserade recept):

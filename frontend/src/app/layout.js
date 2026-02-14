@@ -1,5 +1,5 @@
 // ============================================
-// Root Layout — Nisse / MatKompass
+// Root Layout — Nisse
 // Platform-aware: Web (Navbar+Footer) vs App (TabBar)
 // ============================================
 

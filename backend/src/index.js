@@ -1,5 +1,5 @@
 // ============================================
-// MatKompass Backend — Entry Point
+// Nisse Backend — Entry Point
 // ============================================
 
 import express from 'express';
@@ -142,7 +142,7 @@ async function start() {
 
     // Start Express
     app.listen(config.PORT, '0.0.0.0', () => {
-      console.log(`\n🍳 MatKompass API running on port ${config.PORT}`);
+      console.log(`\n🍳 Nisse API running on port ${config.PORT}`);
       console.log(`   Environment: ${config.NODE_ENV}`);
       console.log(`   Health:      http://localhost:${config.PORT}/api/health`);
       console.log(`   CORS origin: ${config.CORS_ORIGIN}\n`);

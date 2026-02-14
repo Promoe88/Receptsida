@@ -1,12 +1,14 @@
 // ============================================
 // Store Map — Find nearby grocery stores with GPS
+// Uses global useLocation hook + Capacitor Geolocation
 // ============================================
 
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MapPin, Navigation, Store, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { MapPin, Navigation, Store, Loader2, AlertCircle } from 'lucide-react';
 import { locations } from '../lib/api';
+import { useLocation } from '../hooks/useLocation';
 
 const CHAIN_COLORS = {
   ICA: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
@@ -27,11 +29,10 @@ function formatDistance(meters) {
 }
 
 export function StoreMap() {
+  const { lat, lng, loading: locLoading, error: locError, denied, hasPosition, requestLocation } = useLocation();
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
-  const [locationDenied, setLocationDenied] = useState(false);
 
   const fetchStores = useCallback(async (lat, lng) => {
     setLoading(true);
@@ -46,49 +47,26 @@ export function StoreMap() {
     }
   }, []);
 
-  function requestLocation() {
-    if (!navigator.geolocation) {
-      setError('Din webbläsare stöder inte platsåtkomst.');
-      return;
-    }
-
-    setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude });
-        fetchStores(latitude, longitude);
-      },
-      (err) => {
-        setLoading(false);
-        if (err.code === err.PERMISSION_DENIED) {
-          setLocationDenied(true);
-          setError('Platsåtkomst nekad. Aktivera plats i webbläsarens inställningar.');
-        } else {
-          setError('Kunde inte hämta din position. Försök igen.');
-        }
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
-  }
+  // Fetch stores whenever position updates
+  useEffect(() => {
+    if (hasPosition) fetchStores(lat, lng);
+  }, [hasPosition, lat, lng, fetchStores]);
 
   async function openDirections(store) {
-    if (!userLocation) return;
+    if (!hasPosition) return;
     try {
-      const data = await locations.directions(
-        userLocation.lat, userLocation.lng,
-        store.lat, store.lng,
-        'driving'
-      );
+      const data = await locations.directions(lat, lng, store.lat, store.lng, 'driving');
       window.open(data.directionsUrl, '_blank');
     } catch {
-      // Fallback to direct Google Maps link
       window.open(
-        `https://www.google.com/maps/dir/${userLocation.lat},${userLocation.lng}/${store.lat},${store.lng}`,
+        `https://www.google.com/maps/dir/${lat},${lng}/${store.lat},${store.lng}`,
         '_blank'
       );
     }
   }
+
+  const isLoading = locLoading || loading;
+  const displayError = locError || error;
 
   return (
     <div className="space-y-4">
@@ -100,28 +78,28 @@ export function StoreMap() {
         </div>
         <button
           onClick={requestLocation}
-          disabled={loading}
+          disabled={isLoading}
           className="btn-primary text-sm flex items-center gap-2"
         >
-          {loading ? (
+          {isLoading ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
             <MapPin size={16} />
           )}
-          {userLocation ? 'Uppdatera' : 'Hitta min plats'}
+          {hasPosition ? 'Uppdatera' : 'Hitta min plats'}
         </button>
       </div>
 
       {/* Error state */}
-      {error && (
+      {displayError && (
         <div className="bg-terra-50 border border-terra-200 text-terra-600 px-4 py-3 rounded-2xl text-sm flex items-center gap-2">
           <AlertCircle size={16} />
-          {error}
+          {displayError}
         </div>
       )}
 
       {/* Empty state */}
-      {!loading && !userLocation && !error && (
+      {!isLoading && !hasPosition && !displayError && (
         <div className="card p-8 text-center">
           <div className="w-14 h-14 bg-sage-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
             <MapPin size={28} className="text-sage-400" />
@@ -134,7 +112,7 @@ export function StoreMap() {
       )}
 
       {/* Loading state */}
-      {loading && stores.length === 0 && (
+      {isLoading && stores.length === 0 && (
         <div className="card p-8 text-center">
           <Loader2 size={24} className="animate-spin text-sage-400 mx-auto mb-2" />
           <p className="text-sm text-warm-500">Söker efter butiker...</p>

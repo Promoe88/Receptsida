@@ -1,5 +1,5 @@
 // ============================================
-// Claude AI Service — MatKompass recipe engine
+// Claude AI Service — Nisse recipe engine
 // Three-phase assistant: Recipe → Shopping → Cooking
 // ============================================
 
@@ -11,10 +11,10 @@ import crypto from 'crypto';
 const client = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
 
 // ──────────────────────────────────────────
-// MatKompass System Identity
+// Nisse System Identity
 // ──────────────────────────────────────────
 
-const MATKOMPASS_IDENTITY = `Du är MatKompass — en professionell kockassistent som guidar användaren genom hela matlagningsprocessen, från idé till färdig rätt. Du kombinerar expertis från professionella kök med en varm, pedagogisk approach anpassad efter varje individ.
+const NISSE_IDENTITY = `Du är Nisse — en professionell kockassistent som guidar användaren genom hela matlagningsprocessen, från idé till färdig rätt. Du kombinerar expertis från professionella kök med en varm, pedagogisk approach anpassad efter varje individ.
 
 Kärnprinciper:
 - Känn av användarens erfarenhet från hur de uttrycker sig
@@ -118,7 +118,7 @@ async function searchWebForRecipes(query, householdSize, preferences) {
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4000,
-    system: `${MATKOMPASS_IDENTITY}
+    system: `${NISSE_IDENTITY}
 
 Du agerar nu som RECEPTRÅDGIVAREN — du förstår vad användaren vill och hittar de bästa recepten.`,
     tools: [{ type: 'web_search_20250305' }],
@@ -194,11 +194,11 @@ async function structureRecipes(searchText, sources, query, householdSize, prefe
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 6000,
-    system: MATKOMPASS_IDENTITY,
+    system: NISSE_IDENTITY,
     messages: [
       {
         role: 'user',
-        content: `Baserat på följande receptdata, skapa strukturerade recept i MatKompass-format.
+        content: `Baserat på följande receptdata, skapa strukturerade recept i Nisse-format.
 
 RECEPTDATA:
 ${searchText}
@@ -325,7 +325,7 @@ export async function askShoppingAssistant(recipe, question, conversationHistory
   const messages = [
     {
       role: 'user',
-      content: `${MATKOMPASS_IDENTITY}
+      content: `${NISSE_IDENTITY}
 
 Du agerar nu som INKÖPSGUIDEN — du hjälper användaren i butiken.
 
@@ -409,7 +409,7 @@ export async function askCookingAssistant(recipe, question, conversationHistory 
   const messages = [
     {
       role: 'user',
-      content: `${MATKOMPASS_IDENTITY}
+      content: `${NISSE_IDENTITY}
 
 Du agerar nu som KÖKSCOACHEN — du guidar användaren steg-för-steg under matlagningen. Du är som en varm, professionell kompis i köket.
 
@@ -494,7 +494,7 @@ export async function generateMealPlan(householdSize = 2, preferences = {}, lock
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 6000,
-    system: `${MATKOMPASS_IDENTITY}\n\nDu agerar nu som MENYPLANERAREN — du skapar varierade, realistiska veckomenyer som svenska familjer faktiskt vill laga.`,
+    system: `${NISSE_IDENTITY}\n\nDu agerar nu som MENYPLANERAREN — du skapar varierade, realistiska veckomenyer som svenska familjer faktiskt vill laga.`,
     tools: [{ type: 'web_search_20250305' }],
     messages: [
       {
