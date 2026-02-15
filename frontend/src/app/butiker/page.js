@@ -15,7 +15,6 @@ import {
 import { locations } from '../../lib/api';
 import { isApp } from '../../lib/platform';
 import { NisseButton } from '../../components/NisseButton';
-import { PageTransition } from '../../components/PageTransition';
 import { StoreGoogleMap } from '../../components/StoreGoogleMap';
 import { useLocation } from '../../hooks/useLocation';
 
@@ -96,14 +95,8 @@ export default function StoresPage() {
   const hasGoogleMapsKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   return (
-    <PageTransition className={isApp ? 'safe-top' : ''}>
-      <div className="relative" style={{ height: isApp ? 'calc(100vh - 64px)' : 'calc(100vh - 80px)' }}>
-
-        {/* DEBUG — ta bort efter felsökning */}
-        <div className="absolute top-0 left-0 right-0 z-50 bg-black/80 text-white text-[10px] p-2 font-mono">
-          <div>KEY: "{process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '(undefined)'}"</div>
-          <div>hasKey: {String(hasGoogleMapsKey)} | hasPos: {String(hasPosition)} | lat: {lat} | lng: {lng}</div>
-        </div>
+    <div className={isApp ? 'safe-top' : ''}>
+      <div className="relative" style={{ height: isApp ? 'calc(100dvh - 64px)' : 'calc(100dvh - 80px)' }}>
 
         {/* Map area — full size, everything else overlays on top */}
         {hasGoogleMapsKey && hasPosition ? (
@@ -163,7 +156,7 @@ export default function StoresPage() {
                 <MapPin size={32} className="text-warm-400 mx-auto mb-3" />
                 <p className="text-warm-600 font-medium">Google Maps API-nyckel saknas</p>
                 <p className="text-sm text-warm-400 mt-1">
-                  Lägg till NEXT_PUBLIC_GOOGLE_MAPS_API_KEY i .env.development och starta om servern.
+                  Lägg till NEXT_PUBLIC_GOOGLE_MAPS_API_KEY i .env.local och bygg om appen.
                 </p>
               </div>
             )}
@@ -321,6 +314,6 @@ export default function StoresPage() {
           </motion.div>
         )}
       </div>
-    </PageTransition>
+    </div>
   );
 }
