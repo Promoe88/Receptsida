@@ -16,7 +16,7 @@ import { isApp } from '../../lib/platform';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles,
   MapPin, Shield, Loader2, Zap,
-  Archive, Tag, Heart,
+  Box, Tag, Heart,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -92,7 +92,7 @@ const blurToFocus = {
 
 // ── Decision Chip data (Step 2) — Premium Lucide icons ──
 const DECISION_CHIPS = [
-  { label: 'Matlådor fixade', Icon: Archive, bg: `${SAGE}18`, iconColor: SAGE },
+  { label: 'Matlådor fixade', Icon: Box, bg: `${SAGE}18`, iconColor: SAGE },
   { label: 'Extrapriser hittade', Icon: Tag, bg: `${CORAL}15`, iconColor: CORAL },
   { label: 'Barnen mätta', Icon: Heart, bg: `${SAGE}18`, iconColor: SAGE },
 ];
@@ -266,6 +266,7 @@ function StepLogic() {
       </motion.p>
 
       {/* Feature Tiles — Premium Lucide icons in soft-colored circles */}
+      <AnimatePresence mode="wait">
       <div className="flex flex-col gap-3 w-full max-w-[300px]">
         {DECISION_CHIPS.map((chip, i) => (
           <motion.div
@@ -300,6 +301,7 @@ function StepLogic() {
           </motion.div>
         ))}
       </div>
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -498,26 +500,29 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
 }
 
 // ═══════════════════════════════════════════
-// Nav Island — FIXED HEIGHT (h-[120px])
-// Uniform dimensions across all 3 steps
+// Nav Island — Hardcoded px dimensions
+// Identical width/height on all 3 steps
 // ═══════════════════════════════════════════
 
 function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
   return (
-    <div className="flex justify-center w-full px-4">
+    <div className="flex justify-center w-full">
       <div
-        className="w-[92%] max-w-[420px] rounded-3xl px-4 py-3"
+        className="rounded-3xl flex flex-col justify-center"
         style={{
-          background: 'rgba(255,255,255,0.6)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          width: '340px',
+          height: '88px',
+          padding: '0 16px',
+          background: 'rgba(255,255,255,0.7)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
           border: '1px solid rgba(255,255,255,0.7)',
           boxShadow: '0 8px 40px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.9) inset',
         }}
       >
-        <div className="flex items-center justify-between gap-3">
-          {/* Left — Back / Skip (very discreet) */}
-          <div className="min-w-[72px]">
+        <div className="flex items-center justify-between">
+          {/* Left — Back / Skip */}
+          <div style={{ width: '80px', height: '40px' }} className="flex items-center">
             {step > 0 ? (
               <motion.button
                 initial={{ opacity: 0, x: -8 }}
@@ -525,8 +530,8 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
                 transition={SPRING}
                 onClick={onBack}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-1 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors"
-                style={{ color: '#B0B8C4' }}
+                className="flex items-center gap-1 rounded-xl text-[13px] font-medium transition-colors"
+                style={{ width: '80px', height: '40px', color: '#B0B8C4' }}
               >
                 <ArrowLeft size={14} />
                 Tillbaka
@@ -534,27 +539,27 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
             ) : (
               <button
                 onClick={onSkip}
-                className="text-[10px] font-medium px-3 py-2.5 transition-colors"
-                style={{ color: '#CBD5E1', opacity: 0.5 }}
+                className="text-[10px] font-medium transition-colors"
+                style={{ width: '80px', height: '40px', color: '#CBD5E1', opacity: 0.5 }}
               >
                 Hoppa över
               </button>
             )}
           </div>
 
-          {/* Right — Uniform CTA Button (same dimensions on every step) */}
+          {/* Right — CTA Button (fixed px dimensions) */}
           <motion.button
             whileTap={{ scale: 0.96 }}
             whileHover={{ scale: 1.02 }}
             onClick={onNext}
             disabled={!canProceed}
             className="relative flex items-center justify-center gap-2 rounded-2xl text-[15px] font-extrabold
-                     overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed flex-1"
+                     overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
+              width: '220px',
+              height: '48px',
               background: '#111111',
               color: '#FFFFFF',
-              padding: '16px 28px',
-              maxWidth: '240px',
               boxShadow: canProceed
                 ? '0 8px 32px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.15)'
                 : '0 6px 24px rgba(0,0,0,0.18)',
@@ -579,9 +584,9 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
           </motion.button>
         </div>
 
-        {/* Skip on middle steps — very discreet */}
-        {step > 0 && !isLast && (
-          <div className="text-center mt-1.5">
+        {/* Skip row — fixed height spacer for identical layout on all steps */}
+        <div style={{ height: '18px' }} className="flex items-center justify-center">
+          {step > 0 && !isLast && (
             <button
               onClick={onSkip}
               className="text-[10px] font-medium transition-colors"
@@ -589,8 +594,8 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
             >
               Hoppa över introduktionen
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
@@ -598,9 +603,10 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
 
 // ═══════════════════════════════════════════
 // Main Component — Zero-Scroll Flex Architecture
-// TOP: Progress + Sparkle (fixed)
-// MIDDLE: Content (max-h-[50vh], shrinkable)
-// BOTTOM: Nav Island (fixed h-[120px])
+// 100dvh, overflow-hidden, flex column
+// TOP 15%: Progress + Sparkle
+// MIDDLE 65%: Content (flex-1, overflow-hidden)
+// BOTTOM 20%: Nav Island (fixed h-[100px])
 // ═══════════════════════════════════════════
 
 export default function TutorialPage() {
@@ -654,7 +660,7 @@ export default function TutorialPage() {
 
   return (
     <div
-      className="h-[100dvh] overflow-hidden flex flex-col justify-between"
+      className="h-[100dvh] overflow-hidden flex flex-col"
       style={{
         background: `
           radial-gradient(ellipse 90% 70% at 15% 5%, rgba(255,107,53,0.06) 0%, transparent 50%),
@@ -664,9 +670,9 @@ export default function TutorialPage() {
         `,
       }}
     >
-      {/* ─── TOP: Progress Bar + Nisse Sparkle (fixed, flex-shrink-0) ─── */}
+      {/* ─── TOP 15%: Progress Bar + Nisse Sparkle ─── */}
       <div
-        className="flex-shrink-0 flex flex-col items-center z-20"
+        className="flex-shrink-0 h-[15%] flex flex-col items-center justify-center z-20"
         style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
       >
         <ProgressBar step={step} />
@@ -675,8 +681,8 @@ export default function TutorialPage() {
         </div>
       </div>
 
-      {/* ─── MIDDLE: Content (shrinkable, max-h-[50vh], zero scroll) ─── */}
-      <div className="flex-1 min-h-0 shrink flex items-center justify-center px-7 overflow-hidden max-h-[50vh]">
+      {/* ─── MIDDLE 65%: Content (flex-1, overflow-hidden) ─── */}
+      <div className="flex-1 min-h-0 flex items-center justify-center px-7 overflow-hidden">
         <AnimatePresence mode="wait" custom={direction}>
           {step === 0 && (
             <motion.div
@@ -732,9 +738,9 @@ export default function TutorialPage() {
         </AnimatePresence>
       </div>
 
-      {/* ─── BOTTOM: Nav Island (fixed h-[120px], safe area) ─── */}
+      {/* ─── BOTTOM 20%: Nav Island (fixed h-[100px], safe area) ─── */}
       <div
-        className="flex-shrink-0 h-[120px] flex items-center z-30"
+        className="flex-shrink-0 h-[100px] flex items-center z-30"
         style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
       >
         <NavIsland

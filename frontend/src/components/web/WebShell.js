@@ -6,11 +6,22 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Navbar } from '../Navbar';
 import { CookieConsent } from '../CookieConsent';
 import { Sparkles } from 'lucide-react';
 
+// Routes where global header/footer should be hidden (onboarding flow)
+const ONBOARDING_ROUTES = ['/tutorial', '/login', '/register', '/verify', '/forgot-password', '/reset-password'];
+
 export function WebShell({ children }) {
+  const pathname = usePathname();
+  const isOnboarding = ONBOARDING_ROUTES.some((r) => pathname.startsWith(r));
+
+  if (isOnboarding) {
+    return <>{children}</>;
+  }
+
   return (
     <>
       <Navbar />
