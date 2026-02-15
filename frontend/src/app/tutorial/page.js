@@ -498,26 +498,29 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
 }
 
 // ═══════════════════════════════════════════
-// Nav Island — FIXED HEIGHT (h-[120px])
-// Uniform dimensions across all 3 steps
+// Nav Island — Hardcoded px dimensions
+// Identical width/height on all 3 steps
 // ═══════════════════════════════════════════
 
 function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
   return (
-    <div className="flex justify-center w-full px-4">
+    <div className="flex justify-center w-full">
       <div
-        className="w-[92%] max-w-[420px] rounded-3xl px-4 py-3"
+        className="rounded-3xl flex flex-col justify-center"
         style={{
-          background: 'rgba(255,255,255,0.6)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          width: '340px',
+          height: '88px',
+          padding: '0 16px',
+          background: 'rgba(255,255,255,0.7)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
           border: '1px solid rgba(255,255,255,0.7)',
           boxShadow: '0 8px 40px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.9) inset',
         }}
       >
-        <div className="flex items-center justify-between gap-3">
-          {/* Left — Back / Skip (very discreet) */}
-          <div className="min-w-[72px]">
+        <div className="flex items-center justify-between">
+          {/* Left — Back / Skip */}
+          <div style={{ width: '80px', height: '40px' }} className="flex items-center">
             {step > 0 ? (
               <motion.button
                 initial={{ opacity: 0, x: -8 }}
@@ -525,8 +528,8 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
                 transition={SPRING}
                 onClick={onBack}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-1 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors"
-                style={{ color: '#B0B8C4' }}
+                className="flex items-center gap-1 rounded-xl text-[13px] font-medium transition-colors"
+                style={{ width: '80px', height: '40px', color: '#B0B8C4' }}
               >
                 <ArrowLeft size={14} />
                 Tillbaka
@@ -534,27 +537,27 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
             ) : (
               <button
                 onClick={onSkip}
-                className="text-[10px] font-medium px-3 py-2.5 transition-colors"
-                style={{ color: '#CBD5E1', opacity: 0.5 }}
+                className="text-[10px] font-medium transition-colors"
+                style={{ width: '80px', height: '40px', color: '#CBD5E1', opacity: 0.5 }}
               >
                 Hoppa över
               </button>
             )}
           </div>
 
-          {/* Right — Uniform CTA Button (same dimensions on every step) */}
+          {/* Right — CTA Button (fixed px dimensions) */}
           <motion.button
             whileTap={{ scale: 0.96 }}
             whileHover={{ scale: 1.02 }}
             onClick={onNext}
             disabled={!canProceed}
             className="relative flex items-center justify-center gap-2 rounded-2xl text-[15px] font-extrabold
-                     overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed flex-1"
+                     overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
+              width: '220px',
+              height: '48px',
               background: '#111111',
               color: '#FFFFFF',
-              padding: '16px 28px',
-              maxWidth: '240px',
               boxShadow: canProceed
                 ? '0 8px 32px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.15)'
                 : '0 6px 24px rgba(0,0,0,0.18)',
@@ -579,9 +582,9 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
           </motion.button>
         </div>
 
-        {/* Skip on middle steps — very discreet */}
-        {step > 0 && !isLast && (
-          <div className="text-center mt-1.5">
+        {/* Skip row — fixed height spacer for identical layout on all steps */}
+        <div style={{ height: '18px' }} className="flex items-center justify-center">
+          {step > 0 && !isLast && (
             <button
               onClick={onSkip}
               className="text-[10px] font-medium transition-colors"
@@ -589,8 +592,8 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
             >
               Hoppa över introduktionen
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
