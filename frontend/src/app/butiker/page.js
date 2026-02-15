@@ -99,6 +99,12 @@ export default function StoresPage() {
     <PageTransition className={isApp ? 'safe-top' : ''}>
       <div className="relative" style={{ height: isApp ? 'calc(100vh - 64px)' : 'calc(100vh - 80px)' }}>
 
+        {/* DEBUG — ta bort efter felsökning */}
+        <div className="absolute top-0 left-0 right-0 z-50 bg-black/80 text-white text-[10px] p-2 font-mono">
+          <div>KEY: "{process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '(undefined)'}"</div>
+          <div>hasKey: {String(hasGoogleMapsKey)} | hasPos: {String(hasPosition)} | lat: {lat} | lng: {lng}</div>
+        </div>
+
         {/* Map area — full size, everything else overlays on top */}
         {hasGoogleMapsKey && hasPosition ? (
           <StoreGoogleMap
