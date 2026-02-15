@@ -97,9 +97,9 @@ export default function StoresPage() {
 
   return (
     <PageTransition className={isApp ? 'safe-top' : ''}>
-      <div className="relative flex flex-col" style={{ height: isApp ? 'calc(100vh - 64px)' : 'calc(100vh - 80px)' }}>
+      <div className="relative" style={{ height: isApp ? 'calc(100vh - 64px)' : 'calc(100vh - 80px)' }}>
 
-        {/* Map area — real Google Maps or placeholder */}
+        {/* Map area — full size, everything else overlays on top */}
         {hasGoogleMapsKey && hasPosition ? (
           <StoreGoogleMap
             stores={stores}
@@ -110,7 +110,7 @@ export default function StoresPage() {
             onNavigate={openDirections}
           />
         ) : (
-          <div className="flex-1 bg-cream-200 relative flex items-center justify-center">
+          <div className="absolute inset-0 bg-cream-200 flex items-center justify-center">
             {/* Decorative grid fallback when no API key or no position */}
             <div className="absolute inset-0 opacity-[0.08]"
               style={{
@@ -161,22 +161,6 @@ export default function StoresPage() {
                 </p>
               </div>
             )}
-
-            {hasPosition && stores.length > 0 && hasGoogleMapsKey && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                onClick={requestLocation}
-                className="absolute top-4 right-4 z-20 w-11 h-11 bg-white rounded-full shadow-elevated
-                         flex items-center justify-center active:scale-95 transition-transform"
-              >
-                {isLoading ? (
-                  <Loader2 size={18} className="animate-spin text-sage-400" />
-                ) : (
-                  <LocateFixed size={18} className="text-sage-400" />
-                )}
-              </motion.button>
-            )}
           </div>
         )}
 
@@ -197,13 +181,13 @@ export default function StoresPage() {
           )}
         </AnimatePresence>
 
-        {/* Sliding store list overlay */}
+        {/* Sliding store list overlay — positioned at bottom of map */}
         {stores.length > 0 && (
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="bg-white rounded-t-3xl shadow-strong relative z-20"
+            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-strong z-20"
           >
             {/* Drag handle */}
             <button
