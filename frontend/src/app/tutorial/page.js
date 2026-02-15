@@ -2,6 +2,7 @@
 // Tutorial / Onboarding — "Mental Relief" Overhaul
 // Focus: Zero Effort, Decision-Free Living, Active Solution
 // Tone: Relief-triggering — "Sluta fundera", "Automatiskt", "Löst"
+// Architecture: Zero-scroll, flex column, uniform across all 3 steps
 // ============================================
 
 'use client';
@@ -15,6 +16,7 @@ import { isApp } from '../../lib/platform';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles,
   MapPin, Shield, Loader2, Zap,
+  Archive, Tag, Heart,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -22,6 +24,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 const CHARCOAL = '#0F172A';
 const CORAL = '#FF6B35';
 const SAGE = '#5A7D6C';
+
+// ── Uniform heading / text / tile tokens ──
+const HEADING_CLASS = 'font-display text-[36px] font-extrabold tracking-tight leading-[1.05] text-center';
+const SUBTEXT_CLASS = 'text-[15px] leading-relaxed font-medium max-w-[300px] text-center';
+const TILE_RADIUS = 'rounded-[24px]';
 
 // ── Springs ──
 const SPRING = { type: 'spring', stiffness: 260, damping: 22 };
@@ -83,14 +90,14 @@ const blurToFocus = {
   }),
 };
 
-// ── Decision Chip data (Step 2) ──
+// ── Decision Chip data (Step 2) — Premium Lucide icons ──
 const DECISION_CHIPS = [
-  { label: 'Matlådor fixade', emoji: '✅' },
-  { label: 'Extrapriser hittade', emoji: '💰' },
-  { label: 'Barnen mätta', emoji: '👶' },
+  { label: 'Matlådor fixade', Icon: Archive, bg: `${SAGE}18`, iconColor: SAGE },
+  { label: 'Extrapriser hittade', Icon: Tag, bg: `${CORAL}15`, iconColor: CORAL },
+  { label: 'Barnen mätta', Icon: Heart, bg: `${SAGE}18`, iconColor: SAGE },
 ];
 
-// ── Chip pulse animation ──
+// ── Chip entrance animation ──
 const chipVariant = (i) => ({
   hidden: { opacity: 0, y: 30, scale: 0.8, filter: 'blur(8px)' },
   show: {
@@ -103,15 +110,42 @@ const chipVariant = (i) => ({
 });
 
 // ═══════════════════════════════════════════
-// LAYER 20 — Progress Bar (fixed top)
+// Nisse Sparkle — Uniform branding mark
+// Exactly the same size on every step screen
+// ═══════════════════════════════════════════
+
+function NisseSparkle() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.7 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ ...SPRING, delay: 0.05 }}
+      className="relative w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
+      style={{
+        background: 'rgba(255,255,255,0.95)',
+        boxShadow: `0 12px 40px rgba(255,107,53,0.18), 0 0 60px rgba(255,107,53,0.08)`,
+        border: '1px solid rgba(255,107,53,0.12)',
+      }}
+    >
+      <Sparkles size={28} style={{ color: CORAL }} />
+      {/* Soft glow ring */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl"
+        animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.12, 1] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ background: `radial-gradient(circle, ${CORAL}20 0%, transparent 70%)` }}
+      />
+    </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// Progress Bar — non-absolute, flex child
 // ═══════════════════════════════════════════
 
 function ProgressBar({ step }) {
   return (
-    <div
-      className="absolute top-0 left-0 right-0 z-20 flex justify-center items-center gap-2 pt-3 pb-3"
-      style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
-    >
+    <div className="flex justify-center items-center gap-2 py-3">
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
@@ -142,50 +176,11 @@ function StepHook() {
       animate="show"
       className="flex flex-col items-center text-center"
     >
-      {/* LARGE Nisse Sparkle — intense glow */}
-      <motion.div
-        variants={cinematicIn}
-        transition={{ ...SPRING, delay: 0 }}
-        className="relative mb-8"
-        style={{ zIndex: 15 }}
-      >
-        <div
-          className="w-28 h-28 rounded-[32px] flex items-center justify-center"
-          style={{
-            background: 'rgba(255,255,255,0.95)',
-            boxShadow: `0 24px 80px rgba(255,107,53,0.25), 0 0 80px rgba(255,107,53,0.15), 0 0 120px rgba(255,107,53,0.08)`,
-            border: '1px solid rgba(255,107,53,0.15)',
-          }}
-        >
-          <Sparkles size={52} style={{ color: CORAL }} />
-        </div>
-        {/* Intense glow ring — pulsing */}
-        <motion.div
-          className="absolute inset-0 rounded-[32px]"
-          animate={{
-            opacity: [0.3, 0.6, 0.3],
-            scale: [1, 1.15, 1],
-          }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ background: `radial-gradient(circle, ${CORAL}30 0%, transparent 70%)` }}
-        />
-        {/* Outer pulse ring */}
-        <motion.div
-          className="absolute -inset-4 rounded-[40px]"
-          animate={{
-            opacity: [0, 0.4, 0],
-            scale: [0.9, 1.3, 1.5],
-          }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-          style={{ background: `radial-gradient(circle, ${CORAL}15 0%, transparent 60%)` }}
-        />
-      </motion.div>
-
       {/* Badge: 100% BESLUTSFRITT */}
       <motion.div
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.08 }}
-        className="mb-5"
+        className="mb-4"
       >
         <span
           className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-[0.2em]"
@@ -200,21 +195,21 @@ function StepHook() {
         </span>
       </motion.div>
 
-      {/* Massive Headline */}
+      {/* Headline — Uniform size */}
       <motion.h1
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.15 }}
-        className="font-display text-[44px] font-extrabold tracking-tight leading-[1.05] mb-5"
+        className={`${HEADING_CLASS} mb-4`}
         style={{ color: CHARCOAL }}
       >
         Sluta tänka<br />på maten.
       </motion.h1>
 
-      {/* Subtitle — with orange highlight */}
+      {/* Subtitle — Uniform size */}
       <motion.p
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.25 }}
-        className="text-[16px] leading-relaxed font-medium max-w-[300px]"
+        className={SUBTEXT_CLASS}
         style={{ color: '#64748B' }}
       >
         <span style={{ color: CORAL, fontWeight: 700 }}>Nisse tar över</span> planeringen.
@@ -248,21 +243,21 @@ function StepLogic() {
         Helt automatiskt
       </motion.p>
 
-      {/* Massive Headline */}
+      {/* Headline — Uniform size */}
       <motion.h1
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.05 }}
-        className="font-display text-[42px] font-extrabold tracking-tight leading-[1.05] mb-5 text-center"
+        className={`${HEADING_CLASS} mb-4`}
         style={{ color: CHARCOAL }}
       >
         AI som förstår<br />din vardag.
       </motion.h1>
 
-      {/* Subtitle */}
+      {/* Subtitle — Uniform size */}
       <motion.p
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.15 }}
-        className="text-[16px] leading-relaxed font-medium max-w-[310px] text-center mb-10"
+        className={`${SUBTEXT_CLASS} mb-6`}
         style={{ color: '#64748B' }}
       >
         Oavsett om det är barnfamiljspusslet eller lyxmiddag för två –
@@ -270,13 +265,13 @@ function StepLogic() {
         <span style={{ color: CORAL, fontWeight: 700 }}>Helt automatiskt.</span>
       </motion.p>
 
-      {/* Floating Decision Chips */}
+      {/* Feature Tiles — Premium Lucide icons in soft-colored circles */}
       <div className="flex flex-col gap-3 w-full max-w-[300px]">
         {DECISION_CHIPS.map((chip, i) => (
           <motion.div
             key={i}
             variants={chipVariant(i)}
-            className="flex items-center gap-3 py-4 px-5 rounded-2xl"
+            className={`flex items-center gap-3 py-4 px-5 ${TILE_RADIUS}`}
             style={{
               background: 'rgba(255,255,255,0.8)',
               backdropFilter: 'blur(12px)',
@@ -285,19 +280,19 @@ function StepLogic() {
               boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.8) inset',
             }}
           >
-            <motion.span
-              className="text-xl"
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.5, ease: 'easeInOut' }}
+            {/* Icon in soft-colored circle (10% opacity bg) */}
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: chip.bg }}
             >
-              {chip.emoji}
-            </motion.span>
+              <chip.Icon size={18} strokeWidth={1.5} style={{ color: chip.iconColor }} />
+            </div>
             <span className="text-[15px] font-bold" style={{ color: CHARCOAL }}>
               {chip.label}
             </span>
             {/* Pulse dot */}
             <motion.div
-              className="ml-auto w-2.5 h-2.5 rounded-full"
+              className="ml-auto w-2.5 h-2.5 rounded-full flex-shrink-0"
               style={{ background: SAGE }}
               animate={{ opacity: [0.4, 1, 0.4], scale: [0.9, 1.1, 0.9] }}
               transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.3 }}
@@ -314,43 +309,6 @@ function StepLogic() {
 // "Spara tid och tusenlappar."
 // ═══════════════════════════════════════════
 
-function RadarIcon() {
-  return (
-    <div className="relative w-24 h-24 flex items-center justify-center mx-auto mb-6">
-      {/* Radar scanning waves */}
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="absolute inset-0 rounded-full"
-          style={{ border: `2px solid ${CORAL}30` }}
-          initial={{ scale: 0.4, opacity: 0.9 }}
-          animate={{ scale: 2.4, opacity: 0 }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: i * 0.6,
-            ease: 'easeOut',
-          }}
-        />
-      ))}
-      {/* Core icon */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.5, filter: 'blur(10px)' }}
-        animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-        transition={{ ...SPRING_IMPACT, delay: 0.15 }}
-        className="w-20 h-20 rounded-3xl flex items-center justify-center relative z-10"
-        style={{
-          background: 'rgba(255,255,255,0.9)',
-          boxShadow: `0 20px 60px ${CORAL}18`,
-          border: '1px solid rgba(255,107,53,0.12)',
-        }}
-      >
-        <MapPin size={36} style={{ color: CORAL }} />
-      </motion.div>
-    </div>
-  );
-}
-
 function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocationToggle, privacyAccepted, onPrivacyToggle }) {
   const denied = locationDenied && !locationGranted;
 
@@ -361,11 +319,6 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
       animate="show"
       className="flex flex-col items-center"
     >
-      {/* Radar icon */}
-      <motion.div variants={cinematicIn} transition={{ ...SPRING, delay: 0 }}>
-        <RadarIcon />
-      </motion.div>
-
       {/* Accent tag */}
       <motion.p
         variants={cinematicIn}
@@ -376,33 +329,32 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
         Frihet i vardagen
       </motion.p>
 
-      {/* Massive Headline */}
+      {/* Headline — Uniform size */}
       <motion.h1
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.14 }}
-        className="font-display text-[42px] font-extrabold tracking-tight leading-[1.05] mb-3 text-center"
+        className={`${HEADING_CLASS} mb-3`}
         style={{ color: CHARCOAL }}
       >
         Spara tid och<br /><span style={{ color: CORAL }}>tusenlappar.</span>
       </motion.h1>
 
-      {/* Subtitle */}
+      {/* Subtitle — Uniform size */}
       <motion.p
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.18 }}
-        className="text-[15px] leading-relaxed font-medium max-w-[300px] text-center mb-6"
+        className={`${SUBTEXT_CLASS} mb-5`}
         style={{ color: '#64748B' }}
       >
         Nisse jagar extrapriserna och guidar dig genom butiken.
         När du väl lagar maten, följer du bara rösten.
-        Enklare blir det inte.
       </motion.p>
 
-      {/* Trust card */}
+      {/* Permission Box / Trust card — same border-radius as Feature Tiles */}
       <motion.div
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.22 }}
-        className="w-full max-w-[340px] rounded-3xl p-5"
+        className={`w-full max-w-[340px] ${TILE_RADIUS} p-5`}
         style={{
           background: 'rgba(255,255,255,0.75)',
           backdropFilter: 'blur(16px)',
@@ -411,12 +363,12 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
           boxShadow: '0 24px 64px rgba(0,0,0,0.08)',
         }}
       >
-        {/* Location button */}
+        {/* Location toggle */}
         <motion.button
           onClick={onLocationToggle}
           disabled={locationLoading}
           whileTap={{ scale: 0.98 }}
-          className="w-full py-3.5 px-4 rounded-2xl border-2 flex items-center justify-between mb-4 transition-all disabled:opacity-70"
+          className={`w-full py-3 px-4 ${TILE_RADIUS} border-2 flex items-center justify-between mb-3 transition-all disabled:opacity-70`}
           style={{
             borderColor: locationGranted ? SAGE : denied ? '#EF4444' : '#E2E8F0',
             background: locationGranted ? `${SAGE}08` : denied ? '#FEF2F2' : 'white',
@@ -450,7 +402,7 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
               <motion.div
                 layout
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="w-5.5 h-5.5 bg-white rounded-full mx-1"
+                className="bg-white rounded-full mx-1"
                 style={{ width: 22, height: 22, boxShadow: '0 1px 6px rgba(0,0,0,0.15)' }}
               />
             </div>
@@ -464,7 +416,7 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="text-[12px] mb-3 px-1"
+              className="text-[12px] mb-2 px-1"
               style={{ color: '#EF4444' }}
             >
               Aktivera plats i enhetens inställningar och försök igen.
@@ -473,7 +425,7 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
         </AnimatePresence>
 
         {/* Privacy bullets */}
-        <div className="space-y-2 mb-4">
+        <div className="space-y-1.5 mb-3">
           {[
             'Din plats används bara för att hitta butiker',
             'Data krypteras och lagras inom EU',
@@ -484,7 +436,7 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
               initial={{ opacity: 0, x: 14 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ ...SPRING, delay: 0.35 + i * 0.08 }}
-              className="flex items-center gap-2 text-[13px]"
+              className="flex items-center gap-2 text-[12px]"
               style={{ color: '#64748B' }}
             >
               <div
@@ -500,7 +452,7 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
 
         {/* Privacy checkbox */}
         <label
-          className="flex gap-3 cursor-pointer items-start p-3 rounded-xl"
+          className={`flex gap-3 cursor-pointer items-start p-3 ${TILE_RADIUS}`}
           style={{ background: 'rgba(241,245,249,0.6)', border: '1px solid #F1F5F9' }}
         >
           <div className="relative mt-0.5">
@@ -532,7 +484,7 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
               </AnimatePresence>
             </motion.div>
           </div>
-          <span className="text-[13px] leading-relaxed" style={{ color: '#475569' }}>
+          <span className="text-[12px] leading-snug" style={{ color: '#475569' }}>
             Jag godkänner{' '}
             <a href="/integritetspolicy" target="_blank" style={{ color: SAGE }} className="underline font-medium">
               integritetspolicyn
@@ -546,16 +498,13 @@ function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocat
 }
 
 // ═══════════════════════════════════════════
-// LAYER 30 — Glass Navigation Island
-// Massive "Easy Button", discreet skip
+// Nav Island — FIXED HEIGHT (h-[120px])
+// Uniform dimensions across all 3 steps
 // ═══════════════════════════════════════════
 
 function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
   return (
-    <div
-      className="absolute bottom-0 left-0 right-0 z-30 flex justify-center"
-      style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
-    >
+    <div className="flex justify-center w-full px-4">
       <div
         className="w-[92%] max-w-[420px] rounded-3xl px-4 py-3"
         style={{
@@ -593,7 +542,7 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
             )}
           </div>
 
-          {/* Right — MASSIVE Next / CTA "Easy Button" */}
+          {/* Right — Uniform CTA Button (same dimensions on every step) */}
           <motion.button
             whileTap={{ scale: 0.96 }}
             whileHover={{ scale: 1.02 }}
@@ -604,10 +553,10 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
             style={{
               background: '#111111',
               color: '#FFFFFF',
-              padding: isLast ? '18px 28px' : '16px 32px',
-              maxWidth: isLast ? '260px' : '220px',
-              boxShadow: isLast && canProceed
-                ? '0 10px 40px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2)'
+              padding: '16px 28px',
+              maxWidth: '240px',
+              boxShadow: canProceed
+                ? '0 8px 32px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.15)'
                 : '0 6px 24px rgba(0,0,0,0.18)',
             }}
           >
@@ -624,7 +573,7 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
               {isLast ? (
                 <>Ge mig mental frihet <ArrowRight size={16} /></>
               ) : (
-                <>Nästa <ArrowRight size={15} /></>
+                <>Nästa <ArrowRight size={16} /></>
               )}
             </span>
           </motion.button>
@@ -648,7 +597,10 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
 }
 
 // ═══════════════════════════════════════════
-// Main Component
+// Main Component — Zero-Scroll Flex Architecture
+// TOP: Progress + Sparkle (fixed)
+// MIDDLE: Content (max-h-[50vh], shrinkable)
+// BOTTOM: Nav Island (fixed h-[120px])
 // ═══════════════════════════════════════════
 
 export default function TutorialPage() {
@@ -702,7 +654,7 @@ export default function TutorialPage() {
 
   return (
     <div
-      className="relative h-[100dvh] overflow-hidden"
+      className="h-[100dvh] overflow-hidden flex flex-col justify-between"
       style={{
         background: `
           radial-gradient(ellipse 90% 70% at 15% 5%, rgba(255,107,53,0.06) 0%, transparent 50%),
@@ -712,17 +664,19 @@ export default function TutorialPage() {
         `,
       }}
     >
-      {/* LAYER 20 — Progress Bar */}
-      <ProgressBar step={step} />
-
-      {/* LAYER 10 — Main Content */}
+      {/* ─── TOP: Progress Bar + Nisse Sparkle (fixed, flex-shrink-0) ─── */}
       <div
-        className="absolute inset-0 z-10 flex items-center justify-center px-7"
-        style={{
-          paddingTop: 'max(52px, calc(env(safe-area-inset-top) + 52px))',
-          paddingBottom: 'max(110px, calc(env(safe-area-inset-bottom) + 110px))',
-        }}
+        className="flex-shrink-0 flex flex-col items-center z-20"
+        style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
       >
+        <ProgressBar step={step} />
+        <div className="mt-1 mb-1">
+          <NisseSparkle />
+        </div>
+      </div>
+
+      {/* ─── MIDDLE: Content (shrinkable, max-h-[50vh], zero scroll) ─── */}
+      <div className="flex-1 min-h-0 shrink flex items-center justify-center px-7 overflow-hidden max-h-[50vh]">
         <AnimatePresence mode="wait" custom={direction}>
           {step === 0 && (
             <motion.div
@@ -778,15 +732,20 @@ export default function TutorialPage() {
         </AnimatePresence>
       </div>
 
-      {/* LAYER 30 — Glass Navigation Island */}
-      <NavIsland
-        step={step}
-        isLast={isLast}
-        canProceed={canProceed}
-        onNext={handleNext}
-        onBack={handleBack}
-        onSkip={handleFinish}
-      />
+      {/* ─── BOTTOM: Nav Island (fixed h-[120px], safe area) ─── */}
+      <div
+        className="flex-shrink-0 h-[120px] flex items-center z-30"
+        style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+      >
+        <NavIsland
+          step={step}
+          isLast={isLast}
+          canProceed={canProceed}
+          onNext={handleNext}
+          onBack={handleBack}
+          onSkip={handleFinish}
+        />
+      </div>
     </div>
   );
 }
