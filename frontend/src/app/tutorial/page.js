@@ -598,9 +598,10 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
 
 // ═══════════════════════════════════════════
 // Main Component — Zero-Scroll Flex Architecture
-// TOP: Progress + Sparkle (fixed)
-// MIDDLE: Content (max-h-[50vh], shrinkable)
-// BOTTOM: Nav Island (fixed h-[120px])
+// 100dvh, overflow-hidden, flex column
+// TOP 15%: Progress + Sparkle
+// MIDDLE 65%: Content (flex-1, overflow-hidden)
+// BOTTOM 20%: Nav Island (fixed h-[100px])
 // ═══════════════════════════════════════════
 
 export default function TutorialPage() {
@@ -654,7 +655,7 @@ export default function TutorialPage() {
 
   return (
     <div
-      className="h-[100dvh] overflow-hidden flex flex-col justify-between"
+      className="h-[100dvh] overflow-hidden flex flex-col"
       style={{
         background: `
           radial-gradient(ellipse 90% 70% at 15% 5%, rgba(255,107,53,0.06) 0%, transparent 50%),
@@ -664,9 +665,9 @@ export default function TutorialPage() {
         `,
       }}
     >
-      {/* ─── TOP: Progress Bar + Nisse Sparkle (fixed, flex-shrink-0) ─── */}
+      {/* ─── TOP 15%: Progress Bar + Nisse Sparkle ─── */}
       <div
-        className="flex-shrink-0 flex flex-col items-center z-20"
+        className="flex-shrink-0 h-[15%] flex flex-col items-center justify-center z-20"
         style={{ paddingTop: 'max(12px, env(safe-area-inset-top))' }}
       >
         <ProgressBar step={step} />
@@ -675,8 +676,8 @@ export default function TutorialPage() {
         </div>
       </div>
 
-      {/* ─── MIDDLE: Content (shrinkable, max-h-[50vh], zero scroll) ─── */}
-      <div className="flex-1 min-h-0 shrink flex items-center justify-center px-7 overflow-hidden max-h-[50vh]">
+      {/* ─── MIDDLE 65%: Content (flex-1, overflow-hidden) ─── */}
+      <div className="flex-1 min-h-0 flex items-center justify-center px-7 overflow-hidden">
         <AnimatePresence mode="wait" custom={direction}>
           {step === 0 && (
             <motion.div
@@ -732,9 +733,9 @@ export default function TutorialPage() {
         </AnimatePresence>
       </div>
 
-      {/* ─── BOTTOM: Nav Island (fixed h-[120px], safe area) ─── */}
+      {/* ─── BOTTOM 20%: Nav Island (fixed h-[100px], safe area) ─── */}
       <div
-        className="flex-shrink-0 h-[120px] flex items-center z-30"
+        className="flex-shrink-0 h-[100px] flex items-center z-30"
         style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
       >
         <NavIsland
