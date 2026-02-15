@@ -9,11 +9,12 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../lib/store';
+import { useLocation } from '../../hooks/useLocation';
 import { gdpr } from '../../lib/api';
 import { isApp } from '../../lib/platform';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles,
-  Search, Tag, MapPin, Shield, ChefHat,
+  Search, Tag, MapPin, Shield, ChefHat, Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -289,7 +290,9 @@ function RadarIcon() {
   );
 }
 
-function StepTrust({ locationGranted, onLocationToggle, privacyAccepted, onPrivacyToggle }) {
+function StepTrust({ locationGranted, locationLoading, locationDenied, onLocationToggle, privacyAccepted, onPrivacyToggle }) {
+  const denied = locationDenied && !locationGranted;
+
   return (
     <motion.div
       variants={stagger}
@@ -309,16 +312,24 @@ function StepTrust({ locationGranted, onLocationToggle, privacyAccepted, onPriva
         className="text-[10px] font-extrabold uppercase tracking-[0.25em] mb-3"
         style={{ color: CORAL }}
       >
-        Tryggt och säkert
+        Aktivera platsåtkomst
       </motion.p>
       <motion.h1
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.14 }}
-        className="font-display text-[36px] font-extrabold tracking-tight leading-[1.1] mb-6 text-center"
+        className="font-display text-[36px] font-extrabold tracking-tight leading-[1.1] mb-3 text-center"
         style={{ color: CHARCOAL }}
       >
-        Plats & Integritet
+        Hitta butiker nära dig
       </motion.h1>
+      <motion.p
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.18 }}
+        className="text-[14px] leading-relaxed font-medium max-w-[300px] text-center mb-6"
+        style={{ color: '#64748B' }}
+      >
+        Aktivera din platsåtkomst så kan Nisse visa närmaste butiker och jämföra priser i ditt område.
+      </motion.p>
 
       {/* Trust card */}
       <motion.div
@@ -333,41 +344,72 @@ function StepTrust({ locationGranted, onLocationToggle, privacyAccepted, onPriva
           boxShadow: '0 24px 64px rgba(0,0,0,0.08)',
         }}
       >
-        {/* Location toggle */}
+        {/* Location button */}
         <motion.button
           onClick={onLocationToggle}
+          disabled={locationLoading}
           whileTap={{ scale: 0.98 }}
-          className="w-full py-3.5 px-4 rounded-2xl border-2 flex items-center justify-between mb-4 transition-all"
+          className="w-full py-3.5 px-4 rounded-2xl border-2 flex items-center justify-between mb-4 transition-all disabled:opacity-70"
           style={{
-            borderColor: locationGranted ? SAGE : '#E2E8F0',
-            background: locationGranted ? `${SAGE}08` : 'white',
+            borderColor: locationGranted ? SAGE : denied ? '#EF4444' : '#E2E8F0',
+            background: locationGranted ? `${SAGE}08` : denied ? '#FEF2F2' : 'white',
             boxShadow: locationGranted ? `0 0 20px ${SAGE}20` : 'none',
           }}
         >
           <span className="text-sm font-semibold" style={{ color: CHARCOAL }}>
-            {locationGranted ? 'Platsåtkomst aktiverad' : 'Aktivera platsåtkomst'}
+            {locationLoading
+              ? 'Begär åtkomst...'
+              : locationGranted
+                ? 'Platsåtkomst aktiverad'
+                : denied
+                  ? 'Åtkomst nekad'
+                  : 'Aktivera platsåtkomst'}
           </span>
-          <div
-            className="w-12 h-7 rounded-full flex items-center transition-all duration-300"
-            style={{
-              background: locationGranted ? SAGE : '#CBD5E1',
-              justifyContent: locationGranted ? 'flex-end' : 'flex-start',
-            }}
-          >
+          {locationLoading ? (
             <motion.div
-              layout
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              className="w-5.5 h-5.5 bg-white rounded-full mx-1"
-              style={{ width: 22, height: 22, boxShadow: '0 1px 6px rgba(0,0,0,0.15)' }}
-            />
-          </div>
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            >
+              <Loader2 size={20} style={{ color: '#94A3B8' }} />
+            </motion.div>
+          ) : (
+            <div
+              className="w-12 h-7 rounded-full flex items-center transition-all duration-300"
+              style={{
+                background: locationGranted ? SAGE : '#CBD5E1',
+                justifyContent: locationGranted ? 'flex-end' : 'flex-start',
+              }}
+            >
+              <motion.div
+                layout
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                className="w-5.5 h-5.5 bg-white rounded-full mx-1"
+                style={{ width: 22, height: 22, boxShadow: '0 1px 6px rgba(0,0,0,0.15)' }}
+              />
+            </div>
+          )}
         </motion.button>
+
+        {/* Denied hint */}
+        <AnimatePresence>
+          {denied && (
+            <motion.p
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="text-[12px] mb-3 px-1"
+              style={{ color: '#EF4444' }}
+            >
+              Aktivera plats i enhetens inställningar och försök igen.
+            </motion.p>
+          )}
+        </AnimatePresence>
 
         {/* Privacy bullets */}
         <div className="space-y-2 mb-4">
           {[
+            'Din plats används bara för att hitta butiker',
             'Data krypteras och lagras inom EU',
-            'Exportera eller radera när som helst',
             'Vi säljer aldrig dina uppgifter',
           ].map((text, i) => (
             <motion.div
@@ -541,23 +583,22 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
 export default function TutorialPage() {
   const router = useRouter();
   const { user, completeOnboarding } = useAuthStore();
+  const { hasPosition, loading: locationLoading, denied: locationDenied, requestLocation } = useLocation();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [locationGranted, setLocationGranted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
+  const locationGranted = hasPosition;
   const isLast = step === 2;
   const canProceed = step === 2 ? privacyAccepted : true;
 
-  const handleLocationConsent = useCallback(() => {
-    setLocationGranted((prev) => {
-      const next = !prev;
-      if (next && user) {
-        gdpr.recordConsent('LOCATION', true).catch(() => {});
-      }
-      return next;
-    });
-  }, [user]);
+  const handleLocationConsent = useCallback(async () => {
+    if (locationGranted) return; // already granted
+    await requestLocation();
+    if (user) {
+      gdpr.recordConsent('LOCATION', true).catch(() => {});
+    }
+  }, [locationGranted, requestLocation, user]);
 
   async function handleFinish() {
     if (user) {
@@ -657,6 +698,8 @@ export default function TutorialPage() {
             >
               <StepTrust
                 locationGranted={locationGranted}
+                locationLoading={locationLoading}
+                locationDenied={locationDenied}
                 onLocationToggle={handleLocationConsent}
                 privacyAccepted={privacyAccepted}
                 onPrivacyToggle={setPrivacyAccepted}
