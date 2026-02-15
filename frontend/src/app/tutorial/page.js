@@ -1,7 +1,7 @@
 // ============================================
-// Tutorial / Onboarding — "Netflix-Premium" Cinematic Intro
-// Fixed 100dvh, z-layer architecture, one-shot impact animations,
-// floating glass island nav, radar scanning, materializing sparkle
+// Tutorial / Onboarding — "Mental Relief" Overhaul
+// Focus: Zero Effort, Decision-Free Living, Active Solution
+// Tone: Relief-triggering — "Sluta fundera", "Automatiskt", "Löst"
 // ============================================
 
 'use client';
@@ -14,7 +14,7 @@ import { gdpr } from '../../lib/api';
 import { isApp } from '../../lib/platform';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles,
-  Search, Tag, MapPin, Shield, ChefHat, Loader2,
+  MapPin, Shield, Loader2, Zap,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,6 +26,7 @@ const SAGE = '#5A7D6C';
 // ── Springs ──
 const SPRING = { type: 'spring', stiffness: 260, damping: 22 };
 const SPRING_IMPACT = { type: 'spring', stiffness: 400, damping: 25 };
+const SPRING_HEAVY = { type: 'spring', stiffness: 300, damping: 28 };
 
 // ── Cinematic entrance — blur-fade-scale (one-shot) ──
 const cinematicIn = {
@@ -61,23 +62,43 @@ const pageVariants = {
   }),
 };
 
-// ── Feature tiles (step 2) — 2x2 grid ──
-const FEATURES = [
-  { icon: Search, label: 'Sök recept', desc: 'Baserat på vad du har hemma', accent: CORAL },
-  { icon: Tag, label: 'Jämför priser', desc: 'ICA, Willys, Coop & Lidl', accent: SAGE },
-  { icon: MapPin, label: 'Hitta butiker', desc: 'GPS-guidad vägbeskrivning', accent: '#2ABFBF' },
-  { icon: ChefHat, label: 'Kokassistent', desc: 'Röststyrd steg-för-steg', accent: '#D97757' },
+// ── Blur-to-focus entrance for Step 2 (clarity from chaos) ──
+const blurToFocus = {
+  enter: () => ({
+    opacity: 0,
+    filter: 'blur(20px)',
+    scale: 0.92,
+  }),
+  center: {
+    opacity: 1,
+    filter: 'blur(0px)',
+    scale: 1,
+    transition: { ...SPRING_HEAVY, filter: { duration: 0.8, ease: 'easeOut' } },
+  },
+  exit: (dir) => ({
+    x: dir > 0 ? -60 : 60,
+    opacity: 0,
+    scale: 0.95,
+    filter: 'blur(6px)',
+  }),
+};
+
+// ── Decision Chip data (Step 2) ──
+const DECISION_CHIPS = [
+  { label: 'Matlådor fixade', emoji: '✅' },
+  { label: 'Extrapriser hittade', emoji: '💰' },
+  { label: 'Barnen mätta', emoji: '👶' },
 ];
 
-// ── Impact entrance for grid tiles (one-shot, no loop) ──
-const tileImpact = (i) => ({
-  hidden: { opacity: 0, y: 50, scale: 0.85, filter: 'blur(8px)' },
+// ── Chip pulse animation ──
+const chipVariant = (i) => ({
+  hidden: { opacity: 0, y: 30, scale: 0.8, filter: 'blur(8px)' },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
     filter: 'blur(0px)',
-    transition: { ...SPRING_IMPACT, delay: 0.1 + i * 0.08 },
+    transition: { ...SPRING_IMPACT, delay: 0.3 + i * 0.12 },
   },
 });
 
@@ -109,10 +130,11 @@ function ProgressBar({ step }) {
 }
 
 // ═══════════════════════════════════════════
-// STEP 1 — The Persona (Materializing AI)
+// STEP 1 — THE HOOK (Mental Load Relief)
+// "Sluta tänka på maten."
 // ═══════════════════════════════════════════
 
-function StepPersona() {
+function StepHook() {
   return (
     <motion.div
       variants={stagger}
@@ -120,7 +142,7 @@ function StepPersona() {
       animate="show"
       className="flex flex-col items-center text-center"
     >
-      {/* LARGE Nisse Sparkle — materializing from blur */}
+      {/* LARGE Nisse Sparkle — intense glow */}
       <motion.div
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0 }}
@@ -130,62 +152,85 @@ function StepPersona() {
         <div
           className="w-28 h-28 rounded-[32px] flex items-center justify-center"
           style={{
-            background: 'rgba(255,255,255,0.9)',
-            boxShadow: `0 24px 80px rgba(255,107,53,0.15), 0 0 60px rgba(255,107,53,0.08)`,
-            border: '1px solid rgba(255,107,53,0.1)',
+            background: 'rgba(255,255,255,0.95)',
+            boxShadow: `0 24px 80px rgba(255,107,53,0.25), 0 0 80px rgba(255,107,53,0.15), 0 0 120px rgba(255,107,53,0.08)`,
+            border: '1px solid rgba(255,107,53,0.15)',
           }}
         >
           <Sparkles size={52} style={{ color: CORAL }} />
         </div>
-        {/* Glow ring behind sparkle */}
+        {/* Intense glow ring — pulsing */}
         <motion.div
           className="absolute inset-0 rounded-[32px]"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: [0, 0.5, 0], scale: [0.8, 1.3, 1.5] }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
-          style={{ background: `radial-gradient(circle, ${CORAL}20 0%, transparent 70%)` }}
+          animate={{
+            opacity: [0.3, 0.6, 0.3],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ background: `radial-gradient(circle, ${CORAL}30 0%, transparent 70%)` }}
+        />
+        {/* Outer pulse ring */}
+        <motion.div
+          className="absolute -inset-4 rounded-[40px]"
+          animate={{
+            opacity: [0, 0.4, 0],
+            scale: [0.9, 1.3, 1.5],
+          }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+          style={{ background: `radial-gradient(circle, ${CORAL}15 0%, transparent 60%)` }}
         />
       </motion.div>
 
-      {/* Accent tag */}
-      <motion.p
+      {/* Badge: 100% BESLUTSFRITT */}
+      <motion.div
         variants={cinematicIn}
-        transition={{ ...SPRING, delay: 0.1 }}
-        className="text-[10px] font-extrabold uppercase tracking-[0.25em] mb-4"
-        style={{ color: CORAL }}
+        transition={{ ...SPRING, delay: 0.08 }}
+        className="mb-5"
       >
-        Din personliga matassistent
-      </motion.p>
+        <span
+          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-[0.2em]"
+          style={{
+            background: `${CORAL}12`,
+            color: CORAL,
+            border: `1px solid ${CORAL}25`,
+            boxShadow: `0 2px 12px ${CORAL}15`,
+          }}
+        >
+          <Zap size={10} /> 100% Beslutsfritt
+        </span>
+      </motion.div>
 
       {/* Massive Headline */}
       <motion.h1
         variants={cinematicIn}
-        transition={{ ...SPRING, delay: 0.2 }}
-        className="font-display text-[38px] font-extrabold tracking-tight leading-[1.1] mb-4"
+        transition={{ ...SPRING, delay: 0.15 }}
+        className="font-display text-[44px] font-extrabold tracking-tight leading-[1.05] mb-5"
         style={{ color: CHARCOAL }}
       >
-        Hej! Jag heter{' '}
-        <span style={{ color: CORAL }}>Nisse</span>
+        Sluta tänka<br />på maten.
       </motion.h1>
 
-      {/* Subtitle */}
+      {/* Subtitle — with orange highlight */}
       <motion.p
         variants={cinematicIn}
-        transition={{ ...SPRING, delay: 0.3 }}
-        className="text-[15px] leading-relaxed font-medium max-w-[280px]"
+        transition={{ ...SPRING, delay: 0.25 }}
+        className="text-[16px] leading-relaxed font-medium max-w-[300px]"
         style={{ color: '#64748B' }}
       >
-        Jag hjälper dig hitta recept, jämföra priser och guida dig till närmaste butik.
+        <span style={{ color: CORAL, fontWeight: 700 }}>Nisse tar över</span> planeringen.
+        Från kylskåpsrens till färdig middagsplan på sekunder.
+        Du behöver aldrig mer fråga <em>&quot;vad ska vi äta?&quot;</em>
       </motion.p>
     </motion.div>
   );
 }
 
 // ═══════════════════════════════════════════
-// STEP 2 — The Power (2x2 Impact Grid)
+// STEP 2 — THE LOGIC (Smart Efficiency)
+// "AI som förstår din vardag."
 // ═══════════════════════════════════════════
 
-function StepPower() {
+function StepLogic() {
   return (
     <motion.div
       variants={stagger}
@@ -193,70 +238,86 @@ function StepPower() {
       animate="show"
       className="flex flex-col items-center"
     >
-      {/* Header */}
+      {/* Accent tag */}
       <motion.p
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0 }}
         className="text-[10px] font-extrabold uppercase tracking-[0.25em] mb-3"
         style={{ color: CORAL }}
       >
-        Allt du behöver i köket
+        Helt automatiskt
       </motion.p>
+
+      {/* Massive Headline */}
       <motion.h1
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.05 }}
-        className="font-display text-[36px] font-extrabold tracking-tight leading-[1.1] mb-8 text-center"
+        className="font-display text-[42px] font-extrabold tracking-tight leading-[1.05] mb-5 text-center"
         style={{ color: CHARCOAL }}
       >
-        Vad kan Nisse?
+        AI som förstår<br />din vardag.
       </motion.h1>
 
-      {/* 2x2 Glassmorphism Grid */}
-      <div className="grid grid-cols-2 gap-3 w-full max-w-[340px]">
-        {FEATURES.map((feat, i) => {
-          const Icon = feat.icon;
-          return (
-            <motion.div
-              key={i}
-              variants={tileImpact(i)}
-              className="flex flex-col items-center text-center gap-2.5 py-5 px-3 rounded-2xl"
-              style={{
-                background: 'rgba(255,255,255,0.7)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255,255,255,0.8)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.8) inset',
-              }}
+      {/* Subtitle */}
+      <motion.p
+        variants={cinematicIn}
+        transition={{ ...SPRING, delay: 0.15 }}
+        className="text-[16px] leading-relaxed font-medium max-w-[310px] text-center mb-10"
+        style={{ color: '#64748B' }}
+      >
+        Oavsett om det är barnfamiljspusslet eller lyxmiddag för två –
+        Nisse optimerar recepten efter din smak, din tid och din plånbok.{' '}
+        <span style={{ color: CORAL, fontWeight: 700 }}>Helt automatiskt.</span>
+      </motion.p>
+
+      {/* Floating Decision Chips */}
+      <div className="flex flex-col gap-3 w-full max-w-[300px]">
+        {DECISION_CHIPS.map((chip, i) => (
+          <motion.div
+            key={i}
+            variants={chipVariant(i)}
+            className="flex items-center gap-3 py-4 px-5 rounded-2xl"
+            style={{
+              background: 'rgba(255,255,255,0.8)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.85)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 1px 0 rgba(255,255,255,0.8) inset',
+            }}
+          >
+            <motion.span
+              className="text-xl"
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 2, repeat: Infinity, delay: i * 0.5, ease: 'easeInOut' }}
             >
-              <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center"
-                style={{
-                  background: `${feat.accent}12`,
-                  boxShadow: `0 4px 16px ${feat.accent}15`,
-                }}
-              >
-                <Icon size={22} style={{ color: feat.accent }} />
-              </div>
-              <div>
-                <p className="text-[13px] font-bold" style={{ color: CHARCOAL }}>{feat.label}</p>
-                <p className="text-[11px] mt-0.5" style={{ color: '#94A3B8' }}>{feat.desc}</p>
-              </div>
-            </motion.div>
-          );
-        })}
+              {chip.emoji}
+            </motion.span>
+            <span className="text-[15px] font-bold" style={{ color: CHARCOAL }}>
+              {chip.label}
+            </span>
+            {/* Pulse dot */}
+            <motion.div
+              className="ml-auto w-2.5 h-2.5 rounded-full"
+              style={{ background: SAGE }}
+              animate={{ opacity: [0.4, 1, 0.4], scale: [0.9, 1.1, 0.9] }}
+              transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.3 }}
+            />
+          </motion.div>
+        ))}
       </div>
     </motion.div>
   );
 }
 
 // ═══════════════════════════════════════════
-// STEP 3 — The Trust (Radar Scan + Consent)
+// STEP 3 — THE FREEDOM (Economy & Action)
+// "Spara tid och tusenlappar."
 // ═══════════════════════════════════════════
 
 function RadarIcon() {
   return (
     <div className="relative w-24 h-24 flex items-center justify-center mx-auto mb-6">
-      {/* Radar scanning waves — one-shot burst then subtle repeat */}
+      {/* Radar scanning waves */}
       {[0, 1, 2].map((i) => (
         <motion.div
           key={i}
@@ -290,7 +351,7 @@ function RadarIcon() {
   );
 }
 
-function StepTrust({ locationGranted, locationLoading, locationDenied, onLocationToggle, privacyAccepted, onPrivacyToggle }) {
+function StepFreedom({ locationGranted, locationLoading, locationDenied, onLocationToggle, privacyAccepted, onPrivacyToggle }) {
   const denied = locationDenied && !locationGranted;
 
   return (
@@ -305,30 +366,36 @@ function StepTrust({ locationGranted, locationLoading, locationDenied, onLocatio
         <RadarIcon />
       </motion.div>
 
-      {/* Heading */}
+      {/* Accent tag */}
       <motion.p
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.08 }}
         className="text-[10px] font-extrabold uppercase tracking-[0.25em] mb-3"
         style={{ color: CORAL }}
       >
-        Aktivera platsåtkomst
+        Frihet i vardagen
       </motion.p>
+
+      {/* Massive Headline */}
       <motion.h1
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.14 }}
-        className="font-display text-[36px] font-extrabold tracking-tight leading-[1.1] mb-3 text-center"
+        className="font-display text-[42px] font-extrabold tracking-tight leading-[1.05] mb-3 text-center"
         style={{ color: CHARCOAL }}
       >
-        Hitta butiker nära dig
+        Spara tid och<br /><span style={{ color: CORAL }}>tusenlappar.</span>
       </motion.h1>
+
+      {/* Subtitle */}
       <motion.p
         variants={cinematicIn}
         transition={{ ...SPRING, delay: 0.18 }}
-        className="text-[14px] leading-relaxed font-medium max-w-[300px] text-center mb-6"
+        className="text-[15px] leading-relaxed font-medium max-w-[300px] text-center mb-6"
         style={{ color: '#64748B' }}
       >
-        Aktivera din platsåtkomst så kan Nisse visa närmaste butiker och jämföra priser i ditt område.
+        Nisse jagar extrapriserna och guidar dig genom butiken.
+        När du väl lagar maten, följer du bara rösten.
+        Enklare blir det inte.
       </motion.p>
 
       {/* Trust card */}
@@ -480,6 +547,7 @@ function StepTrust({ locationGranted, locationLoading, locationDenied, onLocatio
 
 // ═══════════════════════════════════════════
 // LAYER 30 — Glass Navigation Island
+// Massive "Easy Button", discreet skip
 // ═══════════════════════════════════════════
 
 function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
@@ -489,7 +557,7 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
       style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
     >
       <div
-        className="w-[90%] max-w-[400px] rounded-3xl px-4 py-3"
+        className="w-[92%] max-w-[420px] rounded-3xl px-4 py-3"
         style={{
           background: 'rgba(255,255,255,0.6)',
           backdropFilter: 'blur(24px) saturate(180%)',
@@ -499,8 +567,8 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
         }}
       >
         <div className="flex items-center justify-between gap-3">
-          {/* Left — Back / Skip */}
-          <div className="min-w-[80px]">
+          {/* Left — Back / Skip (very discreet) */}
+          <div className="min-w-[72px]">
             {step > 0 ? (
               <motion.button
                 initial={{ opacity: 0, x: -8 }}
@@ -509,7 +577,7 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
                 onClick={onBack}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-1 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors"
-                style={{ color: '#94A3B8' }}
+                style={{ color: '#B0B8C4' }}
               >
                 <ArrowLeft size={14} />
                 Tillbaka
@@ -517,41 +585,44 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
             ) : (
               <button
                 onClick={onSkip}
-                className="text-[11px] font-medium px-3 py-2.5 transition-colors"
-                style={{ color: '#94A3B8' }}
+                className="text-[10px] font-medium px-3 py-2.5 transition-colors"
+                style={{ color: '#CBD5E1', opacity: 0.5 }}
               >
                 Hoppa över
               </button>
             )}
           </div>
 
-          {/* Right — Next / CTA */}
+          {/* Right — MASSIVE Next / CTA "Easy Button" */}
           <motion.button
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
             onClick={onNext}
             disabled={!canProceed}
-            className="relative flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl text-[14px] font-bold
-                     overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed flex-1 max-w-[200px]"
+            className="relative flex items-center justify-center gap-2 rounded-2xl text-[15px] font-extrabold
+                     overflow-hidden disabled:opacity-30 disabled:cursor-not-allowed flex-1"
             style={{
               background: '#111111',
               color: '#FFFFFF',
+              padding: isLast ? '18px 28px' : '16px 32px',
+              maxWidth: isLast ? '260px' : '220px',
               boxShadow: isLast && canProceed
-                ? '0 8px 32px rgba(0,0,0,0.3)'
-                : '0 4px 20px rgba(0,0,0,0.15)',
+                ? '0 10px 40px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2)'
+                : '0 6px 24px rgba(0,0,0,0.18)',
             }}
           >
             {/* Shimmer */}
             <motion.div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 55%, transparent 70%)',
+                background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.12) 55%, transparent 70%)',
               }}
               animate={{ x: ['-200%', '200%'] }}
               transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
             />
             <span className="relative z-10 flex items-center gap-2">
               {isLast ? (
-                <>Kom igång <Check size={15} /></>
+                <>Ge mig mental frihet <ArrowRight size={16} /></>
               ) : (
                 <>Nästa <ArrowRight size={15} /></>
               )}
@@ -559,13 +630,13 @@ function NavIsland({ step, isLast, canProceed, onNext, onBack, onSkip }) {
           </motion.button>
         </div>
 
-        {/* Skip on middle steps */}
+        {/* Skip on middle steps — very discreet */}
         {step > 0 && !isLast && (
           <div className="text-center mt-1.5">
             <button
               onClick={onSkip}
               className="text-[10px] font-medium transition-colors"
-              style={{ color: '#CBD5E1' }}
+              style={{ color: '#CBD5E1', opacity: 0.4 }}
             >
               Hoppa över introduktionen
             </button>
@@ -593,7 +664,7 @@ export default function TutorialPage() {
   const canProceed = step === 2 ? privacyAccepted : true;
 
   const handleLocationConsent = useCallback(async () => {
-    if (locationGranted) return; // already granted
+    if (locationGranted) return;
     await requestLocation();
     if (user) {
       gdpr.recordConsent('LOCATION', true).catch(() => {});
@@ -633,7 +704,6 @@ export default function TutorialPage() {
     <div
       className="relative h-[100dvh] overflow-hidden"
       style={{
-        // LAYER 0 — Mesh gradient background
         background: `
           radial-gradient(ellipse 90% 70% at 15% 5%, rgba(255,107,53,0.06) 0%, transparent 50%),
           radial-gradient(ellipse 80% 60% at 85% 80%, rgba(90,125,108,0.06) 0%, transparent 50%),
@@ -645,13 +715,12 @@ export default function TutorialPage() {
       {/* LAYER 20 — Progress Bar */}
       <ProgressBar step={step} />
 
-      {/* LAYER 10 — Main Content (centered, padded for header + footer) */}
+      {/* LAYER 10 — Main Content */}
       <div
         className="absolute inset-0 z-10 flex items-center justify-center px-7"
         style={{
-          // 52px header + 100px footer island = safe content zone
           paddingTop: 'max(52px, calc(env(safe-area-inset-top) + 52px))',
-          paddingBottom: 'max(100px, calc(env(safe-area-inset-bottom) + 100px))',
+          paddingBottom: 'max(110px, calc(env(safe-area-inset-bottom) + 110px))',
         }}
       >
         <AnimatePresence mode="wait" custom={direction}>
@@ -666,7 +735,7 @@ export default function TutorialPage() {
               transition={SPRING}
               className="w-full max-w-[380px]"
             >
-              <StepPersona />
+              <StepHook />
             </motion.div>
           )}
 
@@ -674,14 +743,14 @@ export default function TutorialPage() {
             <motion.div
               key="s1"
               custom={direction}
-              variants={pageVariants}
+              variants={blurToFocus}
               initial="enter"
               animate="center"
               exit="exit"
               transition={SPRING}
               className="w-full max-w-[380px]"
             >
-              <StepPower />
+              <StepLogic />
             </motion.div>
           )}
 
@@ -696,7 +765,7 @@ export default function TutorialPage() {
               transition={SPRING}
               className="w-full max-w-[380px]"
             >
-              <StepTrust
+              <StepFreedom
                 locationGranted={locationGranted}
                 locationLoading={locationLoading}
                 locationDenied={locationDenied}
