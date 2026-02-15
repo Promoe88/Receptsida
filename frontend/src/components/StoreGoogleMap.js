@@ -6,9 +6,9 @@
 
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
-import { Navigation, Clock, Star, MapPin } from 'lucide-react';
+import { Navigation, Clock, Star, MapPin, AlertTriangle } from 'lucide-react';
 
 // ── Chain marker colors ──
 const CHAIN_MARKERS = {
@@ -94,7 +94,14 @@ export function StoreGoogleMap({
   });
 
   const [infoStore, setInfoStore] = useState(null);
+  const [authError, setAuthError] = useState(false);
   const mapRef = useRef(null);
+
+  // Detect Google Maps API key / billing errors
+  useEffect(() => {
+    window.gm_authFailure = () => setAuthError(true);
+    return () => { delete window.gm_authFailure; };
+  }, []);
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
@@ -129,7 +136,7 @@ export function StoreGoogleMap({
 
   if (loadError) {
     return (
-      <div className="flex-1 bg-cream-200 flex items-center justify-center">
+      <div className="absolute inset-0 bg-cream-200 flex items-center justify-center">
         <div className="text-center px-6">
           <MapPin size={32} className="text-warm-400 mx-auto mb-3" />
           <p className="text-warm-600 font-medium">Kartan kunde inte laddas</p>
@@ -143,10 +150,25 @@ export function StoreGoogleMap({
 
   if (!isLoaded) {
     return (
-      <div className="flex-1 bg-cream-200 flex items-center justify-center">
+      <div className="absolute inset-0 bg-cream-200 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-sage-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-sm text-warm-500">Laddar karta...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="absolute inset-0 bg-cream-200 flex items-center justify-center">
+        <div className="text-center px-6">
+          <AlertTriangle size={32} className="text-orange-400 mx-auto mb-3" />
+          <p className="text-warm-600 font-medium">Google Maps kunde inte autentisera</p>
+          <p className="text-sm text-warm-400 mt-1">
+            Kontrollera att API-nyckeln har Maps JavaScript API aktiverat, att fakturering är påslagen,
+            och att localhost finns med i tillåtna referrers i Google Cloud Console.
+          </p>
         </div>
       </div>
     );
@@ -157,9 +179,9 @@ export function StoreGoogleMap({
     : { lat: 59.3293, lng: 18.0686 }; // Stockholm fallback
 
   return (
-    <div className="relative flex-1 min-h-0">
+    <div className="absolute inset-0">
       <GoogleMap
-        mapContainerStyle={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        mapContainerStyle={{ width: '100%', height: '100%' }}
         center={center}
         zoom={14}
         options={MAP_OPTIONS}
