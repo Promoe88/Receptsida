@@ -97,7 +97,7 @@ export default function StoresPage() {
 
   return (
     <PageTransition className={isApp ? 'safe-top' : ''}>
-      <div className="relative flex flex-col" style={{ minHeight: isApp ? 'calc(100vh - 64px)' : 'calc(100vh - 80px)' }}>
+      <div className="relative flex flex-col" style={{ height: isApp ? 'calc(100vh - 64px)' : 'calc(100vh - 80px)' }}>
 
         {/* Map area — real Google Maps or placeholder */}
         {hasGoogleMapsKey && hasPosition ? (
@@ -152,7 +152,17 @@ export default function StoresPage() {
               </div>
             )}
 
-            {hasPosition && stores.length > 0 && (
+            {!hasGoogleMapsKey && hasPosition && (
+              <div className="text-center z-10 px-6">
+                <MapPin size={32} className="text-warm-400 mx-auto mb-3" />
+                <p className="text-warm-600 font-medium">Google Maps API-nyckel saknas</p>
+                <p className="text-sm text-warm-400 mt-1">
+                  Lägg till NEXT_PUBLIC_GOOGLE_MAPS_API_KEY i .env.development och starta om servern.
+                </p>
+              </div>
+            )}
+
+            {hasPosition && stores.length > 0 && hasGoogleMapsKey && (
               <motion.button
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}

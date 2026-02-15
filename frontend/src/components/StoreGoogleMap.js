@@ -133,7 +133,9 @@ export function StoreGoogleMap({
         <div className="text-center px-6">
           <MapPin size={32} className="text-warm-400 mx-auto mb-3" />
           <p className="text-warm-600 font-medium">Kartan kunde inte laddas</p>
-          <p className="text-sm text-warm-400 mt-1">Kontrollera din internetanslutning</p>
+          <p className="text-sm text-warm-400 mt-1">
+            Kontrollera att Google Maps API-nyckeln är giltig och att Maps JavaScript API är aktiverat i Google Cloud Console.
+          </p>
         </div>
       </div>
     );
@@ -155,9 +157,9 @@ export function StoreGoogleMap({
     : { lat: 59.3293, lng: 18.0686 }; // Stockholm fallback
 
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1 min-h-0">
       <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '100%' }}
+        mapContainerStyle={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
         center={center}
         zoom={14}
         options={MAP_OPTIONS}
