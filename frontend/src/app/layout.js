@@ -13,6 +13,10 @@ export const metadata = {
   description:
     'Nisse är din personliga matassistent. Hitta recept, jämför priser hos ICA, Willys, Coop och Lidl. GPS-guidning till närmaste butik.',
   keywords: 'recept, matlagning, ingredienser, prisjämförelse, ICA, Willys, Coop, Lidl, butiker, GPS, Sverige',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'Nisse — Din personliga matassistent',
     description: 'Hitta recept, jämför priser och hitta närmaste butik med GPS.',
