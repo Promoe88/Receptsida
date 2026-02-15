@@ -1,80 +1,108 @@
 // ============================================
-// NisseLogo — Inline SVG logo component
+// NisseLogo — Premium minimalist inline SVG logo
 // Variants: icon, full, horizontal
+// Animated stars with Framer Motion
 // ============================================
 
 'use client';
 
-export function NisseLogo({ variant = 'icon', size = 48, className = '' }) {
+import { motion } from 'framer-motion';
+
+export function NisseLogo({ variant = 'icon', size = 48, className = '', animated = true }) {
   if (variant === 'full') {
-    return <NisseFullLogo size={size} className={className} />;
+    return <NisseFullLogo size={size} className={className} animated={animated} />;
   }
   if (variant === 'horizontal') {
-    return <NisseHorizontalLogo size={size} className={className} />;
+    return <NisseHorizontalLogo size={size} className={className} animated={animated} />;
   }
-  return <NisseIconLogo size={size} className={className} />;
+  return <NisseIconLogo size={size} className={className} animated={animated} />;
 }
 
-function NisseIconLogo({ size, className }) {
+// ─── Shared star paths (reusable across variants) ───
+
+const STAR_CENTER = 'M 100 37 C 102 43, 106 47, 114 51 C 106 55, 102 59, 100 65 C 98 59, 94 55, 86 51 C 94 47, 98 43, 100 37 Z';
+const STAR_LEFT = 'M 66 37 C 66.6 40, 68.2 41.4, 70.5 42 C 68.2 42.6, 66.6 44, 66 47 C 65.4 44, 63.8 42.6, 61.5 42 C 63.8 41.4, 65.4 40, 66 37 Z';
+const STAR_RIGHT = 'M 136 48 C 136.4 50.5, 137.8 51.9, 140 52.5 C 137.8 53.1, 136.4 54.5, 136 57 C 135.6 54.5, 134.2 53.1, 132 52.5 C 134.2 51.9, 135.6 50.5, 136 48 Z';
+const DOME = 'M 42 155 C 42 100, 68 78, 100 75 C 132 78, 158 100, 158 155';
+const PLATE = 'M 34 155 Q 100 163, 166 155';
+
+// ─── Animation configs ───
+
+const floatCenter = {
+  y: [0, -3, 0],
+  transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+};
+
+const floatLeft = {
+  y: [0, -2.5, 0],
+  transition: { duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.4 },
+};
+
+const floatRight = {
+  y: [0, -2, 0],
+  transition: { duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 0.8 },
+};
+
+const pulseCenter = {
+  opacity: [1, 0.8, 1],
+  transition: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' },
+};
+
+// ─── Icon variant (square, icon only) ───
+
+function NisseIconLogo({ size, className, animated }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 160"
+      viewBox="0 0 200 200"
       width={size}
-      height={size * 0.8}
+      height={size}
       className={className}
       aria-label="Nisse logo"
     >
       <defs>
-        <radialGradient id="nisse-sg" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#D97757" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#D97757" stopOpacity="0" />
+        <radialGradient id="nisse-sg" cx="50%" cy="25%" r="30%">
+          <stop offset="0%" stopColor="#FF6B35" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#FF6B35" stopOpacity="0" />
         </radialGradient>
+        <filter id="nisse-glow">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
 
-      {/* Sparkle glow */}
-      <circle cx="100" cy="52" r="18" fill="url(#nisse-sg)" />
+      {/* Subtle radial glow behind stars */}
+      <circle cx="100" cy="48" r="36" fill="url(#nisse-sg)" />
 
-      {/* Cloche dome */}
-      <path
-        d="M 40 130 C 40 130, 40 62, 100 50 C 160 62, 160 130, 160 130"
-        fill="none"
-        stroke="#5A7D6C"
-        strokeWidth="5.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {/* Stars constellation */}
+      <g filter="url(#nisse-glow)">
+        {animated ? (
+          <>
+            <motion.path d={STAR_CENTER} fill="#FF6B35" animate={{ ...floatCenter, ...pulseCenter }} />
+            <motion.path d={STAR_LEFT} fill="#FF6B35" opacity="0.7" animate={floatLeft} />
+            <motion.path d={STAR_RIGHT} fill="#FF6B35" opacity="0.5" animate={floatRight} />
+          </>
+        ) : (
+          <>
+            <path d={STAR_CENTER} fill="#FF6B35" />
+            <path d={STAR_LEFT} fill="#FF6B35" opacity="0.7" />
+            <path d={STAR_RIGHT} fill="#FF6B35" opacity="0.5" />
+          </>
+        )}
+      </g>
 
-      {/* Base plate */}
-      <line x1="32" y1="130" x2="168" y2="130" stroke="#5A7D6C" strokeWidth="5.5" strokeLinecap="round" />
+      {/* Cloche dome — thin, clean arc */}
+      <path d={DOME} fill="none" stroke="#5A7D6C" strokeWidth="2" strokeLinecap="round" />
 
-      {/* Plate lip */}
-      <path
-        d="M 38 138 Q 100 146, 162 138"
-        fill="none"
-        stroke="#5A7D6C"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-
-      {/* 4-pointed AI sparkle */}
-      <path
-        d="M 100 30 C 101.5 36, 104 38.5, 110 40 C 104 41.5, 101.5 44, 100 50 C 98.5 44, 96 41.5, 90 40 C 96 38.5, 98.5 36, 100 30 Z"
-        fill="#D97757"
-      />
-
-      {/* Secondary sparkle */}
-      <path
-        d="M 124 46 C 124.6 48, 126 49.4, 128 50 C 126 50.6, 124.6 52, 124 54 C 123.4 52, 122 50.6, 120 50 C 122 49.4, 123.4 48, 124 46 Z"
-        fill="#D97757"
-        opacity="0.55"
-      />
+      {/* Base plate — subtle curve with rounded ends */}
+      <path d={PLATE} fill="none" stroke="#5A7D6C" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
 
-function NisseFullLogo({ size, className }) {
+// ─── Full variant (icon + wordmark, stacked) ───
+
+function NisseFullLogo({ size, className, animated }) {
   const height = size * (260 / 320);
   return (
     <svg
@@ -86,23 +114,38 @@ function NisseFullLogo({ size, className }) {
       aria-label="Nisse — AI Cooking Assistant"
     >
       <defs>
-        <radialGradient id="nisse-sg-f" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#D97757" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#D97757" stopOpacity="0" />
+        <radialGradient id="nisse-sg-f" cx="50%" cy="25%" r="30%">
+          <stop offset="0%" stopColor="#FF6B35" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#FF6B35" stopOpacity="0" />
         </radialGradient>
+        <filter id="nisse-glow-f">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
 
-      {/* Icon */}
-      <g transform="translate(60, 10)">
-        <circle cx="100" cy="52" r="18" fill="url(#nisse-sg-f)" />
-        <path
-          d="M 40 130 C 40 130, 40 62, 100 50 C 160 62, 160 130, 160 130"
-          fill="none" stroke="#5A7D6C" strokeWidth="5.5" strokeLinecap="round" strokeLinejoin="round"
-        />
-        <line x1="32" y1="130" x2="168" y2="130" stroke="#5A7D6C" strokeWidth="5.5" strokeLinecap="round" />
-        <path d="M 38 138 Q 100 146, 162 138" fill="none" stroke="#5A7D6C" strokeWidth="3.5" strokeLinecap="round" opacity="0.5" />
-        <path d="M 100 30 C 101.5 36, 104 38.5, 110 40 C 104 41.5, 101.5 44, 100 50 C 98.5 44, 96 41.5, 90 40 C 96 38.5, 98.5 36, 100 30 Z" fill="#D97757" />
-        <path d="M 124 46 C 124.6 48, 126 49.4, 128 50 C 126 50.6, 124.6 52, 124 54 C 123.4 52, 122 50.6, 120 50 C 122 49.4, 123.4 48, 124 46 Z" fill="#D97757" opacity="0.55" />
+      {/* Icon (centered at top) */}
+      <g transform="translate(60, -10)">
+        <circle cx="100" cy="48" r="36" fill="url(#nisse-sg-f)" />
+
+        <g filter="url(#nisse-glow-f)">
+          {animated ? (
+            <>
+              <motion.path d={STAR_CENTER} fill="#FF6B35" animate={{ ...floatCenter, ...pulseCenter }} />
+              <motion.path d={STAR_LEFT} fill="#FF6B35" opacity="0.7" animate={floatLeft} />
+              <motion.path d={STAR_RIGHT} fill="#FF6B35" opacity="0.5" animate={floatRight} />
+            </>
+          ) : (
+            <>
+              <path d={STAR_CENTER} fill="#FF6B35" />
+              <path d={STAR_LEFT} fill="#FF6B35" opacity="0.7" />
+              <path d={STAR_RIGHT} fill="#FF6B35" opacity="0.5" />
+            </>
+          )}
+        </g>
+
+        <path d={DOME} fill="none" stroke="#5A7D6C" strokeWidth="2" strokeLinecap="round" />
+        <path d={PLATE} fill="none" stroke="#5A7D6C" strokeWidth="2" strokeLinecap="round" />
       </g>
 
       {/* Wordmark */}
@@ -135,7 +178,9 @@ function NisseFullLogo({ size, className }) {
   );
 }
 
-function NisseHorizontalLogo({ size, className }) {
+// ─── Horizontal variant (icon + wordmark side by side) ───
+
+function NisseHorizontalLogo({ size, className, animated }) {
   const height = size * (100 / 360);
   return (
     <svg
@@ -147,28 +192,43 @@ function NisseHorizontalLogo({ size, className }) {
       aria-label="Nisse — AI Cooking Assistant"
     >
       <defs>
-        <radialGradient id="nisse-sg-h" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#D97757" stopOpacity="0.2" />
-          <stop offset="100%" stopColor="#D97757" stopOpacity="0" />
+        <radialGradient id="nisse-sg-h" cx="50%" cy="25%" r="30%">
+          <stop offset="0%" stopColor="#FF6B35" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#FF6B35" stopOpacity="0" />
         </radialGradient>
+        <filter id="nisse-glow-h">
+          <feGaussianBlur stdDeviation="1" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
 
-      {/* Icon (scaled) */}
-      <g transform="translate(10, 6) scale(0.52)">
-        <circle cx="100" cy="52" r="18" fill="url(#nisse-sg-h)" />
-        <path
-          d="M 40 130 C 40 130, 40 62, 100 50 C 160 62, 160 130, 160 130"
-          fill="none" stroke="#5A7D6C" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round"
-        />
-        <line x1="32" y1="130" x2="168" y2="130" stroke="#5A7D6C" strokeWidth="6.5" strokeLinecap="round" />
-        <path d="M 38 138 Q 100 146, 162 138" fill="none" stroke="#5A7D6C" strokeWidth="4" strokeLinecap="round" opacity="0.5" />
-        <path d="M 100 30 C 101.5 36, 104 38.5, 110 40 C 104 41.5, 101.5 44, 100 50 C 98.5 44, 96 41.5, 90 40 C 96 38.5, 98.5 36, 100 30 Z" fill="#D97757" />
-        <path d="M 124 46 C 124.6 48, 126 49.4, 128 50 C 126 50.6, 124.6 52, 124 54 C 123.4 52, 122 50.6, 120 50 C 122 49.4, 123.4 48, 124 46 Z" fill="#D97757" opacity="0.55" />
+      {/* Icon (scaled to fit left side) */}
+      <g transform="translate(5, 2) scale(0.48)">
+        <circle cx="100" cy="48" r="36" fill="url(#nisse-sg-h)" />
+
+        <g filter="url(#nisse-glow-h)">
+          {animated ? (
+            <>
+              <motion.path d={STAR_CENTER} fill="#FF6B35" animate={{ ...floatCenter, ...pulseCenter }} />
+              <motion.path d={STAR_LEFT} fill="#FF6B35" opacity="0.7" animate={floatLeft} />
+              <motion.path d={STAR_RIGHT} fill="#FF6B35" opacity="0.5" animate={floatRight} />
+            </>
+          ) : (
+            <>
+              <path d={STAR_CENTER} fill="#FF6B35" />
+              <path d={STAR_LEFT} fill="#FF6B35" opacity="0.7" />
+              <path d={STAR_RIGHT} fill="#FF6B35" opacity="0.5" />
+            </>
+          )}
+        </g>
+
+        <path d={DOME} fill="none" stroke="#5A7D6C" strokeWidth="3.5" strokeLinecap="round" />
+        <path d={PLATE} fill="none" stroke="#5A7D6C" strokeWidth="3.5" strokeLinecap="round" />
       </g>
 
       {/* Wordmark */}
       <text
-        x="130" y="58"
+        x="130" y="56"
         fontFamily="'Playfair Display', Georgia, 'Times New Roman', serif"
         fontWeight="500"
         fontSize="42"
@@ -180,7 +240,7 @@ function NisseHorizontalLogo({ size, className }) {
 
       {/* Tagline */}
       <text
-        x="131" y="78"
+        x="131" y="76"
         fontFamily="-apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif"
         fontWeight="400"
         fontSize="10"

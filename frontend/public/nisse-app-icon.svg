@@ -1,16 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Nisse App Icon — iOS/Android (512×512) -->
-  <!-- Cream background, centered cloche with sparkle -->
+  <!-- Nisse App Icon — Premium (iOS/Android 512×512) -->
 
   <defs>
     <radialGradient id="bg-grad" cx="50%" cy="45%" r="55%">
       <stop offset="0%" stop-color="#FEFCF9"/>
       <stop offset="100%" stop-color="#F5F0E8"/>
     </radialGradient>
-    <radialGradient id="sparkle-glow-app" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#D97757" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#D97757" stop-opacity="0"/>
+    <radialGradient id="sparkle-glow-app" cx="50%" cy="25%" r="30%">
+      <stop offset="0%" stop-color="#FF6B35" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FF6B35" stop-opacity="0"/>
     </radialGradient>
+    <filter id="glow-app">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
     <!-- iOS rounded rectangle clip -->
     <clipPath id="ios-clip">
       <rect width="512" height="512" rx="114" ry="114"/>
@@ -21,72 +24,50 @@
     <!-- Background -->
     <rect width="512" height="512" fill="url(#bg-grad)"/>
 
-    <!-- Main icon group (centered) -->
+    <!-- Main icon group (centered, scaled 1.5x) -->
     <g transform="translate(106, 80) scale(1.5)">
-      <!-- Sparkle glow -->
-      <circle cx="100" cy="52" r="22" fill="url(#sparkle-glow-app)"/>
+      <!-- Star glow -->
+      <circle cx="100" cy="48" r="40" fill="url(#sparkle-glow-app)"/>
+
+      <!-- Stars constellation -->
+      <g filter="url(#glow-app)">
+        <!-- Central 4-pointed sparkle -->
+        <path
+          d="M 100 37 C 102 43, 106 47, 114 51 C 106 55, 102 59, 100 65 C 98 59, 94 55, 86 51 C 94 47, 98 43, 100 37 Z"
+          fill="#FF6B35"
+        />
+
+        <!-- Left smaller sparkle -->
+        <path
+          d="M 66 37 C 66.6 40, 68.2 41.4, 70.5 42 C 68.2 42.6, 66.6 44, 66 47 C 65.4 44, 63.8 42.6, 61.5 42 C 63.8 41.4, 65.4 40, 66 37 Z"
+          fill="#FF6B35"
+          opacity="0.7"
+        />
+
+        <!-- Right smaller sparkle -->
+        <path
+          d="M 136 48 C 136.4 50.5, 137.8 51.9, 140 52.5 C 137.8 53.1, 136.4 54.5, 136 57 C 135.6 54.5, 134.2 53.1, 132 52.5 C 134.2 51.9, 135.6 50.5, 136 48 Z"
+          fill="#FF6B35"
+          opacity="0.5"
+        />
+      </g>
 
       <!-- Cloche dome -->
       <path
-        d="M 40 130
-           C 40 130, 40 62, 100 50
-           C 160 62, 160 130, 160 130"
+        d="M 42 155 C 42 100, 68 78, 100 75 C 132 78, 158 100, 158 155"
         fill="none"
         stroke="#5A7D6C"
-        stroke-width="7"
+        stroke-width="2.5"
         stroke-linecap="round"
-        stroke-linejoin="round"
       />
 
       <!-- Base plate -->
-      <line
-        x1="30" y1="130"
-        x2="170" y2="130"
-        stroke="#5A7D6C"
-        stroke-width="7"
-        stroke-linecap="round"
-      />
-
-      <!-- Plate lip -->
       <path
-        d="M 36 140 Q 100 150, 164 140"
+        d="M 34 155 Q 100 163, 166 155"
         fill="none"
         stroke="#5A7D6C"
-        stroke-width="4.5"
+        stroke-width="2.5"
         stroke-linecap="round"
-        opacity="0.45"
-      />
-
-      <!-- 4-pointed AI sparkle (larger for app icon) -->
-      <path
-        d="M 100 26
-           C 102 34, 105 37, 114 40
-           C 105 43, 102 46, 100 54
-           C 98 46, 95 43, 86 40
-           C 95 37, 98 34, 100 26 Z"
-        fill="#D97757"
-      />
-
-      <!-- Secondary sparkle -->
-      <path
-        d="M 128 42
-           C 128.8 44.5, 130.5 46.2, 133 47
-           C 130.5 47.8, 128.8 49.5, 128 52
-           C 127.2 49.5, 125.5 47.8, 123 47
-           C 125.5 46.2, 127.2 44.5, 128 42 Z"
-        fill="#D97757"
-        opacity="0.5"
-      />
-
-      <!-- Third tiny sparkle (top-left) -->
-      <path
-        d="M 80 38
-           C 80.4 39.5, 81.5 40.6, 83 41
-           C 81.5 41.4, 80.4 42.5, 80 44
-           C 79.6 42.5, 78.5 41.4, 77 41
-           C 78.5 40.6, 79.6 39.5, 80 38 Z"
-        fill="#D97757"
-        opacity="0.3"
       />
     </g>
   </g>
