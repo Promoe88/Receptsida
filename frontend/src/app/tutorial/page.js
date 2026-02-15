@@ -16,7 +16,7 @@ import { isApp } from '../../lib/platform';
 import {
   ArrowRight, ArrowLeft, Check, Sparkles,
   MapPin, Shield, Loader2, Zap,
-  Archive, Tag, Heart,
+  Box, Tag, Heart,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -92,7 +92,7 @@ const blurToFocus = {
 
 // ── Decision Chip data (Step 2) — Premium Lucide icons ──
 const DECISION_CHIPS = [
-  { label: 'Matlådor fixade', Icon: Archive, bg: `${SAGE}18`, iconColor: SAGE },
+  { label: 'Matlådor fixade', Icon: Box, bg: `${SAGE}18`, iconColor: SAGE },
   { label: 'Extrapriser hittade', Icon: Tag, bg: `${CORAL}15`, iconColor: CORAL },
   { label: 'Barnen mätta', Icon: Heart, bg: `${SAGE}18`, iconColor: SAGE },
 ];
@@ -266,6 +266,7 @@ function StepLogic() {
       </motion.p>
 
       {/* Feature Tiles — Premium Lucide icons in soft-colored circles */}
+      <AnimatePresence mode="wait">
       <div className="flex flex-col gap-3 w-full max-w-[300px]">
         {DECISION_CHIPS.map((chip, i) => (
           <motion.div
@@ -300,6 +301,7 @@ function StepLogic() {
           </motion.div>
         ))}
       </div>
+      </AnimatePresence>
     </motion.div>
   );
 }
