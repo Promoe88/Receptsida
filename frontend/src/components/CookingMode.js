@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, ChevronLeft, ChevronRight, Play, Pause,
@@ -290,7 +290,7 @@ function NisseChat({
 // Main CookingMode Component
 // ═══════════════════════════════════════════
 
-export function CookingMode({ recipe, onClose }) {
+export const CookingMode = forwardRef(function CookingMode({ recipe, onClose }, ref) {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const [showChat, setShowChat] = useState(false);
@@ -324,6 +324,8 @@ export function CookingMode({ recipe, onClose }) {
     setCompletedSteps((prev) => new Set([...prev, currentStep]));
     if (currentStep < totalSteps - 1) setCurrentStep((s) => s + 1);
   }, [currentStep, totalSteps]);
+
+  useImperativeHandle(ref, () => ({ goNext }), [goNext]);
 
   const goPrev = useCallback(() => {
     if (currentStep > 0) setCurrentStep((s) => s - 1);
@@ -609,4 +611,4 @@ export function CookingMode({ recipe, onClose }) {
       />
     </motion.div>
   );
-}
+});

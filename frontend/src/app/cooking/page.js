@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChefHat, ArrowLeft, Mic, MicOff } from 'lucide-react';
@@ -17,6 +17,7 @@ export default function CookingPage() {
   const [nisseReply, setNisseReply] = useState('');
   const [nisseLoading, setNisseLoading] = useState(false);
   const { speak } = useSpeech();
+  const cookingRef = useRef(null);
 
   useEffect(() => {
     if (!selectedRecipe) return;
@@ -33,12 +34,15 @@ export default function CookingPage() {
       const reply = data.reply ?? data.answer ?? '';
       setNisseReply(reply);
       if (reply) speak(reply);
+      if (data.action === 'next_step') {
+        cookingRef.current?.goNext();
+      }
     } catch {
       setNisseReply('Nisse kunde inte svara just nu. Försök igen.');
     } finally {
       setNisseLoading(false);
     }
-  }, [selectedRecipe]);
+  }, [selectedRecipe, speak]);
 
   function toggleMic() {
     if (isListening) {
@@ -100,7 +104,7 @@ export default function CookingPage() {
 
   return (
     <div className="relative">
-      <CookingMode recipe={selectedRecipe} onClose={handleClose} />
+      <CookingMode ref={cookingRef} recipe={selectedRecipe} onClose={handleClose} />
 
       {/* Voice conversation bubbles */}
       <AnimatePresence>
