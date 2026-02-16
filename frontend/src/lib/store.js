@@ -1,9 +1,23 @@
 // ============================================
-// Auth Store — Zustand global state
+// Zustand Stores — Global state
 // ============================================
 
 import { create } from 'zustand';
 import { auth as authApi } from '../lib/api';
+
+// ──────────────────────────────────────────
+// Recipe Store — selected recipe for cooking
+// ──────────────────────────────────────────
+
+export const useRecipeStore = create((set) => ({
+  selectedRecipe: null,
+  setSelectedRecipe: (recipe) => set({ selectedRecipe: recipe }),
+  clearRecipe: () => set({ selectedRecipe: null }),
+}));
+
+// ──────────────────────────────────────────
+// Auth Store
+// ──────────────────────────────────────────
 
 export const useAuthStore = create((set, get) => ({
   user: null,
