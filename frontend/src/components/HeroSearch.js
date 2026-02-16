@@ -153,14 +153,17 @@ export function HeroSearch({ onSearch, loading }) {
           {firstName ? `Köket är ditt, ${firstName}.` : 'Köket är ditt.'}
         </h1>
         <p className="text-warm-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 max-w-xl mx-auto leading-relaxed">
-          Jag är din personliga kock. Berätta vad du har framför dig eller vad du vill skapa, så tar vi fram en plan steg-för-steg.
+          Jag är din personliga kock. Berätta vad du har hemma, så fixar vi resten.
         </p>
 
         {/* Premium search card */}
         <motion.div
           layout
           className="card p-2 sm:p-3 relative"
-          style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.08)' }}
+          style={{
+            boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
+            border: '1.5px solid rgba(255,107,53,0.25)',
+          }}
         >
           <form onSubmit={handleSubmit}>
             <div className="flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4">
