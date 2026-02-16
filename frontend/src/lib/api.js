@@ -74,12 +74,22 @@ async function apiFetch(path, options = {}) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
+  // AI search calls can take 30-60s (two sequential Claude API calls)
+  const timeoutMs = options.timeout || 90_000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   let response;
   try {
-    response = await fetch(url, { ...options, headers });
-  } catch {
+    response = await fetch(url, { ...options, headers, signal: controller.signal });
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') {
+      throw new ApiError(0, 'ai_timeout', 'Sökningen tog för lång tid. Försök igen.');
+    }
     throw new ApiError(0, 'network_error', 'Kunde inte nå servern. Kontrollera din internetanslutning och försök igen.');
   }
+  clearTimeout(timer);
 
   // Auto-refresh on 401
   if (response.status === 401 && refreshToken) {
