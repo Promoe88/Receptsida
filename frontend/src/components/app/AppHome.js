@@ -10,6 +10,7 @@ import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mic, ArrowRight, Sparkles, Zap, Trash2, Flame, Package } from 'lucide-react';
 import { useAuthStore } from '../../lib/store';
+import { NisseLogo } from '../NisseLogo';
 
 // ── Scenario quick-action chips (Lucide icons, no emojis) ──
 
@@ -119,40 +120,40 @@ export function AppHome({ onSearch, onStartSearch }) {
         initial="hidden"
         animate="show"
       >
-        {/* ═══ NISSE SPARKLE — AI presence (larger, accent glow) ═══ */}
+        {/* ═══ NISSE AVATAR — glowing circle with breathing animation ═══ */}
         <motion.div variants={fadeUp} className="flex justify-center mb-5">
           <motion.div
+            className="relative rounded-full flex items-center justify-center"
+            style={{
+              width: 80,
+              height: 80,
+              background: 'radial-gradient(circle, rgba(255,107,53,0.12) 0%, rgba(255,107,53,0.04) 60%, transparent 100%)',
+              boxShadow: '0 0 32px rgba(255,107,53,0.15), 0 0 64px rgba(255,107,53,0.08)',
+            }}
             animate={{
-              scale: [1, 1.08, 1],
-              filter: [
-                'drop-shadow(0 0 8px rgba(255,107,53,0.15))',
-                'drop-shadow(0 0 20px rgba(255,107,53,0.35))',
-                'drop-shadow(0 0 8px rgba(255,107,53,0.15))',
+              boxShadow: [
+                '0 0 32px rgba(255,107,53,0.15), 0 0 64px rgba(255,107,53,0.08)',
+                '0 0 40px rgba(255,107,53,0.25), 0 0 80px rgba(255,107,53,0.12)',
+                '0 0 32px rgba(255,107,53,0.15), 0 0 64px rgba(255,107,53,0.08)',
               ],
+              scale: [1, 1.04, 1],
             }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <NisseSparkle />
+            <NisseLogo variant="icon" size={52} animated />
           </motion.div>
         </motion.div>
 
         {/* ═══ HEADLINE ═══ */}
         <motion.div variants={fadeUp} className="text-center mb-8">
-          <p className="font-body text-[13px] text-warm-400 mb-1">
-            Hej {firstName}
-          </p>
           <h1
-            className="font-display text-[34px] font-extrabold leading-tight tracking-tight mb-2"
+            className="font-display text-[32px] font-bold leading-tight tracking-tight mb-2"
             style={{ color: '#1A1A1A' }}
           >
-            Vad lagar vi idag?
+            {firstName ? `Köket är ditt, ${firstName}.` : 'Köket är ditt.'}
           </h1>
-          <p className="font-body text-[14px] text-warm-400 max-w-[260px] mx-auto">
-            Berätta vad du har hemma — Nisse löser resten
+          <p className="font-body text-[14px] text-warm-400 max-w-[280px] mx-auto leading-relaxed">
+            Jag är din personliga kock. Berätta vad du har hemma, så fixar vi resten.
           </p>
         </motion.div>
 
@@ -294,27 +295,3 @@ export function AppHome({ onSearch, onStartSearch }) {
   );
 }
 
-// ── Nisse Sparkle — larger, accent #FF6B35, with soft glow ──
-
-function NisseSparkle() {
-  return (
-    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-      <circle cx="32" cy="32" r="30" fill="rgba(255,107,53,0.06)" />
-      <path
-        d="M 32 6 C 34 17, 41 24.5, 54 26.5
-           C 41 28.5, 34 36, 32 47
-           C 30 36, 23 28.5, 10 26.5
-           C 23 24.5, 30 17, 32 6 Z"
-        fill="#FF6B35"
-      />
-      <path
-        d="M 49 10 C 49.6 13, 52 15.5, 55 16
-           C 52 16.5, 49.6 19, 49 22
-           C 48.4 19, 46 16.5, 43 16
-           C 46 15.5, 48.4 13, 49 10 Z"
-        fill="#FF6B35"
-        opacity="0.45"
-      />
-    </svg>
-  );
-}
