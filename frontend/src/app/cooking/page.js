@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChefHat, ArrowLeft, Mic, MicOff } from 'lucide-react';
 import { useRecipeStore } from '../../lib/store';
 import { CookingMode } from '../../components/CookingMode';
-import { useVoiceInput } from '../../hooks/useVoice';
+import { useVoiceInput, useSpeech } from '../../hooks/useVoice';
 import { cooking } from '../../lib/api';
 
 export default function CookingPage() {
@@ -16,6 +16,7 @@ export default function CookingPage() {
   const [voiceText, setVoiceText] = useState('');
   const [nisseReply, setNisseReply] = useState('');
   const [nisseLoading, setNisseLoading] = useState(false);
+  const { speak } = useSpeech();
 
   useEffect(() => {
     if (!selectedRecipe) return;
@@ -29,7 +30,9 @@ export default function CookingPage() {
     setNisseLoading(true);
     try {
       const data = await cooking.speak(finalText, selectedRecipe);
-      setNisseReply(data.reply ?? data.answer ?? '');
+      const reply = data.reply ?? data.answer ?? '';
+      setNisseReply(reply);
+      if (reply) speak(reply);
     } catch {
       setNisseReply('Nisse kunde inte svara just nu. Försök igen.');
     } finally {
