@@ -210,7 +210,7 @@ async function structureRecipes(searchText, sources, query, householdSize, prefe
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 6000,
+    max_tokens: 12000,
     system: NISSE_IDENTITY,
     messages: [
       {
@@ -316,12 +316,64 @@ Svara ENBART med giltig JSON (ingen markdown, inga backticks):
 
   try {
     return JSON.parse(cleanJSON);
-  } catch {
+  } catch (firstErr) {
+    // Try to extract the JSON object and repair common issues
     const match = cleanJSON.match(/\{[\s\S]*\}/);
-    if (match) {
-      return JSON.parse(match[0]);
+    const candidate = match ? match[0] : cleanJSON;
+
+    try {
+      return JSON.parse(repairJSON(candidate));
+    } catch (secondErr) {
+      console.error('JSON parse failed after repair attempt:', secondErr.message);
+      console.error('Raw text length:', rawText.length, '| stop_reason:', response.stop_reason);
+      throw new Error('Failed to parse recipe JSON from AI response');
     }
-    throw new Error('Failed to parse recipe JSON from AI response');
+  }
+}
+
+/**
+ * Attempt to repair common JSON issues from LLM output:
+ * - Trailing commas: [1, 2,] or {"a": 1,}
+ * - Truncated output: close unclosed brackets/braces
+ */
+function repairJSON(str) {
+  // Strip trailing commas before } or ]
+  let repaired = str.replace(/,\s*([}\]])/g, '$1');
+
+  // If output was truncated (stop_reason=max_tokens), try to close brackets
+  try {
+    JSON.parse(repaired);
+    return repaired;
+  } catch {
+    // Count unclosed brackets/braces and close them
+    let braces = 0;
+    let brackets = 0;
+    let inString = false;
+    let escape = false;
+
+    for (const ch of repaired) {
+      if (escape) { escape = false; continue; }
+      if (ch === '\\' && inString) { escape = true; continue; }
+      if (ch === '"') { inString = !inString; continue; }
+      if (inString) continue;
+      if (ch === '{') braces++;
+      else if (ch === '}') braces--;
+      else if (ch === '[') brackets++;
+      else if (ch === ']') brackets--;
+    }
+
+    // Trim trailing incomplete value (e.g. truncated string or number)
+    repaired = repaired.replace(/,\s*"[^"]*$/, '');   // trailing incomplete key/string
+    repaired = repaired.replace(/,\s*\d+$/, '');       // trailing incomplete number
+    repaired = repaired.replace(/:\s*"[^"]*$/, ': ""'); // truncated string value
+    // Re-strip trailing commas
+    repaired = repaired.replace(/,\s*([}\]])/g, '$1');
+
+    repaired += ']'.repeat(Math.max(0, brackets)) + '}'.repeat(Math.max(0, braces));
+    // Final trailing-comma cleanup after bracket-closing
+    repaired = repaired.replace(/,\s*([}\]])/g, '$1');
+
+    return repaired;
   }
 }
 
@@ -510,7 +562,7 @@ export async function generateMealPlan(householdSize = 2, preferences = {}, lock
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 6000,
+    max_tokens: 12000,
     system: `${NISSE_IDENTITY}\n\nDu agerar nu som MENYPLANERAREN — du skapar varierade, realistiska veckomenyer som svenska familjer faktiskt vill laga.`,
     tools: [{ type: 'web_search_20250305', name: 'web_search' }],
     messages: [
@@ -575,8 +627,14 @@ Svara ENBART med giltig JSON (ingen markdown, inga backticks):
     return JSON.parse(cleanJSON);
   } catch {
     const match = cleanJSON.match(/\{[\s\S]*\}/);
-    if (match) return JSON.parse(match[0]);
-    throw new Error('Failed to parse meal plan JSON from AI response');
+    const candidate = match ? match[0] : cleanJSON;
+    try {
+      return JSON.parse(repairJSON(candidate));
+    } catch (err) {
+      console.error('Meal plan JSON parse failed:', err.message);
+      console.error('Raw text length:', text.length, '| stop_reason:', response.stop_reason);
+      throw new Error('Failed to parse meal plan JSON from AI response');
+    }
   }
 }
 

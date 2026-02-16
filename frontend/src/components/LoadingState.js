@@ -11,14 +11,21 @@ import { NisseLoader } from './NisseLoader';
 
 const STEPS = [
   { label: 'Analyserar dina ingredienser...', duration: 1500 },
-  { label: 'Söker recept på nätet via AI...', duration: 3000 },
-  { label: 'Läser och jämför receptkällor...', duration: 2500 },
-  { label: 'Anpassar efter ditt hushåll...', duration: 2000 },
-  { label: 'Sammanställer resultat...', duration: 1500 },
+  { label: 'Söker recept på nätet via AI...', duration: 4000 },
+  { label: 'Läser och jämför receptkällor...', duration: 4000 },
+  { label: 'Anpassar efter ditt hushåll...', duration: 3000 },
+  { label: 'Sammanställer resultat...', duration: 0 },
+];
+
+const LAST_STEP_MESSAGES = [
+  'Sammanställer resultat...',
+  'Finputsar recepten...',
+  'Nästan klart...',
 ];
 
 export function LoadingState() {
   const [activeStep, setActiveStep] = useState(0);
+  const [lastStepMsg, setLastStepMsg] = useState(0);
 
   useEffect(() => {
     let timeout;
@@ -37,6 +44,17 @@ export function LoadingState() {
     return () => clearTimeout(timeout);
   }, []);
 
+  // Cycle through messages on the last step to show it's still working
+  useEffect(() => {
+    if (activeStep < STEPS.length - 1) return;
+
+    const interval = setInterval(() => {
+      setLastStepMsg((prev) => (prev + 1) % LAST_STEP_MESSAGES.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [activeStep]);
+
   return (
     <div className="text-center py-16 px-6 max-w-md mx-auto">
       <NisseLoader size="lg" className="mb-6" />
@@ -52,6 +70,8 @@ export function LoadingState() {
         {STEPS.map((step, idx) => {
           const isDone = idx < activeStep;
           const isActive = idx === activeStep;
+          const isLastStep = idx === STEPS.length - 1;
+          const label = isLastStep && isActive ? LAST_STEP_MESSAGES[lastStepMsg] : step.label;
 
           return (
             <motion.div
@@ -71,9 +91,16 @@ export function LoadingState() {
                   ${isActive ? 'bg-terra-400 text-white shadow-terra-glow' : ''}
                   ${!isDone && !isActive ? 'bg-cream-300 text-warm-400' : ''}`}
               >
-                {isDone ? <Check size={12} strokeWidth={3} /> : idx + 1}
+                {isDone ? <Check size={12} strokeWidth={3} /> : isActive && isLastStep ? (
+                  <motion.span
+                    animate={{ opacity: [1, 0.4, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    {idx + 1}
+                  </motion.span>
+                ) : idx + 1}
               </span>
-              <span className="text-sm">{step.label}</span>
+              <span className="text-sm">{label}</span>
             </motion.div>
           );
         })}
