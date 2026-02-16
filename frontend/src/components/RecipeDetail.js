@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, Share2, Bookmark, Play, Minus, Plus,
@@ -17,6 +18,7 @@ import {
 import { CookingMode } from './CookingMode';
 import { GroceryMode } from './GroceryMode';
 import { getStepText } from '../data/recipes';
+import { useRecipeStore } from '../lib/store';
 
 const INGREDIENT_EMOJIS = {
   'kycklingfilé': '🍗', 'kyckling': '🍗', 'pasta': '🍝', 'penne': '🍝',
@@ -49,6 +51,8 @@ function scaleAmount(amount, factor) {
 }
 
 export function RecipeDetail({ recipe, onClose, rank }) {
+  const router = useRouter();
+  const { setSelectedRecipe } = useRecipeStore();
   const [showCookingMode, setShowCookingMode] = useState(false);
   const [showGroceryMode, setShowGroceryMode] = useState(false);
   const [servings, setServings] = useState(recipe?.servings || 4);
@@ -79,6 +83,11 @@ export function RecipeDetail({ recipe, onClose, rank }) {
       else next.add(idx);
       return next;
     });
+  }
+
+  function startCooking() {
+    setSelectedRecipe(recipe);
+    router.push('/cooking');
   }
 
   if (showCookingMode) {
@@ -187,7 +196,7 @@ export function RecipeDetail({ recipe, onClose, rank }) {
               )}
               {/* Play button overlay */}
               <button
-                onClick={() => setShowCookingMode(true)}
+                onClick={startCooking}
                 className="absolute inset-0 flex items-center justify-center"
               >
                 <div
@@ -452,7 +461,7 @@ export function RecipeDetail({ recipe, onClose, rank }) {
         >
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => setShowCookingMode(true)}
+            onClick={startCooking}
             className="w-full flex items-center justify-center gap-2 bg-warm-800 text-white
                      py-4 rounded-full font-bold text-body shadow-btn"
           >
