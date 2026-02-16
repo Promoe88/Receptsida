@@ -352,6 +352,17 @@ export const mealPlans = {
   },
 };
 
+// ── Cooking API ──
+
+export const cooking = {
+  async speak(text, recipe) {
+    return apiFetch('/cooking/speak', {
+      method: 'POST',
+      body: JSON.stringify({ text, recipe }),
+    });
+  },
+};
+
 // ── Lexicon API ──
 
 export const lexicon = {
@@ -360,4 +371,4 @@ export const lexicon = {
   },
 };
 
-export default { auth, recipes, lexicon, gdpr, locations, mealPlans };
+export default { auth, recipes, lexicon, gdpr, locations, mealPlans, cooking };
