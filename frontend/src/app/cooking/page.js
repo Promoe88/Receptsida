@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChefHat, ArrowLeft, Mic, MicOff } from 'lucide-react';
 import { useRecipeStore } from '../../lib/store';
 import { CookingMode } from '../../components/CookingMode';
-import { useVoiceInput } from '../../hooks/useVoice';
+import { useVoiceInput, useSpeech } from '../../hooks/useVoice';
 import { cooking } from '../../lib/api';
 
 export default function CookingPage() {
@@ -16,6 +16,8 @@ export default function CookingPage() {
   const [voiceText, setVoiceText] = useState('');
   const [nisseReply, setNisseReply] = useState('');
   const [nisseLoading, setNisseLoading] = useState(false);
+  const { speak } = useSpeech();
+  const cookingRef = useRef(null);
 
   useEffect(() => {
     if (!selectedRecipe) return;
@@ -29,13 +31,18 @@ export default function CookingPage() {
     setNisseLoading(true);
     try {
       const data = await cooking.speak(finalText, selectedRecipe);
-      setNisseReply(data.reply ?? data.answer ?? '');
+      const reply = data.reply ?? data.answer ?? '';
+      setNisseReply(reply);
+      if (reply) speak(reply);
+      if (data.action === 'next_step') {
+        cookingRef.current?.goNext();
+      }
     } catch {
       setNisseReply('Nisse kunde inte svara just nu. Försök igen.');
     } finally {
       setNisseLoading(false);
     }
-  }, [selectedRecipe]);
+  }, [selectedRecipe, speak]);
 
   function toggleMic() {
     if (isListening) {
@@ -97,7 +104,7 @@ export default function CookingPage() {
 
   return (
     <div className="relative">
-      <CookingMode recipe={selectedRecipe} onClose={handleClose} />
+      <CookingMode ref={cookingRef} recipe={selectedRecipe} onClose={handleClose} />
 
       {/* Voice conversation bubbles */}
       <AnimatePresence>

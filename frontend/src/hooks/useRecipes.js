@@ -21,7 +21,9 @@ export function useRecipeSearch() {
       setResults(data);
       return data;
     } catch (err) {
-      setError(err.message || 'Något gick fel vid sökningen.');
+      const code = err.code || 'unknown';
+      const message = err.message || 'Något gick fel vid sökningen.';
+      setError({ message, code });
       throw err;
     } finally {
       setLoading(false);

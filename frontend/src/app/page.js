@@ -84,7 +84,7 @@ export default function HomePage() {
 
           {error && (
             <div className="bg-danger-50 border border-danger/20 text-terra-600 px-4 py-3 rounded-xl text-sm mb-4">
-              {error}
+              {typeof error === 'string' ? error : error?.message || 'Något gick fel.'}
             </div>
           )}
 
@@ -130,12 +130,19 @@ export default function HomePage() {
 
   // ── App: error view (when search failed and no results) ──
   if (isApp && error && !results && appView === 'results') {
+    const errorMsg = typeof error === 'string' ? error : error?.message || 'Något gick fel.';
+    const errorCode = typeof error === 'object' ? error?.code : null;
+    const isNetworkError = errorCode === 'network_error';
+    const isTimeout = errorCode === 'ai_timeout';
+
     return (
       <PageTransition>
         <div className="flex flex-col items-center justify-center h-full px-6 py-12 text-center">
-          <span className="text-4xl mb-4">😔</span>
-          <h2 className="font-display text-xl font-bold text-warm-800 mb-2">Sökningen misslyckades</h2>
-          <p className="text-sm text-warm-500 mb-6 max-w-xs leading-relaxed">{error}</p>
+          <span className="text-4xl mb-4">{isNetworkError ? '📡' : isTimeout ? '⏳' : '😔'}</span>
+          <h2 className="font-display text-xl font-bold text-warm-800 mb-2">
+            {isNetworkError ? 'Ingen anslutning' : isTimeout ? 'Sökningen tog för lång tid' : 'Sökningen misslyckades'}
+          </h2>
+          <p className="text-sm text-warm-500 mb-6 max-w-xs leading-relaxed">{errorMsg}</p>
           <NisseButton variant="primary" onClick={handleReset}>
             <ArrowLeft size={16} /> Försök igen
           </NisseButton>
