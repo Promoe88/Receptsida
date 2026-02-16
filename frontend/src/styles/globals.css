@@ -460,3 +460,22 @@ body.keyboard-open .app-main--scroll {
     box-shadow: 0 8px 40px rgba(255, 107, 53, 0.5), 0 0 0 8px rgba(255, 107, 53, 0.08);
   }
 }
+
+/* ── Blinking text cursor for ingredient prompt ── */
+.blink-caret {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 1.3em;
+  background-color: #FF6B35;
+  border-radius: 1px;
+  animation: blinkCaret 1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes blinkCaret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

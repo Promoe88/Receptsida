@@ -46,6 +46,7 @@ export function AppHome({ onSearch, onStartSearch }) {
   const [inputValue, setInputValue] = useState('');
   const [freeText, setFreeText] = useState('');
   const [activeScenario, setActiveScenario] = useState(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const inputRef = useRef(null);
   const freeTextRef = useRef(null);
 
@@ -230,12 +231,14 @@ export function AppHome({ onSearch, onStartSearch }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="bg-white w-full min-h-[56px] flex flex-wrap items-center gap-2 cursor-text"
+                className="bg-white w-full min-h-[72px] flex flex-wrap items-center gap-2 cursor-text"
                 style={{
                   borderRadius: '20px',
-                  padding: '12px 16px',
+                  padding: '16px 20px',
                   boxShadow: '0 30px 60px -12px rgba(50,50,93,0.12), 0 18px 36px -18px rgba(0,0,0,0.15)',
-                  border: '1px solid #D1D5DB',
+                  border: isInputFocused
+                    ? '2px solid rgba(255,107,53,0.5)'
+                    : '1.5px solid rgba(255,107,53,0.25)',
                 }}
                 onClick={() => inputRef.current?.focus()}
               >
@@ -272,21 +275,29 @@ export function AppHome({ onSearch, onStartSearch }) {
                   ))}
                 </AnimatePresence>
 
-                {/* Text input */}
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  onKeyDown={handleInputKeyDown}
-                  placeholder={
-                    ingredients.length === 0
-                      ? 'Skriv ingrediens, tryck Enter eller komma...'
-                      : 'Lägg till fler...'
-                  }
-                  className="flex-1 min-w-[100px] bg-transparent border-none outline-none
-                           text-warm-800 placeholder:text-warm-300 font-body text-[15px]"
-                />
+                {/* Text input with blinking cursor */}
+                <div className="flex-1 min-w-[120px] relative flex items-center">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => setIsInputFocused(false)}
+                    placeholder={
+                      ingredients.length === 0
+                        ? 'Skriv ingrediens, tryck Enter eller komma...'
+                        : 'Lägg till fler...'
+                    }
+                    className="w-full bg-transparent border-none outline-none
+                             text-warm-800 placeholder:text-warm-400 font-body text-[17px]"
+                    style={{ caretColor: '#FF6B35' }}
+                  />
+                  {!inputValue && !isInputFocused && ingredients.length === 0 && (
+                    <span className="blink-caret" />
+                  )}
+                </div>
 
                 {/* Mic icon */}
                 <button
