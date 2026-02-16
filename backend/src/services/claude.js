@@ -6,9 +6,14 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config/env.js';
 import { cacheGet, cacheSet } from '../config/redis.js';
+import { AppError } from '../middleware/errorHandler.js';
 import crypto from 'crypto';
 
-const client = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY });
+const client = new Anthropic({
+  apiKey: config.ANTHROPIC_API_KEY,
+  timeout: 120_000, // 2 min — web search can be slow
+  maxRetries: 1,
+});
 
 // ──────────────────────────────────────────
 // Nisse System Identity
@@ -58,12 +63,24 @@ export async function searchRecipes(query, householdSize = 1, preferences = {}) 
   try {
     searchResult = await searchWebForRecipes(query, householdSize, preferences);
   } catch (err) {
-    console.error('Web search failed:', err.message);
-    throw new Error('Kunde inte söka efter recept just nu. Försök igen om en stund.');
+    // Re-throw if already an AppError (from nested calls)
+    if (err instanceof AppError) throw err;
+
+    console.error('Web search failed:', err.message, err.status || '', err.error?.message || '');
+    if (err.status === 401 || err.error?.type === 'authentication_error') {
+      throw new AppError(502, 'ai_auth_error', 'AI-tjänsten kunde inte autentiseras. Kontakta support.');
+    }
+    if (err.status === 429) {
+      throw new AppError(429, 'ai_rate_limit', 'Receptsökningen är tillfälligt överbelastad. Försök igen om en stund.');
+    }
+    if (err.name === 'APIConnectionTimeoutError' || err.code === 'ETIMEDOUT') {
+      throw new AppError(504, 'ai_timeout', 'Receptsökningen tog för lång tid. Försök igen.');
+    }
+    throw new AppError(502, 'ai_search_failed', 'Kunde inte söka efter recept just nu. Försök igen om en stund.');
   }
 
   if (!searchResult.text || searchResult.text.trim().length === 0) {
-    throw new Error('Inga recept hittades. Prova att söka med andra ingredienser.');
+    throw new AppError(404, 'no_recipes_found', 'Inga recept hittades. Prova att söka med andra ingredienser.');
   }
 
   let structured;
@@ -77,7 +94,7 @@ export async function searchRecipes(query, householdSize = 1, preferences = {}) 
     );
   } catch (err) {
     console.error('Recipe structuring failed:', err.message);
-    throw new Error('Kunde inte bearbeta recepten. Försök igen.');
+    throw new AppError(502, 'ai_parse_failed', 'Kunde inte bearbeta recepten. Försök igen.');
   }
 
   const result = {
