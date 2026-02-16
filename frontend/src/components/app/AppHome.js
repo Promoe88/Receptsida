@@ -8,7 +8,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Mic, ArrowRight, Sparkles, Zap, Trash2, Flame, Package } from 'lucide-react';
+import { X, Mic, ArrowRight, Sparkles, Zap, Trash2, Flame, Package, List, Type } from 'lucide-react';
 import { useAuthStore } from '../../lib/store';
 import { NisseLogo } from '../NisseLogo';
 
@@ -41,10 +41,13 @@ const stagger = {
 
 export function AppHome({ onSearch, onStartSearch }) {
   const { user } = useAuthStore();
+  const [inputMode, setInputMode] = useState('ingredients'); // 'ingredients' | 'freetext'
   const [ingredients, setIngredients] = useState([]);
   const [inputValue, setInputValue] = useState('');
+  const [freeText, setFreeText] = useState('');
   const [activeScenario, setActiveScenario] = useState(null);
   const inputRef = useRef(null);
+  const freeTextRef = useRef(null);
 
   const firstName = user?.name ? user.name.split(' ')[0] : 'där';
 
@@ -74,12 +77,16 @@ export function AppHome({ onSearch, onStartSearch }) {
     }
   }, [inputValue, ingredients, addIngredient, removeIngredient]);
 
-  // Space-to-tag: when user types space after a word, convert it to a tag
+  // Comma-to-tag: when user types comma, convert text to a tag
+  // (space no longer triggers tag — allows multi-word ingredients like "krossade tomater")
   const handleInputChange = useCallback((e) => {
     const val = e.target.value;
-    if (val.endsWith(' ') && val.trim().length > 0) {
-      addIngredient(val);
-      setInputValue('');
+    if (val.endsWith(',')) {
+      const cleaned = val.slice(0, -1).trim();
+      if (cleaned) {
+        addIngredient(cleaned);
+        setInputValue('');
+      }
     } else {
       setInputValue(val);
     }
@@ -95,6 +102,15 @@ export function AppHome({ onSearch, onStartSearch }) {
     setActiveScenario((prev) => (prev === scenario.id ? null : scenario.id));
   }, []);
 
+  // ── Mode toggle ──
+
+  const handleModeSwitch = useCallback((mode) => {
+    import('@capacitor/haptics').then(({ Haptics, ImpactStyle }) => {
+      Haptics.impact({ style: ImpactStyle.Light });
+    }).catch(() => {});
+    setInputMode(mode);
+  }, []);
+
   // ── Execute search ──
 
   const handleExecute = useCallback(() => {
@@ -102,15 +118,20 @@ export function AppHome({ onSearch, onStartSearch }) {
       Haptics.impact({ style: ImpactStyle.Medium });
     }).catch(() => {});
 
-    if (ingredients.length > 0) {
+    if (inputMode === 'freetext' && freeText.trim()) {
+      onSearch?.(freeText.trim());
+    } else if (ingredients.length > 0) {
       onSearch?.(ingredients.join(', '));
     } else if (activeScenario) {
       const scenario = SCENARIOS.find((s) => s.id === activeScenario);
       onSearch?.(scenario?.label || '');
     }
-  }, [ingredients, activeScenario, onSearch]);
+  }, [inputMode, freeText, ingredients, activeScenario, onSearch]);
 
-  const canExecute = ingredients.length > 0 || activeScenario;
+  const canExecute =
+    (inputMode === 'freetext' && freeText.trim().length > 0) ||
+    (inputMode === 'ingredients' && ingredients.length > 0) ||
+    activeScenario;
 
   return (
     <div className="h-full flex flex-col" style={{ background: '#EBEDF0' }}>
@@ -157,77 +178,154 @@ export function AppHome({ onSearch, onStartSearch }) {
           </p>
         </motion.div>
 
-        {/* ═══ MASTER PROMPT — Ingredient input ═══ */}
-        <motion.div variants={fadeUp} className="mb-6">
+        {/* ═══ MODE TOGGLE — Switch between ingredients and free text ═══ */}
+        <motion.div variants={fadeUp} className="mb-3">
           <div
-            className="bg-white w-full min-h-[56px] flex flex-wrap items-center gap-2 cursor-text"
+            className="flex mx-auto p-1 rounded-full"
             style={{
-              borderRadius: '20px',
-              padding: '12px 16px',
-              boxShadow: '0 30px 60px -12px rgba(50,50,93,0.12), 0 18px 36px -18px rgba(0,0,0,0.15)',
-              border: '1px solid #D1D5DB',
+              background: '#E0E2E6',
+              width: 'fit-content',
             }}
-            onClick={() => inputRef.current?.focus()}
           >
-            {/* Ingredient tags — accent color when active */}
-            <AnimatePresence mode="popLayout">
-              {ingredients.map((ingredient) => (
-                <motion.span
-                  key={ingredient}
-                  layout
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                           text-[13px] font-medium select-none"
-                  style={{
-                    background: '#FFF0E8',
-                    color: '#FF6B35',
-                  }}
-                >
-                  {ingredient}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeIngredient(ingredient);
-                    }}
-                    className="flex items-center justify-center w-4 h-4 rounded-full
-                             transition-colors"
-                    style={{ background: 'rgba(255,107,53,0.15)' }}
-                  >
-                    <X size={10} strokeWidth={2.5} style={{ color: '#FF6B35' }} />
-                  </button>
-                </motion.span>
-              ))}
-            </AnimatePresence>
-
-            {/* Text input */}
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleInputKeyDown}
-              placeholder={
-                ingredients.length === 0
-                  ? 'Lägg till ingredienser...'
-                  : 'Lägg till fler...'
-              }
-              className="flex-1 min-w-[100px] bg-transparent border-none outline-none
-                       text-warm-800 placeholder:text-warm-300 font-body text-[15px]"
-            />
-
-            {/* Mic icon */}
             <button
-              className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
-                       transition-colors"
-              style={{ background: '#F0F1F3' }}
-              aria-label="Röstinmatning"
+              onClick={() => handleModeSwitch('ingredients')}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full
+                       text-[13px] font-medium transition-all duration-200"
+              style={{
+                background: inputMode === 'ingredients' ? '#FFFFFF' : 'transparent',
+                color: inputMode === 'ingredients' ? '#1A1A1A' : '#8E8E93',
+                boxShadow: inputMode === 'ingredients'
+                  ? '0 1px 3px rgba(0,0,0,0.1)'
+                  : 'none',
+              }}
             >
-              <Mic size={16} className="text-warm-400" strokeWidth={1.5} />
+              <List size={14} strokeWidth={1.5} />
+              Ingredienser
+            </button>
+            <button
+              onClick={() => handleModeSwitch('freetext')}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full
+                       text-[13px] font-medium transition-all duration-200"
+              style={{
+                background: inputMode === 'freetext' ? '#FFFFFF' : 'transparent',
+                color: inputMode === 'freetext' ? '#1A1A1A' : '#8E8E93',
+                boxShadow: inputMode === 'freetext'
+                  ? '0 1px 3px rgba(0,0,0,0.1)'
+                  : 'none',
+              }}
+            >
+              <Type size={14} strokeWidth={1.5} />
+              Beskriv rätt
             </button>
           </div>
+        </motion.div>
+
+        {/* ═══ MASTER PROMPT — Input area ═══ */}
+        <motion.div variants={fadeUp} className="mb-6">
+          <AnimatePresence mode="wait">
+            {inputMode === 'ingredients' ? (
+              <motion.div
+                key="ingredients-input"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white w-full min-h-[56px] flex flex-wrap items-center gap-2 cursor-text"
+                style={{
+                  borderRadius: '20px',
+                  padding: '12px 16px',
+                  boxShadow: '0 30px 60px -12px rgba(50,50,93,0.12), 0 18px 36px -18px rgba(0,0,0,0.15)',
+                  border: '1px solid #D1D5DB',
+                }}
+                onClick={() => inputRef.current?.focus()}
+              >
+                {/* Ingredient tags — accent color when active */}
+                <AnimatePresence mode="popLayout">
+                  {ingredients.map((ingredient) => (
+                    <motion.span
+                      key={ingredient}
+                      layout
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                               text-[13px] font-medium select-none"
+                      style={{
+                        background: '#FFF0E8',
+                        color: '#FF6B35',
+                      }}
+                    >
+                      {ingredient}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeIngredient(ingredient);
+                        }}
+                        className="flex items-center justify-center w-4 h-4 rounded-full
+                                 transition-colors"
+                        style={{ background: 'rgba(255,107,53,0.15)' }}
+                      >
+                        <X size={10} strokeWidth={2.5} style={{ color: '#FF6B35' }} />
+                      </button>
+                    </motion.span>
+                  ))}
+                </AnimatePresence>
+
+                {/* Text input */}
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onKeyDown={handleInputKeyDown}
+                  placeholder={
+                    ingredients.length === 0
+                      ? 'Skriv ingrediens, tryck Enter eller komma...'
+                      : 'Lägg till fler...'
+                  }
+                  className="flex-1 min-w-[100px] bg-transparent border-none outline-none
+                           text-warm-800 placeholder:text-warm-300 font-body text-[15px]"
+                />
+
+                {/* Mic icon */}
+                <button
+                  className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center
+                           transition-colors"
+                  style={{ background: '#F0F1F3' }}
+                  aria-label="Röstinmatning"
+                >
+                  <Mic size={16} className="text-warm-400" strokeWidth={1.5} />
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="freetext-input"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white w-full"
+                style={{
+                  borderRadius: '20px',
+                  padding: '14px 16px',
+                  boxShadow: '0 30px 60px -12px rgba(50,50,93,0.12), 0 18px 36px -18px rgba(0,0,0,0.15)',
+                  border: '1px solid #D1D5DB',
+                }}
+                onClick={() => freeTextRef.current?.focus()}
+              >
+                <textarea
+                  ref={freeTextRef}
+                  value={freeText}
+                  onChange={(e) => setFreeText(e.target.value)}
+                  placeholder={'Beskriv vad du vill laga, t.ex. "Jag vill göra en krämig pasta med kyckling och svamp"'}
+                  rows={3}
+                  className="w-full bg-transparent border-none outline-none resize-none
+                           text-warm-800 placeholder:text-warm-300 font-body text-[15px] leading-relaxed"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* ═══ SCENARIO CHIPS (Lucide icons, no emojis) ═══ */}
