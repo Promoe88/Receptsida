@@ -21,6 +21,7 @@ import scraperRoutes from './routes/scraper.js';
 import gdprRoutes from './routes/gdpr.js';
 import locationRoutes from './routes/locations.js';
 import mealPlanRoutes from './routes/meal-plans.js';
+import cookingRoutes from './routes/cooking.js';
 
 const app = express();
 
@@ -74,6 +75,7 @@ app.use('/api/v1/scraper', scraperRoutes);
 app.use('/api/v1/gdpr', gdprRoutes);
 app.use('/api/v1/locations', locationRoutes);
 app.use('/api/v1/meal-plans', mealPlanRoutes);
+app.use('/api/v1/cooking', cookingRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {
