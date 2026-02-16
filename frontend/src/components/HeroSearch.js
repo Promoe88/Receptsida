@@ -1,5 +1,6 @@
 // ============================================
-// HeroSearch — Premium command center with massive serif headline
+// HeroSearch — Conversational Chef Companion
+// Personal greeting with Nisse avatar, breathing animation
 // 800px wide, store logos row, spring transitions
 // ============================================
 
@@ -12,7 +13,9 @@ import {
   Zap, Leaf, UsersRound, Package, Wine,
 } from 'lucide-react';
 import { useVoiceInput } from '../hooks/useVoice';
+import { useAuthStore } from '../lib/store';
 import { NisseButton } from './NisseButton';
+import { NisseLogo } from './NisseLogo';
 
 const CONTEXT_CHIPS = [
   { id: 'barnfamilj', label: 'Barnfamilj', Icon: UsersRound, color: 'sage' },
@@ -40,6 +43,8 @@ const STORE_LOGOS = [
 ];
 
 export function HeroSearch({ onSearch, loading }) {
+  const { user } = useAuthStore();
+  const firstName = user?.name ? user.name.split(' ')[0] : null;
   const [query, setQuery] = useState('');
   const [householdSize, setHouseholdSize] = useState(2);
   const [selectedChips, setSelectedChips] = useState([]);
@@ -111,15 +116,44 @@ export function HeroSearch({ onSearch, loading }) {
         className="w-full text-center"
         style={{ maxWidth: '800px' }}
       >
-        {/* Massive Serif Headline */}
+        {/* Nisse Avatar — glowing circle with breathing animation */}
+        <motion.div
+          className="mx-auto mb-6 sm:mb-8 flex items-center justify-center"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <motion.div
+            className="relative rounded-full flex items-center justify-center"
+            style={{
+              width: 96,
+              height: 96,
+              background: 'radial-gradient(circle, rgba(255,107,53,0.12) 0%, rgba(255,107,53,0.04) 60%, transparent 100%)',
+              boxShadow: '0 0 40px rgba(255,107,53,0.15), 0 0 80px rgba(255,107,53,0.08)',
+            }}
+            animate={{
+              boxShadow: [
+                '0 0 40px rgba(255,107,53,0.15), 0 0 80px rgba(255,107,53,0.08)',
+                '0 0 50px rgba(255,107,53,0.25), 0 0 100px rgba(255,107,53,0.12)',
+                '0 0 40px rgba(255,107,53,0.15), 0 0 80px rgba(255,107,53,0.08)',
+              ],
+              scale: [1, 1.04, 1],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <NisseLogo variant="icon" size={64} animated />
+          </motion.div>
+        </motion.div>
+
+        {/* Personal Greeting Headline */}
         <h1
-          className="font-display text-display-sm sm:text-display-md lg:text-display-lg tracking-tight mb-4 leading-tight"
+          className="font-display text-display-sm sm:text-display-md lg:text-display-lg tracking-tight mb-4 leading-tight font-bold"
           style={{ color: '#111111' }}
         >
-          Sveriges smartaste<br className="hidden sm:block" /> matassistent
+          {firstName ? `Köket är ditt, ${firstName}.` : 'Köket är ditt.'}
         </h1>
-        <p className="text-warm-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 max-w-lg mx-auto leading-relaxed">
-          Skriv ingredienser, en maträtt, eller berätta vad du är sugen på.
+        <p className="text-warm-500 text-sm sm:text-base md:text-lg mb-6 sm:mb-10 max-w-xl mx-auto leading-relaxed">
+          Jag är din personliga kock. Berätta vad du har framför dig eller vad du vill skapa, så tar vi fram en plan steg-för-steg.
         </p>
 
         {/* Premium search card */}
