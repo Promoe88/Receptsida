@@ -231,7 +231,7 @@ export function AppHome({ onSearch, onStartSearch }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
-                className="bg-white w-full min-h-[72px] flex flex-wrap items-center gap-2 cursor-text"
+                className="bg-white w-full min-h-[80px] flex flex-wrap items-center gap-2 cursor-text"
                 style={{
                   borderRadius: '20px',
                   padding: '16px 20px',
@@ -275,8 +275,8 @@ export function AppHome({ onSearch, onStartSearch }) {
                   ))}
                 </AnimatePresence>
 
-                {/* Text input with blinking cursor */}
-                <div className="flex-1 min-w-[120px] relative flex items-center">
+                {/* Text input with custom two-line placeholder */}
+                <div className="flex-1 min-w-[120px] relative">
                   <input
                     ref={inputRef}
                     type="text"
@@ -285,15 +285,24 @@ export function AppHome({ onSearch, onStartSearch }) {
                     onKeyDown={handleInputKeyDown}
                     onFocus={() => setIsInputFocused(true)}
                     onBlur={() => setIsInputFocused(false)}
-                    placeholder={
-                      ingredients.length === 0
-                        ? 'Skriv ingrediens, tryck Enter eller komma...'
-                        : 'Lägg till fler...'
-                    }
-                    className="w-full bg-transparent border-none outline-none
+                    placeholder={ingredients.length > 0 ? 'Lägg till fler...' : ''}
+                    className="w-full bg-transparent border-none outline-none relative z-10
                              text-warm-800 placeholder:text-warm-400 font-body text-[17px]"
                     style={{ caretColor: '#FF6B35' }}
                   />
+                  {/* Custom two-line placeholder when empty */}
+                  {!inputValue && ingredients.length === 0 && (
+                    <div
+                      className="absolute inset-0 flex items-center pointer-events-none font-body text-[15px] leading-snug"
+                      style={{ color: '#9CA3AF' }}
+                    >
+                      <span>
+                        Skriv en ingrediens,
+                        <br />
+                        tryck Enter eller komma...
+                      </span>
+                    </div>
+                  )}
                   {!inputValue && !isInputFocused && ingredients.length === 0 && (
                     <span className="blink-caret" />
                   )}
