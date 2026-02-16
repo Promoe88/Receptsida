@@ -101,6 +101,23 @@ app.get('/api/health', async (req, res) => {
     checks.redis = 'not_configured';
   }
 
+  // Claude API check (only when ?deep=true to avoid cost on every ping)
+  if (req.query.deep === 'true') {
+    try {
+      const Anthropic = (await import('@anthropic-ai/sdk')).default;
+      const client = new Anthropic({ apiKey: config.ANTHROPIC_API_KEY, timeout: 10_000 });
+      const response = await client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'Svara med OK' }],
+      });
+      const text = response.content?.[0]?.text || '';
+      checks.claude_api = text.length > 0 ? 'ok' : 'empty_response';
+    } catch (err) {
+      checks.claude_api = `error: ${err.status || err.code || err.message}`;
+    }
+  }
+
   const healthy = checks.database === 'ok';
 
   res.status(healthy ? 200 : 503).json({

@@ -138,7 +138,7 @@ async function searchWebForRecipes(query, householdSize, preferences) {
     system: `${NISSE_IDENTITY}
 
 Du agerar nu som RECEPTRÅDGIVAREN — du förstår vad användaren vill och hittar de bästa recepten.`,
-    tools: [{ type: 'web_search_20250305' }],
+    tools: [{ type: 'web_search_20250305', name: 'web_search' }],
     messages: [
       {
         role: 'user',
@@ -512,7 +512,7 @@ export async function generateMealPlan(householdSize = 2, preferences = {}, lock
     model: 'claude-sonnet-4-20250514',
     max_tokens: 6000,
     system: `${NISSE_IDENTITY}\n\nDu agerar nu som MENYPLANERAREN — du skapar varierade, realistiska veckomenyer som svenska familjer faktiskt vill laga.`,
-    tools: [{ type: 'web_search_20250305' }],
+    tools: [{ type: 'web_search_20250305', name: 'web_search' }],
     messages: [
       {
         role: 'user',
